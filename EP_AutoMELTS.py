@@ -171,7 +171,7 @@ def run_bsp():
                 t = Timer(200, p.kill)
                 t.start()
                 #p.communicate(input=b"\n".join([b"1", str(filename), b"8", b"alloy-liquid", b"0", b"x", b"5", b"3", b"+0.4", b"2", b"1400", b"10000", b"10", b"1", b"3", b"1", b"liquid", b"1", b"0.07", b"0", b"10", b"0", b"4", b"0"])) #these are alphamelts settings
-                p.communicate(input=b"\n".join([b"1", str(filename), b"8", b"alloy-liquid", b"0", b"x", b"5", b"4", b"-1.5", b"2", b"2500", b"4200", b"4", b"1", b"0"]))
+                p.communicate(input=b"\n".join([b"1", str(filename), b"8", b"alloy-liquid", b"0", b"x", b"5", b"4", b"-1.4", b"2", b"2500", b"4200", b"4", b"1", b"0"]))
                 #1 = enter MELTS file, str(filename) = enters file from directory, 8 = suppress phase, alloy-liquid = liquid alloy phase
                 #0 = suppress (for stability of the program), x = exit phase suppression, 5 = select fO2, 4 = iron-wustite buffer
                 #-1.6 = -1.6 log units below buffer, 4 = equilibriate, 0 = exit alphaMELTS
