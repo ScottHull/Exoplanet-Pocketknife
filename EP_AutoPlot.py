@@ -1,4 +1,4 @@
-import os, shutil, time, bisect
+import os, shutil, time, bisect, string
 import pandas as pd
 import numpy as np
 import matplotlib
@@ -34,6 +34,15 @@ gale_morb_rho = [2.96748, 2.98934, 3.02871, 3.12504, 3.2649, 3.32414, 3.40401, 3
                  3.87404, 3.88108, 3.88832, 3.89579, 3.90353, 3.91157, 3.91994, 3.92868, 3.93784, 3.94746, 3.95758,
                  3.96823, 3.97945, 3.99123, 4.00355, 4.01639, 4.02969, 4.04339, 4.05801, 4.07212, 4.08535, 4.09777,
                  4.10947, 4.1205, 4.13093, 4.14081]
+
+simple_earth_bsp = [3.1399, 3.16644, 3.21129, 3.21993, 3.22843, 3.23679, 3.24503, 3.25316, 3.26117, 3.26909, 3.28169,
+                    3.29415, 3.30499, 3.31476, 3.3238, 3.33232, 3.34046, 3.34832, 3.35595, 3.3634, 3.3707, 3.37788,
+                    3.38495, 3.39193, 3.39884, 3.40567, 3.41244, 3.41916, 3.42582, 3.43244, 3.43902, 3.44557, 3.45208,
+                    3.45857, 3.46504, 3.47149, 3.47794, 3.48438, 3.49083, 3.4973, 3.50379, 3.51032, 3.51783, 3.52856,
+                    3.5352, 3.54193, 3.54876, 3.55574, 3.56291, 3.57035, 3.57813, 3.58638, 3.59525, 3.60495, 3.61577,
+                    3.69282, 3.7338, 3.74885, 3.75742, 3.76575, 3.77393, 3.78203, 3.79015, 3.79837, 3.80676, 3.81424,
+                    3.81873, 3.82321, 3.82768, 3.83213, 3.83656, 3.84098, 3.84538, 3.84977, 3.85831, 3.87594, 3.89625,
+                    3.90832, 3.91254, 3.91675, 3.92094]
 
 
 home_dir_list = []
@@ -99,7 +108,7 @@ def makethedirs():
         pass
     print "\n" + "\n" + "Beginning BSP Output File Parsing..." + "\n"
     time.sleep(2)
-    print "\n" + "Creating 'Graphs' directory.." + "\n"
+    print "\n" + "Creating 'BSP_vs_Rho_Plots' directory.." + "\n"
     if not os.path.exists(home_dir_list[0] + "/BSP_vs_Rho_Plots"):
         os.mkdir(home_dir_list[0] + "/BSP_vs_Rho_Plots")
     else:
@@ -319,7 +328,7 @@ def plotbspvsmorb():
                     tdir = home_dir_list[0] + "/BSP_vs_Rho_Plots/" + str(graphtitle2) + ".png"
                     shutil.move(zdir, tdir)
                     print "\n" + "****************************"
-                    print str(graphtitle2) + ".png is available in 'Graphs' directory..."
+                    print str(graphtitle2) + ".png is available in 'BSP_vs_Rho_Plots' directory..."
                     print "****************************" + "\n"
                     #time.sleep(0.2)
                 else:
@@ -522,12 +531,21 @@ def ploterror():
             error_morb = map(truediv, diff_morb, gale_morb_rho)
             reformatted_diff_bsp = []
             reformatted_diff_morb = []
-            reformatted_diff_bsp.append(graphtitle2)
-            for i in error_bsp:
-                reformatted_diff_bsp.append(i)
-            reformatted_diff_morb.append("****")
-            for i in error_morb:
-                reformatted_diff_morb.append(i)
+            reformatted_diff_bsp.append(str(graphtitle2))
+            reformatted_diff_bsp.append("BSP:")
+            reformatted_diff_morb.append("----")
+            reformatted_diff_morb.append("MORB:")
+            bspedit = ",".join(str(i) for i in error_bsp)
+            morbedit = ",".join(str(i) for i in error_morb)
+            reformatted_diff_bsp.append(bspedit)
+            reformatted_diff_morb.append(morbedit)
+            reformatted_diff_bsp2 = ",".join(str(i) for i in reformatted_diff_bsp)
+            reformatted_diff_morb2 = ",".join(str(i) for i in reformatted_diff_morb)
+          #  for i in error_bsp:
+           #     reformatted_diff_bsp.append(i)
+          #  reformatted_diff_morb.append("----, MORB:")
+      #      for i in error_morb:
+       #         reformatted_diff_morb.append(i)
             print "\n" + "Printing BSP percent error..." + "\n"
             print error_bsp
             print "\n" + "Printing MORB percent error..." + "\n"
@@ -557,7 +575,7 @@ def ploterror():
                 print "\n" + graphname + " not found!"
                 pass
             os.chdir(home_dir_list[0])
-            erroroutput.write("%s\n%s\n" % (reformatted_diff_bsp, reformatted_diff_morb))
+            erroroutput.write("%s\n%s\n" % (reformatted_diff_bsp2, reformatted_diff_morb2))
         else:
             print "Error handling files for star: " + graphtitle2 + " ..."
     erroroutput.close()
