@@ -33,19 +33,19 @@ _____________________________________________________
 
 The AutoMELTS script automates the BSP/MORB compositional modeling process using the alphaMELTS v1.4 algorithm.  The Linux-based alphaMELTS Lubuntu virtual disk, for use in a virtual machine, can be downloaded here:
 
-http://magmasource.caltech.edu/alphamelts/download.php?os=virtual
+http://magmasource.caltech.edu/alphaMELTS/download.php?os=virtual
 
 The user can begin the process by placing EP_AutoMELTS in the alphaMELTS working directory along with the bundled environment files:
 -BSP_Env_File
 -MORB_Env_File
 
-Navigate to the folder in which the aforementioned environment files and alphaMELTs reside via the command line and call up EP_AutoMELTS.  The user will be prompted to enter 'begin'.  Note that subdirectories and output files produced and captured by AutoMELTS will be erased and recreated after this command is entered--please save wanted work from previous sessions before restarting AutoMELTS.  The user will then be prompted to calculate either BSP or MORB.  Please select the desired type of calculation, as AutoMELTS will enter the appropriate settings for the user and output to appropriately named folders. 
+Navigate to the folder in which the aforementioned environment files and alphaMELTS reside via the command line and call up EP_AutoMELTS.  The user will be prompted to enter 'begin'.  Note that subdirectories and output files produced and captured by AutoMELTS will be erased and recreated after this command is entered--please save wanted work from previous sessions before restarting AutoMELTS.  The user will then be prompted to calculate either BSP or MORB.  Please select the desired type of calculation, as AutoMELTS will enter the appropriate settings for the user and output to appropriately named folders. 
 
 The user will then be asked to enter the name of a .xlsx (Microsoft Excel) spreadsheet, which the user should place in the same directory as alphaMELTS.  From this spreadsheet, alphaMELTS will extract text row-by-row and write MELTS input files.  Therefore, each simulated planet should take up 1 row of the spreadsheet, with each line residing in one cell within that row.  You may format the order in the same manner as writing a MELTS input file manually, but please keep the title (ex. Title: Star1) in the first cell.  Please note that the file extension, .xlsx, must be entered along with the spreadsheet file name (ex. 'example.xlsx').
 
 Please note that AutoMELTS will open the first sheet detected and read from that sheet.  Also, please make sure that the spreadsheet is not referencing cells--make sure that the contents of the spreadsheet are text only.  There are quick and efficient ways to format a spreadsheet so that oxide wt% values are automatically entered into a formatted cell (i.e. produce a cell that will automatically format an oxide input as follows: '="Initial Composition: SiO2 "&A1, where A1 is the value of a cell which contains a calculated SiO2 oxide wt% value.  Please make sure there is a space after the oxide, so that the oxide name and the oxide wt% value do not blur together.
 
-After AutoMELTS produces the MELTS input files and stores them to their respective "BSP_MELTS_Files" or "MORB_MELTS_Files" subdirectory, it will call up the alphaMELTS algorithm and enter in one input file at a time, capturing the 'alphamelts_tbl.txt' comprehensive output file and renaming it to the name of the star with a BSP or MORB tag.  The files will be moved to a "Completed_BSP_MELTS_Files" or "Completed_MORB_MELTS_Files" directory, inside of which a subdirectory will be created and CSV formatted versions of the alphaMELTS output files will be created for the convinence of quick parsing after alphaMELTS calculations complete.  These CSV-formatted versions of the alphaMELTS outputs are what other components of the alphaMELTS suite will look for, so please transfer these over to your shared folder (if you are using a virtual machine) for further actions.  Again, please do not rename them.  Once calculations are complete and CSV-formatted files are created, the AutoMELTS script will automatically exit.
+After AutoMELTS produces the MELTS input files and stores them to their respective "BSP_MELTS_Files" or "MORB_MELTS_Files" subdirectory, it will call up the alphaMELTS algorithm and enter in one input file at a time, capturing the 'alphaMELTS_tbl.txt' comprehensive output file and renaming it to the name of the star with a BSP or MORB tag.  The files will be moved to a "Completed_BSP_MELTS_Files" or "Completed_MORB_MELTS_Files" directory, inside of which a subdirectory will be created and CSV formatted versions of the alphaMELTS output files will be created for the convenience of quick parsing after alphaMELTS calculations complete.  These CSV-formatted versions of the alphaMELTS outputs are what other components of the alphaMELTS suite will look for, so please transfer these over to your shared folder (if you are using a virtual machine) for further actions.  Again, please do not rename them.  Once calculations are complete and CSV-formatted files are created, the AutoMELTS script will automatically exit.
 
 The user should note that AutoMELTS contains a built in kill timer, should the alphaMELTS algorithm enter an infinite loop.  If the calculation exceeds an reasonable amount of time for a calculation to complete, the process will be killed and AutoMELTS will move on to the next calculation.
 
@@ -54,7 +54,7 @@ The user should note that AutoMELTS contains a built in kill timer, should the a
 _____________________________________________________
 ---EP_MELTSParser:
 
-Place MELTSParser in two seperate folders: one containing the CSV formatted alphaMELTS BSP output files generated by the EP_AutoMELTS script and another containing the CSV formatted alphamelts MORB output files generated by the EP_AutoMELTS script.  Upon launching the script, the user will be asked whether to parse BSP or MORB files.  Please enter the appropriate prompt, and the script will automate parsing.  The results will be stored in either the 'BSP_Data.csv' output file or the 'MORB_Data.csv' output file.
+Place MELTSParser in two seperate folders: one containing the CSV formatted alphaMELTS BSP output files generated by the EP_AutoMELTS script and another containing the CSV formatted alphaMELTS MORB output files generated by the EP_AutoMELTS script.  Upon launching the script, the user will be asked whether to parse BSP or MORB files.  Please enter the appropriate prompt, and the script will automate parsing.  The results will be stored in either the 'BSP_Data.csv' output file or the 'MORB_Data.csv' output file.
 
 Parsing BSP files will capture both the name of the star and the sum of phase alloy_solid_0 generated.  Parsing MORB files will capture the pressure, temperature, mass, and composition of the liquid at 5 melt mass%.  These can be easily transferred over to a spreadsheet for further analysis.
 
@@ -78,7 +78,7 @@ Once the calculations are complete, the script will automatically exit.  The use
 _____________________________________________________
 ---EP_AutoPlot:
 
-AutoPlot requires the user to create two subdirectories in the directory in which AutoPlot is placed: 'hefesto_fort.58_bsp_outputs' and 'hefesto_fort.58_morb_outputs'.  Within these subdirectories, BSP and MORB fort.58 HeFESTo output files must be placed in the appropriate directory.  The user may then call up the AutoPlot script and will be asked to enter 'begin'.  Once more, AutoPlot will delete and recreate all output files and subdirectories that it genereates throughout its processes.  If you have work you like to keep from previous runs of the script, it is recommended that you move those files/subdirectories outside of the working AutoPlot directory.
+AutoPlot requires the user to create two subdirectories in the directory in which AutoPlot is placed: 'hefesto_fort.58_bsp_outputs' and 'hefesto_fort.58_morb_outputs'.  Within these subdirectories, BSP and MORB fort.58 HeFESTo output files must be placed in the appropriate directory.  The user may then call up the AutoPlot script and will be asked to enter 'begin'.  Once more, AutoPlot will delete and recreate all output files and subdirectories that it generates throughout its processes.  If you have work you like to keep from previous runs of the script, it is recommended that you move those files/subdirectories outside of the working AutoPlot directory.
 
 After entering 'begin', AutoPlot will begin reading the fort.58 BSP/MORB output files and creating CSV formatted versions in which depth and density (rho) data is written.  AutoPlot associates BSP and MORB output files based on the name of the star contained in the title of the fort.58 file, so it is important that they remain unaltered.  AutoPlot will then create three types of graphs, found in the following subdirectories:
 
@@ -87,9 +87,9 @@ Contained in this subdirectory are plots where density is plotted as a function 
 
 >Delta_Rho_Plots:
 Contained in this subdirectory are simulated BSP and MORB changes as a function of increasing BSP density, following the "delta rho" formula: [(MORB_Density - BSP_Density) / BSP_Density].  On these plots the depth of the override of BSP density by MORB density (i.e. the last depth at which this occurs) is written.  Produced from these calculations are the following output files:
-	-Combined_All_File.csv: Each planet occupies 3 rows.  The first row is the aforementioned "delta rho" calculation, the second row is BSP density, and the third 	row is depth.
+	-Combined_All_File.csv: Each planet occupies 3 rows.  The first row is the 			aforementioned "delta rho" calculation, the second row is BSP density, and the third 	row is depth.
 	-Combined_BSPRho_File.csv: Contains the BSP density for each simulated planet.
-	-Combined_DeltaRho_File.csv: Contains the "delta rho" calculations for each simulated planet.
+	-Combined_DeltaRho_File.csv: Contains the "delta rho" calculations for each 			simulated planet.
 	***A "Combined_MORBRho_File.csv" is pending addition to the code.
 
 >Error_Plots:
