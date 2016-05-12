@@ -92,6 +92,10 @@ def makethedirs():
         os.remove(home_dir_list[0] + "/Combined_BSPRho_File.csv")
     else:
         pass
+    if "Combined_MORBRho_File.csv" in os.listdir(home_dir_list[0]):
+        os.remove(home_dir_list[0] + "/Combined_MORBRho_File.csv")
+    else:
+        pass
     if "Combined_Depth_File.csv" in os.listdir(home_dir_list[0]):
         os.remove(home_dir_list[0] + "/Combined_Depth_File.csv")
     else:
@@ -212,6 +216,7 @@ def makethedirs():
 
 
 def plotbspvsmorb():
+    combined_morb_output_file = open("Combined_MORBRho_File.csv", "a")
     print "\n" + "Looking for matches between BSP and MORB directories..." + "\n"
     time.sleep(2)
     planet_log = open("log.csv", "a")
@@ -233,26 +238,6 @@ def plotbspvsmorb():
             os.chdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted")
             try:
                 print "\n" + "Opening data from " + str(filename) + "..." + "\n"
-                #asplund05_depth = [0, 6, 19.7, 28.9, 36.4, 43.88, 51.34, 58.81,	66.36, 73.94, 81.5,	88.97,
-                #                   96.45, 103.93, 111.41, 118.92, 126.47, 134.01, 141.55, 149.09, 156.64, 164.18,
-                 #                  171.72, 179.27, 186.79, 194.27, 201.75, 209.23, 216.71, 224.09, 231.4, 238.7,
-                  #                 246.01, 253.31, 260.62, 267.9, 275.16, 282.42, 289.68, 296.94, 304.19]
-                #asplund05_bse = [3.1373, 3.16069, 3.19859, 3.22072, 3.22894, 3.23705, 3.24506,3.25296, 3.26077,
-                 #                3.27278,
-                  #               3.28641, 3.29782, 3.30781, 3.31688, 3.32533, 3.33335, 3.34106, 3.34854, 3.35585,
-                   #              3.36301, 3.37006, 3.37701, 3.38389, 3.39069, 3.39743, 3.40412, 3.41075, 3.41735,
-                    #             3.4239,
-                     #            3.43042, 3.4369, 3.44336, 3.4498, 3.45622, 3.46262, 3.46901, 3.4754, 3.48179, 3.48819,
-                      #           3.49461, 3.50106]
-                #asplund05_morb = [2.93232, 3.00092, 3.02049, 3.11415, 3.29339, 3.38933, 3.40143, 3.41286, 3.42364,
-                 #                 3.43379,
-                  #                3.44336, 3.45238, 3.4614, 3.4701, 3.47788, 3.48535, 3.49257, 3.49956, 3.50638,
-                   #               3.51305,
-                    #              3.51959, 3.52602, 3.53237, 3.53863, 3.54483, 3.55097, 3.55705, 3.56308, 3.56908,
-                     #             3.57504,
-                      #            3.58096, 3.58686, 3.59273, 3.59858, 3.60441, 3.61023, 3.61604, 3.62183, 3.62763,
-                       #           3.63342,
-                        #          3.63922]
                 bsp_rho_data = np.loadtxt(filename, delimiter=",", usecols=[0])
                 bsp_depth = np.loadtxt(filename, delimiter=",", usecols=[1])
                 print "\n" + "************************" + "\n" + "DATA FOR " + str(filename) + "\n" + "************************" + "\n"
@@ -303,6 +288,12 @@ def plotbspvsmorb():
                 print morb_data
                 print "\n" + "PRINTING MORB DEPTH LIST FOR " + str(fileclipped) + "..." + "\n"
                 print morb_depth
+                reform_morb_data = []
+                reform_morb_data.append(graphtitle2)
+                reform_morb_data2 = ",".join(str(i) for i in morb_depth)
+                reform_morb_data.append(reform_morb_data2)
+                reform_morb_data3 = ",".join(i for i in reform_morb_data)
+                combined_morb_output_file.write("%s\n" % reform_morb_data3)
                 font = {'weight' : 'bold',
                         'size' : 14}
                 matplotlib.rc('font', **font)
@@ -347,6 +338,15 @@ def plotbspvsmorb():
         shutil.move(fdirr, tdirr)
     else:
         print "'log.csv' not found!"
+    combined_morb_output_file.close()
+    if "Combined_MORBRho_File.csv" in os.listdir(home_dir_list[0] + "/hefesto_fort.58_morb_outputs"):
+        fdir1 = home_dir_list[0] + "/hefesto_fort.58_morb_outputs/Combined_MORBRho_File.csv"
+        tdir1 = home_dir_list[0] + "/Combined_MORBRho_File.csv"
+        shutil.move(fdir1, tdir1)
+        print "\n" + "'Combined_MORBRho_File.csv' now available!" + "\n"
+    else:
+        print "\n" + "Unable to find 'Combined_MORBRho_File.csv'!" + "\n"
+        pass
     plotdeltarhovsbserho()
 
 
