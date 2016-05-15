@@ -1,10 +1,10 @@
-import os, shutil, time, bisect, string
+import os, shutil, time, bisect, math
 import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import operator
-from operator import truediv
+from operator import truediv, div
 
 
 
@@ -43,6 +43,15 @@ simple_earth_bsp = [3.1399, 3.16644, 3.21129, 3.21993, 3.22843, 3.23679, 3.24503
                     3.69282, 3.7338, 3.74885, 3.75742, 3.76575, 3.77393, 3.78203, 3.79015, 3.79837, 3.80676, 3.81424,
                     3.81873, 3.82321, 3.82768, 3.83213, 3.83656, 3.84098, 3.84538, 3.84977, 3.85831, 3.87594, 3.89625,
                     3.90832, 3.91254, 3.91675, 3.92094]
+
+simple_earth_morb = [2.89708, 2.92792, 2.94455, 3.04297, 3.17487, 3.19574, 3.25329, 3.36196, 3.37489, 3.38665, 3.39781,
+                     3.40855, 3.43322, 3.4435, 3.45364, 3.46287, 3.47109, 3.47896, 3.4865, 3.49376, 3.50079, 3.50761,
+                     3.51426, 3.52077, 3.52715, 3.53344, 3.53963, 3.54574, 3.55179, 3.55777, 3.56371, 3.5696, 3.57545,
+                     3.58126, 3.58704, 3.59279, 3.66547, 3.67112, 3.67676, 3.68238, 3.68799, 3.69359, 3.69919, 3.70479,
+                     3.71039, 3.71601, 3.72163, 3.72728, 3.73294, 3.73864, 3.74438, 3.75015, 3.75598, 3.76188, 3.76784,
+                     3.77389, 3.78003, 3.78629, 3.79267, 3.79921, 3.80591, 3.8128, 3.81991, 3.82728, 3.83492, 3.84288,
+                     3.85119,3.85991, 3.86906, 3.8787, 3.88887, 3.89961, 3.91094, 3.9229, 3.9355, 3.94971, 3.97115,
+                     3.99127, 4.01053, 4.02931, 4.04793]
 
 
 home_dir_list = []
@@ -112,12 +121,12 @@ def makethedirs():
         pass
     print "\n" + "\n" + "Beginning BSP Output File Parsing..." + "\n"
     time.sleep(2)
-    print "\n" + "Creating 'BSP_vs_Rho_Plots' directory.." + "\n"
-    if not os.path.exists(home_dir_list[0] + "/BSP_vs_Rho_Plots"):
-        os.mkdir(home_dir_list[0] + "/BSP_vs_Rho_Plots")
+    print "\n" + "Creating 'Depth_vs_Rho_Plots' directory.." + "\n"
+    if not os.path.exists(home_dir_list[0] + "/Depth_vs_Rho_Plots"):
+        os.mkdir(home_dir_list[0] + "/Depth_vs_Rho_Plots")
     else:
-        shutil.rmtree(home_dir_list[0] + "/BSP_vs_Rho_Plots")
-        os.mkdir(home_dir_list[0] + "/BSP_vs_Rho_Plots")
+        shutil.rmtree(home_dir_list[0] + "/Depth_vs_Rho_Plots")
+        os.mkdir(home_dir_list[0] + "/Depth_vs_Rho_Plots")
     print "\n"+ "Creating directory 'CSV_Formatted'..." + "\n"
     if not os.path.exists(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs/CSV_Formatted"):
         os.mkdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs/CSV_Formatted")
@@ -263,13 +272,8 @@ def plotbspvsmorb():
                 print morb_data
                 print "\n" + "PRINTING MORB DEPTH LIST FOR " + str(filename) + "..." + "\n"
                 print morb_depth
-                #deltarho = [(morb_rho_list-bsp_rho_list for morb_rho_list,bsp_rho_list in zip(morb_rho_list,bsp_rho_list))]
-                #deltarho = map(sub, morb_data, bsp_rho_data)
                 delta_rho_filename = str(graphtitle2)+"_deltarho.csv"
-                #deltarho = list(set(morb_data) - set(bsp_rho_data))
-                #deltarho = [morb_data - bsp_rho_data for morb_data, bsp_rho_data in zip(morb_data,bsp_rho_data)]
                 deltarho_rows = map(operator.sub, morb_depth_list, bsp_depth_list)
-                #deltarho_cols = zip(*deltarho_rows)
                 try:
                     with open(delta_rho_filename, "wb") as fp:
                         for x in zip(*deltarho_rows):
@@ -301,8 +305,10 @@ def plotbspvsmorb():
                     os.remove(str(graphtitle2) + ".png")
                 else:
                     pass
-                plt.plot(depth_trans_zone, mcdonough_bse_rho, 'b', linestyle="--", label="Earth BSP", linewidth=3.0)
-                plt.plot(depth_trans_zone, gale_morb_rho, 'b', label="Earth MORB", linewidth=3.0)
+                plt.plot(depth_trans_zone, mcdonough_bse_rho, 'b', linestyle="--", label="McD2014 BSP", linewidth=3.0)
+                plt.plot(depth_trans_zone, gale_morb_rho, 'b', label="Gale2013 MORB", linewidth=3.0)
+                plt.plot(depth_trans_zone, simple_earth_bsp, 'g', linestyle="--", label="SEM BSP", linewidth=3.0)
+                plt.plot(depth_trans_zone, simple_earth_morb, 'g', label="SEM MORB", linewidth=3.0)
                 plt.plot(bsp_rho_data, bsp_depth, '-r', linestyle="--", label="Exo-BSP", linewidth=3.0)
                 plt.plot(morb_data,morb_depth, "-r", label="Exo-MORB", linewidth=3.0)
                 plt.ylabel("Density (g/cc)")
@@ -316,10 +322,10 @@ def plotbspvsmorb():
                 #plt.show()
                 if str(graphtitle2) + ".png" in os.listdir(home_dir_list[0] + "/hefesto_fort.58_morb_outputs/CSV_Formatted"):
                     zdir = home_dir_list[0] + "/hefesto_fort.58_morb_outputs/CSV_Formatted/" + str(graphtitle2) + ".png"
-                    tdir = home_dir_list[0] + "/BSP_vs_Rho_Plots/" + str(graphtitle2) + ".png"
+                    tdir = home_dir_list[0] + "/Depth_vs_Rho_Plots/" + str(graphtitle2) + ".png"
                     shutil.move(zdir, tdir)
                     print "\n" + "****************************"
-                    print str(graphtitle2) + ".png is available in 'BSP_vs_Rho_Plots' directory..."
+                    print str(graphtitle2) + ".png is available in 'Depth_vs_Rho_Plots' directory..."
                     print "****************************" + "\n"
                     #time.sleep(0.2)
                 else:
@@ -358,7 +364,7 @@ def plotdeltarhovsbserho():
     combined_bsp_rho_file = open("Combined_BSPRho_File.csv", "a")
     combined_depth_file = open("Combined_Depth_File.csv", "a")
     os.chdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted")
-    for filename in os.listdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted"):
+    for filename in os.listdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs/CSV_Formatted"):
         print "\n" + "___________________________________________________________________" + "\n"
         graphtitletemp2 = str(filename)[:-29]
         graphtitle2 = str(graphtitletemp2)[16:]
@@ -369,98 +375,115 @@ def plotdeltarhovsbserho():
         print "Processing Planet: " + graphtitle2 + "..."
         print "*******************************" + "\n"
         print "\n" + "Found '"+str(filename)[:-4] + "' in BSP directory..."
-        try:
-            bsp_rho = np.loadtxt(filename, delimiter=",", usecols=[1])
-            thedepths = np.loadtxt(filename, delimiter=",", usecols=[0])
-        except:
-            pass
-        os.chdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs")
+        #bsp_rho_list = np.genfromtxt(filename, delimiter=",", usecols=[1], autostrip=True, converters={lambda s: float(s or 0)})
+        #thedepths = np.loadtxt(filename, delimiter=",", usecols=[0])
         if fileclipped in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
-            print "\n" + "Found files for star '" + str(graphtitle2) + "' in BSP/delta rho directories!"
-            print "Found file: '" + str(fileclipped) + "' ..."
-            print "Found file: '" + str(filename) + "' ..." + "\n"
-            delta_rho = np.loadtxt(fileclipped, usecols=[0])
-            deltarhovsbsprho = map(truediv, delta_rho, bsp_rho)
-            if str(graphtitle2) + ".png" in os.listdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted"):
-                os.remove(str(graphtitle2) + ".png")
-            else:
-                pass
-            print "\n" + "Printing delta rho values..." + "\n"
-            print delta_rho
-            print "\n" + "Printing bsp rho values..." + "\n"
-            print bsp_rho
-            print "\n" + "Printing (delta rho / bsp rho) values..." + "\n"
-            print deltarhovsbsprho
-            outputs = []
-            outputs.append(str(graphtitle2))
-            reform_deltarhovsbsprho = ", ".join(str(i) for i in deltarhovsbsprho)
-            outputs.append(reform_deltarhovsbsprho)
-            reform_outputs = ", ".join(str(i) for i in outputs)
-            #reformattedoutputs = outputs[1:-1]
-            bsp_rho_outputs = []
-            bsp_rho_outputs.append(str("---"))
-            reform_bsprho = ", ".join(str(i) for i in bsp_rho)
-            bsp_rho_outputs.append(reform_bsprho)
-            reform_bsp_rho_outputs = ", ".join(str(i) for i in bsp_rho_outputs)
-            bsp_rho_outputs2 = []
-            bsp_rho_outputs2.append(str(graphtitle2))
-            bsp_rho_outputs2.append(reform_bsprho)
-            reform_bsp_rho_outputs2 = ", ".join(str(i) for i in bsp_rho_outputs2)
-            greaterthanzero = bisect.bisect(deltarhovsbsprho, 0)
-            thevalue = thedepths[greaterthanzero]
-            print "\n" + "The depth of MORB override of BSP on planet " + graphtitle2 + " is: " + str(thevalue) + " km..." + "\n"
-            thevalueformatted = []
-            #reform_depth_outputs = ", ".join(thevalue)
-            reform_depth_outputs = ", " + str(thevalue)
-            thevalueformatted.append(str(graphtitle2))
-            thevalueformatted.append(reform_depth_outputs)
-            reform_depth_outputs = ", ".join(str(i) for i in thevalueformatted)
-            depthsdepths = []
-            depthsdepths.append(str("---"))
-            reform_depthsdepths = ", ".join(str(i) for i in thedepths)
-            depthsdepths.append(reform_depthsdepths)
-            reform_depthdepth_outputs = ", ".join(str(i) for i in depthsdepths)
-            combinedfile.write('%s\n%s\n%s\n' % (reform_outputs, reform_bsp_rho_outputs, reform_depthdepth_outputs))
-            combined_bsp_rho_file.write('%s\n' % reform_bsp_rho_outputs2)
-            combined_deltarho_file.write('%s\n' % reform_outputs)
-            combined_depth_file.write('%s\n' % reform_depth_outputs)
-            line_deltarho_y1 = 0.049748193831
-            line_deltarho_x1 = 0
-            line_deltarho_x2 = 6
-            font = {'weight' : 'bold',
-                    'size' : 14}
-            matplotlib.rc('font', **font)
-            plt.plot(bsp_rho, deltarhovsbsprho, '-b', label="Delta Rho", linewidth=2)
-            plt.hlines(line_deltarho_y1, line_deltarho_x1, line_deltarho_x2, colors="r", linestyles='dashed', label="Earth-like", linewidth=2)
-            plt.hlines(0, 1, 6, colors="k", linestyle="dashed",  linewidth=3)
-            plt.xlabel("BSP Rho")
-            plt.ylabel("Delta Rho / BSP Rho")
-            plt.xlim(xmin=2.8, xmax=4.2)
-            plt.text(3.6, -0.03, "Depth of MORB" + "\n" + "Override: " + str(thevalue) + " km", withdash=False)
-            plt.grid()
-            plt.legend(loc='lower right')
-            plt.title(graphtitle2 + " [(Delta Rho / BSP Rho) vs BSP Rho]")
-            #plt.show()
-            plt.savefig(str(graphtitle2 + "_deltarhograph.png"), format='png')
-            plt.close()
-            movethisfile = graphtitle2 + "_deltarhograph.png"
-            if movethisfile in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
-                fdir = home_dir_list[0] + "/Delta_Rho_CSV_Outputs/" + movethisfile
-                tdir = home_dir_list[0] + "/Delta_Rho_Plots/" + movethisfile
-                shutil.move(fdir, tdir)
-                print "\n" + "*******************************"
-                print movethisfile + " is now in 'Delta_Rho_Plots' directory!"
-                print "*******************************" + "\n"
-            else:
-                print movethisfile + " not found in the directory!"
-                pass
-            os.chdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted")
+            os.chdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs/CSV_Formatted")
+            bsp_rho_list = np.genfromtxt(filename.strip(), delimiter=",", usecols=[1], autostrip=True, dtype=float)
+            thedepths = np.genfromtxt(filename.strip(), delimiter=",", usecols=[0], autostrip=True, dtype=float)
+            os.chdir(home_dir_list[0] + "\Delta_Rho_CSV_Outputs")
+            with open(fileclipped) as z:
+                if len(z.readlines()) >= 81:
+                    z.close()
+                    #try:
+                    print "\n" + "Found files for star '" + str(graphtitle2) + "' in BSP/delta rho directories!"
+                    print "Found file: '" + str(fileclipped) + "' ..."
+                    print "Found file: '" + str(filename) + "' ..." + "\n"
+                    os.chdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs")
+                    delta_rho = np.genfromtxt(fileclipped.strip(), dtype=float, delimiter=None, autostrip=True)
+                    #delta_rho = pd.read_csv(fileclipped, usecols=[0], delimiter=",", dtype=float)
+                    #delta_rho = np.genfromtxt(fileclipped, usecols=[0], autostrip=True, converters={lambda s: float(s or 0)})
+                    deltarhovsbsprho = map(truediv, delta_rho, bsp_rho_list)
+                    #deltarhovsbsprho = div(delta_rho, bsp_rho)
+                    if str(graphtitle2) + ".png" in os.listdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted"):
+                        os.remove(str(graphtitle2) + ".png")
+                    else:
+                        pass
+                    print "\n" + "Printing delta rho values..." + "\n"
+                    print delta_rho
+                    print "\n" + "Printing bsp rho values..." + "\n"
+                    print bsp_rho_list
+                    print "\n" + "Printing (delta rho / bsp rho) values..." + "\n"
+                    print deltarhovsbsprho
+                    outputs = []
+                    outputs.append(str(graphtitle2))
+                    reform_deltarhovsbsprho = ", ".join(str(i) for i in deltarhovsbsprho)
+                    outputs.append(reform_deltarhovsbsprho)
+                    reform_outputs = ", ".join(str(i) for i in outputs)
+                    #reformattedoutputs = outputs[1:-1]
+                    bsp_rho_outputs = []
+                    bsp_rho_outputs.append(str("---"))
+                    reform_bsprho = ", ".join(str(i) for i in bsp_rho_list)
+                    bsp_rho_outputs.append(reform_bsprho)
+                    reform_bsp_rho_outputs = ", ".join(str(i) for i in bsp_rho_outputs)
+                    bsp_rho_outputs2 = []
+                    bsp_rho_outputs2.append(str(graphtitle2))
+                    bsp_rho_outputs2.append(reform_bsprho)
+                    reform_bsp_rho_outputs2 = ", ".join(str(i) for i in bsp_rho_outputs2)
+                    greaterthanzero = bisect.bisect(deltarhovsbsprho, 0)
+                    thevalue = thedepths[greaterthanzero]
+                    print "\n" + "The depth of MORB override of BSP on planet " + graphtitle2 + " is: " + str(thevalue) + " km..." + "\n"
+                    thevalueformatted = []
+                    #reform_depth_outputs = ", ".join(thevalue)
+                    reform_depth_outputs = ", " + str(thevalue)
+                    thevalueformatted.append(str(graphtitle2))
+                    thevalueformatted.append(reform_depth_outputs)
+                    reform_depth_outputs = ", ".join(str(i) for i in thevalueformatted)
+                    depthsdepths = []
+                    depthsdepths.append(str("---"))
+                    reform_depthsdepths = ", ".join(str(i) for i in thedepths)
+                    depthsdepths.append(reform_depthsdepths)
+                    reform_depthdepth_outputs = ", ".join(str(i) for i in depthsdepths)
+                    combinedfile.write('%s\n%s\n%s\n' % (reform_outputs, reform_bsp_rho_outputs, reform_depthdepth_outputs))
+                    combined_bsp_rho_file.write('%s\n' % reform_bsp_rho_outputs2)
+                    combined_deltarho_file.write('%s\n' % reform_outputs)
+                    combined_depth_file.write('%s\n' % reform_depth_outputs)
+                    line_deltarho_y1 = 0.0539198491061
+                    line_deltarho_x1 = 0
+                    line_deltarho_x2 = 6
+                    font = {'weight' : 'bold',
+                            'size' : 14}
+                    matplotlib.rc('font', **font)
+                    plt.plot(bsp_rho_list, deltarhovsbsprho, '-b', label="Delta Rho", linewidth=2)
+                    plt.hlines(line_deltarho_y1, line_deltarho_x1, line_deltarho_x2, colors="r", linestyles='dashed', label="Earth-like", linewidth=2)
+                    plt.hlines(0, 1, 6, colors="k", linestyle="dashed",  linewidth=3)
+                    plt.xlabel("BSP Rho")
+                    plt.ylabel("Delta Rho / BSP Rho")
+                    plt.xlim(xmin=2.8, xmax=4.2)
+                    plt.text(3.6, -0.03, "Depth of MORB" + "\n" + "Override: " + str(thevalue) + " km", withdash=False)
+                    plt.grid()
+                    plt.legend(loc='lower right')
+                    plt.title(graphtitle2 + " [(Delta Rho / BSP Rho) vs BSP Rho]")
+                    #plt.show()
+                    plt.savefig(str(graphtitle2 + "_deltarhograph.png"), format='png')
+                    plt.close()
+                    movethisfile = graphtitle2 + "_deltarhograph.png"
+                    if movethisfile in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
+                        fdir = home_dir_list[0] + "/Delta_Rho_CSV_Outputs/" + movethisfile
+                        tdir = home_dir_list[0] + "/Delta_Rho_Plots/" + movethisfile
+                        shutil.move(fdir, tdir)
+                        print "\n" + "*******************************"
+                        print movethisfile + " is now in 'Delta_Rho_Plots' directory!"
+                        print "*******************************" + "\n"
+                    else:
+                        print movethisfile + " not found in the directory!"
+                        pass
+                    os.chdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted")
+                    # except:
+                    #     print "\nProblem with file: " + str(fileclipped) + ".  Small decimal or 0 value likely experienced...\n"
+                    #     error_deltarho = str(graphtitle2) + ",ERROR!  SMALL DECIMAL OR 0 VALUE LIKELY EXPERIENCED!"
+                    #     combined_deltarho_file.write("%s\n," % error_deltarho)
+                    #     pass
+                else:
+                    print "\nProblem with file: " + str(fileclipped) + " ...\n"
+                    pass
         else:
-            print "Problem with file: " + str(fileclipped)
+            print "\nProblem with file: " + str(fileclipped) + " ...\n"
             pass
     combinedfile.close()
     combined_bsp_rho_file.close()
     combined_deltarho_file.close()
+    combined_depth_file.close()
     combinedfile_name = "Combined_All_File.csv"
     combined_bsp_rho_name = "Combined_BSPRho_File.csv"
     combined_deltarho_name = "Combined_DeltaRho_File.csv"
@@ -493,11 +516,14 @@ def plotdeltarhovsbserho():
         shutil.move(fdir5, tdir5)
     else:
         pass
-    if os.path.exists(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
-        dir1 = home_dir_list[0] + "/Delta_Rho_CSV_Outputs"
-        dir2 = home_dir_list[0] + "/Delta_Rho_Plots/Delta_Rho_CSV_Outputs"
-        shutil.move(dir1, dir2)
-    else:
+    try:
+        if os.path.exists(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
+            dir1 = home_dir_list[0] + "/Delta_Rho_CSV_Outputs"
+            dir2 = home_dir_list[0] + "/Delta_Rho_Plots/Delta_Rho_CSV_Outputs"
+            shutil.move(dir1, dir2)
+        else:
+            pass
+    except:
         pass
     ploterror()
 
@@ -520,62 +546,68 @@ def ploterror():
         graphtitle = str(graphtitletemp)[7:]
         fileclipped = str(filename)[:-28] + "morb.txt_morb_csvformatted.csv"
         if fileclipped in os.listdir(home_dir_list[0] + "/hefesto_fort.58_morb_outputs\CSV_Formatted"):
-            print "\n" + "Found '" + str(filename)[:-4] + "' in MORB directory..."
-            os.chdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted")
-            bsp_rho = np.loadtxt(filename, delimiter=",", usecols=[1])
-            os.chdir(home_dir_list[0] + "/hefesto_fort.58_morb_outputs\CSV_Formatted")
-            morb_rho = np.loadtxt(fileclipped, delimiter=",", usecols=[1])
-            diff_bsp = map(operator.sub, bsp_rho, mcdonough_bse_rho)
-            diff_morb = map(operator.sub, morb_rho, gale_morb_rho)
-            error_bsp = map(truediv, diff_bsp, mcdonough_bse_rho)
-            error_morb = map(truediv, diff_morb, gale_morb_rho)
-            reformatted_diff_bsp = []
-            reformatted_diff_morb = []
-            reformatted_diff_bsp.append(str(graphtitle2))
-            reformatted_diff_bsp.append("BSP:")
-            reformatted_diff_morb.append("----")
-            reformatted_diff_morb.append("MORB:")
-            bspedit = ",".join(str(i) for i in error_bsp)
-            morbedit = ",".join(str(i) for i in error_morb)
-            reformatted_diff_bsp.append(bspedit)
-            reformatted_diff_morb.append(morbedit)
-            reformatted_diff_bsp2 = ",".join(str(i) for i in reformatted_diff_bsp)
-            reformatted_diff_morb2 = ",".join(str(i) for i in reformatted_diff_morb)
-          #  for i in error_bsp:
-           #     reformatted_diff_bsp.append(i)
-          #  reformatted_diff_morb.append("----, MORB:")
-      #      for i in error_morb:
-       #         reformatted_diff_morb.append(i)
-            print "\n" + "Printing BSP percent error..." + "\n"
-            print error_bsp
-            print "\n" + "Printing MORB percent error..." + "\n"
-            print error_morb
-            font = {'weight' : 'bold',
-                    'size' : 14}
-            matplotlib.rc('font', **font)
-            plt.plot(depth_trans_zone, error_bsp, '-b', label="BSP Error", linewidth=2)
-            plt.plot(depth_trans_zone, error_morb, '-r', label="MORB Error", linewidth=2)
-            plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=3)
-            plt.xlabel("Depth")
-            plt.ylabel("Percent Error")
-            plt.grid()
-            plt.legend(loc='upper right')
-            plt.title(graphtitle2 + " Error")
-            #plt.show()
-            plt.savefig(str(graphtitle2) + "_error.png", format='png')
-            plt.close()
-            time.sleep(.02)
-            graphname = str(graphtitle2) + "_error.png"
-            if graphname in os.listdir(home_dir_list[0] + "/hefesto_fort.58_morb_outputs\CSV_Formatted"):
-                fdir = home_dir_list[0] + "/hefesto_fort.58_morb_outputs/CSV_Formatted/" + graphname
-                tdir = home_dir_list[0] + "/Error_Plots/" + graphname
-                shutil.move(fdir, tdir)
-                print "\n" + graphname + " now available in 'Error_Plots' directory!" + "\n"
-            else:
-                print "\n" + graphname + " not found!"
+            try:
+                print "\n" + "Found '" + str(filename)[:-4] + "' in MORB directory..."
+                os.chdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted")
+                bsp_rho = np.loadtxt(filename, delimiter=",", usecols=[1])
+                os.chdir(home_dir_list[0] + "/hefesto_fort.58_morb_outputs\CSV_Formatted")
+                morb_rho = np.loadtxt(fileclipped, delimiter=",", usecols=[1])
+                diff_bsp = map(operator.sub, bsp_rho, mcdonough_bse_rho)
+                diff_morb = map(operator.sub, morb_rho, gale_morb_rho)
+                error_bsp = map(truediv, diff_bsp, mcdonough_bse_rho)
+                error_morb = map(truediv, diff_morb, gale_morb_rho)
+                reformatted_diff_bsp = []
+                reformatted_diff_morb = []
+                reformatted_diff_bsp.append(str(graphtitle2))
+                reformatted_diff_bsp.append("BSP:")
+                reformatted_diff_morb.append("----")
+                reformatted_diff_morb.append("MORB:")
+                bspedit = ",".join(str(i) for i in error_bsp)
+                morbedit = ",".join(str(i) for i in error_morb)
+                reformatted_diff_bsp.append(bspedit)
+                reformatted_diff_morb.append(morbedit)
+                reformatted_diff_bsp2 = ",".join(str(i) for i in reformatted_diff_bsp)
+                reformatted_diff_morb2 = ",".join(str(i) for i in reformatted_diff_morb)
+              #  for i in error_bsp:
+               #     reformatted_diff_bsp.append(i)
+              #  reformatted_diff_morb.append("----, MORB:")
+          #      for i in error_morb:
+           #         reformatted_diff_morb.append(i)
+                print "\n" + "Printing BSP percent error..." + "\n"
+                print error_bsp
+                print "\n" + "Printing MORB percent error..." + "\n"
+                print error_morb
+                font = {'weight' : 'bold',
+                        'size' : 14}
+                matplotlib.rc('font', **font)
+                plt.plot(depth_trans_zone, error_bsp, '-b', label="BSP Error", linewidth=2)
+                plt.plot(depth_trans_zone, error_morb, '-r', label="MORB Error", linewidth=2)
+                plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=3)
+                plt.xlabel("Depth")
+                plt.ylabel("Percent Error")
+                plt.grid()
+                plt.legend(loc='upper right')
+                plt.title(graphtitle2 + " Error")
+                #plt.show()
+                plt.savefig(str(graphtitle2) + "_error.png", format='png')
+                plt.close()
+                time.sleep(.02)
+                graphname = str(graphtitle2) + "_error.png"
+                if graphname in os.listdir(home_dir_list[0] + "/hefesto_fort.58_morb_outputs\CSV_Formatted"):
+                    fdir = home_dir_list[0] + "/hefesto_fort.58_morb_outputs/CSV_Formatted/" + graphname
+                    tdir = home_dir_list[0] + "/Error_Plots/" + graphname
+                    shutil.move(fdir, tdir)
+                    print "\n" + graphname + " now available in 'Error_Plots' directory!" + "\n"
+                else:
+                    print "\n" + graphname + " not found!"
+                    pass
+                os.chdir(home_dir_list[0])
+                erroroutput.write("%s\n%s\n" % (reformatted_diff_bsp2, reformatted_diff_morb2))
+            except:
+                print "\n" "Problem with file: " + str(graphtitle2) + ".  Likely got a very small or 0 value."
+                err_error = str(graphtitle2) + ",ERROR!  LILEY GOT A VERY SMALL OR 0 VALUE!"
+                erroroutput.write("%s\n" % err_error)
                 pass
-            os.chdir(home_dir_list[0])
-            erroroutput.write("%s\n%s\n" % (reformatted_diff_bsp2, reformatted_diff_morb2))
         else:
             print "Error handling files for star: " + graphtitle2 + " ..."
     erroroutput.close()
@@ -591,7 +623,7 @@ def ploterror():
 
 
 def exitscript():
-    DIRR = home_dir_list[0] + "/BSP_vs_Rho_Plots"
+    DIRR = home_dir_list[0] + "/Depth_vs_Rho_Plots"
     number_plots = len(os.walk(DIRR).next()[2])
     print "\n" + "Finished with automated plotting.  There are " + str(number_plots) + " simulated planets with plots!  Exiting script..." + "\n" + "\n" + "\n" + "____________________________________"
 
