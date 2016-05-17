@@ -146,6 +146,10 @@ def makethedirs():
         os.remove("Combined_DeltaRho_Integrated_File.csv")
     else:
         pass
+    if "Max_Integrated_DeltaRho_Value.csv" in os.listdir(home_dir_list[0]):
+        os.remove("Max_Integrated_DeltaRho_Value.csv")
+    else:
+        pass
     print "\n" + "\n" + "Beginning BSP Output File Parsing..." + "\n"
     time.sleep(2)
     print "\n" + "Creating 'Depth_vs_Rho_Plots' directory.." + "\n"
@@ -347,7 +351,7 @@ def plotbspvsmorb():
                 plt.xlabel("Depth (km)")
                 plt.title(str(graphtitle2))
                 plt.legend(loc='lower right')
-                plt.xlim(xmax=570)
+                plt.xlim(xmax=573.68)
                 plt.grid()
                 plt.savefig(str(graphtitle2 + ".png"), format='png')
                 plt.close()
@@ -626,6 +630,7 @@ def ploterror():
                 plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=3)
                 plt.xlabel("Depth")
                 plt.ylabel("Percent Error")
+                plt.xlim(xmax=573.68)
                 plt.grid()
                 plt.legend(loc='upper right')
                 plt.title(graphtitle2 + " Error")
@@ -658,6 +663,7 @@ def ploterror():
 def integrated_density():
     integrated_output_file = open("Combined_DeltaRho_Integrated_File.csv", 'a')
     be_status_file = open("BasaltEclogite_Prob_File.csv", "a")
+    max_integrated_output_file = open("Max_Integrated_DeltaRho_Value.csv", 'a')
     print "\n" + "___________________________________________________________________" + "\n"
     os.chdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs")
     if "Integrated_DeltaRho.png" in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
@@ -702,7 +708,7 @@ def integrated_density():
                         print "\n" + "*******************************"
                         print "Processing Planet: " + str(y) + "..."
                         print "*******************************" + "\n"
-                        print "Planet " + str(y) + " is favorable for a basalt-eclogite transition!\n"
+                        print "Planet " + str(y) + " is likely for a basalt-eclogite transition!\n"
                         integrated_delta_rho = integrate.cumtrapz(thedata3, x=depth_trans_zone, initial=0)
                         integrated_listoflists_BEpositive.append(integrated_delta_rho)
                         print "Printing delta rho values...\n"
@@ -720,6 +726,15 @@ def integrated_density():
                         stat1 = []
                         stat1.append(str(y)+",POS")
                         be_status_file.write("%s\n" % str(y))
+                        int_numpy_list = np.array(integrated_delta_rho)
+                        max_val = np.amax(int_numpy_list)
+                        list1 = []
+                        list1.append(str(y) + ",POS")
+                        dat1 = str(max_val)
+                        list1.append(dat1)
+                        dat2 = ",".join(q for q in list1)
+                        max_integrated_output_file.write("%s\n" % dat2)
+                        print "The maximum integrated delta rho value obtained by planet " + str(y) + " is: " + dat1
                     else:
                         integrated_listoflists_BEnegative_names.append(str(y))
                         graphtitle2 = str(filename)[:-12]
@@ -727,7 +742,7 @@ def integrated_density():
                         print "\n" + "*******************************"
                         print "Processing Planet: " + str(y) + "..."
                         print "*******************************" + "\n"
-                        print "Planet " + str(y) + " is NOT favorable for a basalt-eclogite transition!\n"
+                        print "Planet " + str(y) + " is NOT likely for a basalt-eclogite transition!\n"
                         integrated_delta_rho = integrate.cumtrapz(thedata3, x=depth_trans_zone, initial=0)
                         integrated_listoflists_BEnegative.append(integrated_delta_rho)
                         print "Printing delta rho values...\n"
@@ -745,20 +760,30 @@ def integrated_density():
                         stat1 = []
                         stat1.append(str(y)+",NEG")
                         be_status_file.write("%s\n" % str(y))
+                        int_numpy_list = np.array(integrated_delta_rho)
+                        max_val = np.amax(int_numpy_list)
+                        list1 = []
+                        list1.append(str(y) + ",NEG")
+                        dat1 = str(max_val)
+                        list1.append(dat1)
+                        dat2 = ",".join(q for q in list1)
+                        max_integrated_output_file.write("%s\n" % dat2)
+                        print "The maximum integrated delta rho value obtained by planet " + str(y) + " is: " + dat1 + "\n"
                     time.sleep(1)
                     os.remove("temp.csv")
                 else:
                     pass
     integrated_output_file.close()
+    max_integrated_output_file.close()
     print "\n\n\n\n"
     print "\n" + "___________________________________________________________________" + "\n"
     print "Finished integrating...\n"
     be_fav = ", ".join(str(i) for i in integrated_listoflists_BEpositive_names)
     be_unfav = ", ".join(str(i) for i in integrated_listoflists_BEnegative_names)
-    print "Planets FAVORABLE for basalt eclogite transition:"
+    print "Planets LIKELY for basalt eclogite transition:"
     print be_fav
     print "\n"
-    print "Planets UNFAVORABLE for basalt eclogite transition:"
+    print "Planets UNLIKELY for basalt eclogite transition:"
     print be_unfav
     print "\n"
     print "Plotting integration results.  Please wait..."
@@ -775,13 +800,13 @@ def integrated_density():
         # print dtz.shape
         # print "______________________"
         if not label_added:
-            #if z2.shape == '(80L)':
             plt.hold(True)
-            plt.plot(dtz, z2, "r", linewidth=2, label="BE-trans unfavorable")
+            plt.plot(dtz, z2, "r", linewidth=2, label="BE-trans unlikely")
             plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=3)
             plt.title("Integrated Delta Rho vs Depth")
             plt.ylabel("Integrated Delta Rho")
             plt.xlabel("Depth")
+            plt.xlim(xmax=573.68)
             plt.grid()
             label_added = True
         else:
@@ -790,13 +815,13 @@ def integrated_density():
     for i in integrated_listoflists_BEpositive:
         z2 = np.array(i)
         if not label_added:
-            #if z2.shape == '(80L)':
             plt.hold(True)
-            plt.plot(dtz, z2, "b", linewidth=2, label="BE-trans favorable")
+            plt.plot(dtz, z2, "b", linewidth=2, label="BE-trans likely")
             plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=2)
             plt.title("Integrated Delta Rho vs Depth")
             plt.ylabel("Integrated Delta Rho")
             plt.xlabel("Depth")
+            plt.xlim(xmax=573.68)
             plt.grid()
             label_added = True
         else:
@@ -806,6 +831,7 @@ def integrated_density():
     plt.title("Integrated Delta Rho vs Depth")
     plt.ylabel("Integrated Delta Rho")
     plt.xlabel("Depth")
+    plt.xlim(xmax=573.68)
     plt.grid()
     plt.legend(loc="upper left")
     plt.savefig("Integrated_DeltaRho.png", format='png')
@@ -814,6 +840,16 @@ def integrated_density():
         fdir1 = home_dir_list[0] + "/Delta_Rho_CSV_Outputs/Integrated_DeltaRho.png"
         fdir2 = home_dir_list[0] + "/Integrated_DeltaRho.png"
         shutil.move(fdir1, fdir2)
+        print "'Integrated_DeltaRho.png' now available in directory: " + str(home_dir_list[0])
+    else:
+        pass
+    if "Combined_DeltaRho_Integrated_File.csv" in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
+        fdir1 = home_dir_list[0] + "/Delta_Rho_CSV_Outputs/Combined_DeltaRho_Integrated_File.csv"
+        fdir2 = home_dir_list[0] + "/Combined_DeltaRho_Integrated_File.csv"
+        shutil.move(fdir1, fdir2)
+        print "'Combined_DeltaRho_Integrated_File.csv' now available in directory: " + str(home_dir_list[0])
+    else:
+        pass
     exitscript()
 
 
@@ -821,7 +857,9 @@ def integrated_density():
 def exitscript():
     DIRR = home_dir_list[0] + "/Depth_vs_Rho_Plots"
     number_plots = len(os.walk(DIRR).next()[2])
-    print "\n" + "Finished with automated plotting.  There are " + str(number_plots) + " simulated planets with plots!  Exiting script..." + "\n" + "\n" + "\n" + "____________________________________"
+    print "\n" + "Finished with automated plotting.  There are " + str(number_plots) + " simulated planets with plots!"
+    print "Please see directory " + str(home_dir_list[0]) + " for output files."
+    print "Exiting script..." + "\n" + "\n" + "\n" + "____________________________________"
 
 
 initialization()
