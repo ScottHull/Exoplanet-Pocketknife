@@ -1,10 +1,11 @@
-import os, shutil, time, bisect, math
+import os, shutil, time, bisect, string
 import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 import operator
-from operator import truediv, div
+from operator import truediv
+from scipy import integrate
 
 
 
@@ -53,6 +54,21 @@ simple_earth_morb = [2.89708, 2.92792, 2.94455, 3.04297, 3.17487, 3.19574, 3.253
                      3.85119,3.85991, 3.86906, 3.8787, 3.88887, 3.89961, 3.91094, 3.9229, 3.9355, 3.94971, 3.97115,
                      3.99127, 4.01053, 4.02931, 4.04793]
 
+simple_earth_integrated_deltarho = [-0.457983511, -1.542959736, -2.177855918, -2.446160257, -2.555639127, -2.593449716,
+                                    -2.459027679, -2.201137325, -1.932684051, -1.662998873, -1.401128917, -1.126137423,
+                                    -0.835773866, -0.5444199, -0.250626327, 0.044889365, 0.339409207, 0.633158702,
+                                    0.925934849, 1.217941505, 1.508231893, 1.797041022, 2.084642134, 2.369407199,
+                                    2.650909376, 2.930621348, 3.208478061, 3.484458448, 3.754876934, 4.020854231,
+                                    4.284582678, 4.546773448, 4.806697514, 5.06504398, 5.320392154, 5.642959826,
+                                    6.033233158, 6.421119968, 6.80656509, 7.188975288, 7.567233107, 7.931961546,
+                                    8.288728407, 8.638470139, 8.985415545, 9.329397436, 9.670197468, 10.00751567,
+                                    10.34141464, 10.6704125, 10.99423977, 11.31189257, 11.62204921, 11.92161156,
+                                    12.14372919, 12.26304297, 12.34066184, 12.40796738, 12.47135312, 12.5315898,
+                                    12.5887274, 12.64124724, 12.69212081, 12.74149886, 12.79053983, 12.84320916,
+                                    12.90275642, 12.96990528, 13.04315801, 13.12374276, 13.21405196, 13.31503122,
+                                    13.42767175, 13.54955334, 13.67155013, 13.79110142, 13.92154482, 14.07377004,
+                                    14.25071685, 14.45151495]
+
 
 home_dir_list = []
 home_dir_list.append(os.getcwd())
@@ -81,6 +97,7 @@ def initialization():
     x = raw_input(">>>Please enter 'begin': ")
     if x == "begin":
         makethedirs()
+        #integrated_density()
     else:
         print "\n" + "Oops!  That's not a valid command!" + "\n"
         initialization()
@@ -111,12 +128,22 @@ def makethedirs():
         pass
     if "log.csv" in os.listdir(home_dir_list[0]):
         os.remove(home_dir_list[0] + "/log.csv")
-    if "log.csv" in os.listdir(home_dir_list[0]):
-        os.remove(home_dir_list[0] + "/log.csv")
     else:
         pass
     if "Error_Calculations.csv" in os.listdir(home_dir_list[0]):
         os.remove(home_dir_list[0] + "/Error_Calculations.csv")
+    else:
+        pass
+    if "Integrated_DeltaRho.png" in os.listdir(home_dir_list[0]):
+        os.remove("Integrated_DeltaRho.png")
+    else:
+        pass
+    if "BasaltEclogite_Prob_File.csv" in os.listdir(home_dir_list[0]):
+        os.remove("BasaltEclogite_Prob_File.csv")
+    else:
+        pass
+    if "Combined_DeltaRho_Integrated_File.csv" in os.listdir(home_dir_list[0]):
+        os.remove("Combined_DeltaRho_Integrated_File.csv")
     else:
         pass
     print "\n" + "\n" + "Beginning BSP Output File Parsing..." + "\n"
@@ -138,6 +165,11 @@ def makethedirs():
     else:
         shutil.rmtree(home_dir_list[0] + "/hefesto_fort.58_morb_outputs/CSV_Formatted")
         os.mkdir(home_dir_list[0] + "/hefesto_fort.58_morb_outputs/CSV_Formatted")
+    if not os.path.exists(home_dir_list[0] + "/MORB_Minus_BSP_Outputs"):
+        os.mkdir(home_dir_list[0] + "/MORB_Minus_BSP_Outputs")
+    else:
+        shutil.rmtree(home_dir_list[0] + "/MORB_Minus_BSP_Outputs")
+        os.mkdir(home_dir_list[0] + "/MORB_Minus_BSP_Outputs")
     if not os.path.exists(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
         os.mkdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs")
     else:
@@ -272,7 +304,7 @@ def plotbspvsmorb():
                 print morb_data
                 print "\n" + "PRINTING MORB DEPTH LIST FOR " + str(filename) + "..." + "\n"
                 print morb_depth
-                delta_rho_filename = str(graphtitle2)+"_deltarho.csv"
+                delta_rho_filename = str(graphtitle2)+"_morbminusbsp.csv"
                 deltarho_rows = map(operator.sub, morb_depth_list, bsp_depth_list)
                 try:
                     with open(delta_rho_filename, "wb") as fp:
@@ -283,7 +315,7 @@ def plotbspvsmorb():
                     pass
                 #time.sleep(0.5)
                 fdir = home_dir_list[0] + "/hefesto_fort.58_morb_outputs/CSV_Formatted/" + delta_rho_filename
-                gdir = home_dir_list[0] + "/Delta_Rho_CSV_Outputs/" + delta_rho_filename
+                gdir = home_dir_list[0] + "/MORB_Minus_BSP_Outputs/" + delta_rho_filename
                 if delta_rho_filename in os.listdir(os.curdir):
                     shutil.move(fdir, gdir)
                 else:
@@ -359,6 +391,7 @@ def plotbspvsmorb():
 
 def plotdeltarhovsbserho():
     print "\n" + "Creating delta rho plots..." + "\n"
+    integrated_listoflists = []
     combinedfile = open("Combined_All_File.csv", "a")
     combined_deltarho_file = open("Combined_DeltaRho_File.csv", "a")
     combined_bsp_rho_file = open("Combined_BSPRho_File.csv", "a")
@@ -370,18 +403,18 @@ def plotdeltarhovsbserho():
         graphtitle2 = str(graphtitletemp2)[16:]
         graphtitletemp = str(filename)[:-28]
         graphtitle = str(graphtitletemp)[7:]
-        fileclipped = graphtitle2+"_deltarho.csv"
+        fileclipped = graphtitle2+"_morbminusbsp.csv"
         print "\n" + "*******************************"
         print "Processing Planet: " + graphtitle2 + "..."
         print "*******************************" + "\n"
         print "\n" + "Found '"+str(filename)[:-4] + "' in BSP directory..."
         #bsp_rho_list = np.genfromtxt(filename, delimiter=",", usecols=[1], autostrip=True, converters={lambda s: float(s or 0)})
         #thedepths = np.loadtxt(filename, delimiter=",", usecols=[0])
-        if fileclipped in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
+        if fileclipped in os.listdir(home_dir_list[0] + "/MORB_Minus_BSP_Outputs"):
             os.chdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs/CSV_Formatted")
             bsp_rho_list = np.genfromtxt(filename.strip(), delimiter=",", usecols=[1], autostrip=True, dtype=float)
             thedepths = np.genfromtxt(filename.strip(), delimiter=",", usecols=[0], autostrip=True, dtype=float)
-            os.chdir(home_dir_list[0] + "\Delta_Rho_CSV_Outputs")
+            os.chdir(home_dir_list[0] + "\MORB_Minus_BSP_Outputs")
             with open(fileclipped) as z:
                 if len(z.readlines()) >= 81:
                     z.close()
@@ -389,12 +422,11 @@ def plotdeltarhovsbserho():
                     print "\n" + "Found files for star '" + str(graphtitle2) + "' in BSP/delta rho directories!"
                     print "Found file: '" + str(fileclipped) + "' ..."
                     print "Found file: '" + str(filename) + "' ..." + "\n"
-                    os.chdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs")
+                    os.chdir(home_dir_list[0] + "/MORB_Minus_BSP_Outputs")
                     delta_rho = np.genfromtxt(fileclipped.strip(), dtype=float, delimiter=None, autostrip=True)
                     #delta_rho = pd.read_csv(fileclipped, usecols=[0], delimiter=",", dtype=float)
                     #delta_rho = np.genfromtxt(fileclipped, usecols=[0], autostrip=True, converters={lambda s: float(s or 0)})
                     deltarhovsbsprho = map(truediv, delta_rho, bsp_rho_list)
-                    #deltarhovsbsprho = div(delta_rho, bsp_rho)
                     if str(graphtitle2) + ".png" in os.listdir(home_dir_list[0] + "/hefesto_fort.58_bsp_outputs\CSV_Formatted"):
                         os.remove(str(graphtitle2) + ".png")
                     else:
@@ -420,7 +452,7 @@ def plotdeltarhovsbserho():
                     bsp_rho_outputs2.append(str(graphtitle2))
                     bsp_rho_outputs2.append(reform_bsprho)
                     reform_bsp_rho_outputs2 = ", ".join(str(i) for i in bsp_rho_outputs2)
-                    greaterthanzero = bisect.bisect(deltarhovsbsprho, 0)
+                    greaterthanzero = bisect.bisect_right(deltarhovsbsprho, 0)
                     thevalue = thedepths[greaterthanzero]
                     print "\n" + "The depth of MORB override of BSP on planet " + graphtitle2 + " is: " + str(thevalue) + " km..." + "\n"
                     thevalueformatted = []
@@ -438,6 +470,15 @@ def plotdeltarhovsbserho():
                     combined_bsp_rho_file.write('%s\n' % reform_bsp_rho_outputs2)
                     combined_deltarho_file.write('%s\n' % reform_outputs)
                     combined_depth_file.write('%s\n' % reform_depth_outputs)
+                    deltarhofile = open(str(graphtitle2) + "_deltarho.csv", 'wb')
+                    deltarhofile.write(reform_outputs)
+                    deltarhofile.close()
+                    if str(graphtitle2) + "_deltarho.csv" in os.listdir(os.getcwd()):
+                        dur1 = os.getcwd() + "/" + str(graphtitle2) + "_deltarho.csv"
+                        dur2 = home_dir_list[0] + "/Delta_Rho_CSV_Outputs/" + str(graphtitle2) + "_deltarho.csv"
+                        shutil.move(dur1, dur2)
+                    else:
+                        pass
                     line_deltarho_y1 = 0.0539198491061
                     line_deltarho_x1 = 0
                     line_deltarho_x2 = 6
@@ -458,8 +499,8 @@ def plotdeltarhovsbserho():
                     plt.savefig(str(graphtitle2 + "_deltarhograph.png"), format='png')
                     plt.close()
                     movethisfile = graphtitle2 + "_deltarhograph.png"
-                    if movethisfile in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
-                        fdir = home_dir_list[0] + "/Delta_Rho_CSV_Outputs/" + movethisfile
+                    if movethisfile in os.listdir(home_dir_list[0] + "/MORB_Minus_BSP_Outputs"):
+                        fdir = home_dir_list[0] + "/MORB_Minus_BSP_Outputs/" + movethisfile
                         tdir = home_dir_list[0] + "/Delta_Rho_Plots/" + movethisfile
                         shutil.move(fdir, tdir)
                         print "\n" + "*******************************"
@@ -517,9 +558,9 @@ def plotdeltarhovsbserho():
     else:
         pass
     try:
-        if os.path.exists(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
-            dir1 = home_dir_list[0] + "/Delta_Rho_CSV_Outputs"
-            dir2 = home_dir_list[0] + "/Delta_Rho_Plots/Delta_Rho_CSV_Outputs"
+        if os.path.exists(home_dir_list[0] + "/MORB_Minus_BSP_Outputs"):
+            dir1 = home_dir_list[0] + "/MORB_Minus_BSP_Outputs"
+            dir2 = home_dir_list[0] + "/Delta_Rho_Plots/MORB_Minus_BSP_Outputs"
             shutil.move(dir1, dir2)
         else:
             pass
@@ -611,14 +652,166 @@ def ploterror():
         else:
             print "Error handling files for star: " + graphtitle2 + " ..."
     erroroutput.close()
+    integrated_density()
+
+
+def integrated_density():
+    integrated_output_file = open("Combined_DeltaRho_Integrated_File.csv", 'a')
+    be_status_file = open("BasaltEclogite_Prob_File.csv", "a")
+    print "\n" + "___________________________________________________________________" + "\n"
+    os.chdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs")
+    if "Integrated_DeltaRho.png" in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
+        os.remove("Integrated_DeltaRho.png")
+    else:
+        pass
+    integrated_listoflists_BEpositive = []
+    integrated_listoflists_BEnegative = []
+    integrated_listoflists_BEpositive_names = []
+    integrated_listoflists_BEnegative_names = []
+    simpleearth_deltarhomax = float(0.0539198491061)
+    print "\n\n\n\n\nPerforming integration calculations as a function of depth...\n"
+    time.sleep(1)
+    if "temp.csv" in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
+        os.remove("temp.csv")
+    else:
+        pass
+    for filename in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
+        graphtitle2 = str(filename)[:-13]
+        thedata = np.genfromtxt(os.path.join(home_dir_list[0], "Combined_DeltaRho_File.csv"), delimiter=',', dtype=None, autostrip=True)
+        for i in thedata:
+            thedata2 = list(i)
+            for y in thedata2:
+                if y == graphtitle2:
+                    success = ",\n".join(str(t) for t in thedata2)
+                    with open("temp.csv", 'wb') as tempfile:
+                        tempfile.write("%s" % success)
+                        tempfile.close()
+                    thedata_nonlist = np.genfromtxt("temp.csv", skip_header=True, dtype=None, autostrip=True)
+                    thedata_almost = list(thedata_nonlist)
+                    thedata3 = [float(i[:-1].strip()) for i in thedata_almost]
+                    datacheck = []
+                    for value in thedata3:
+                        if value >= simpleearth_deltarhomax:
+                            datacheck.append(0)
+                        else:
+                            datacheck.append(1)
+                    if 0 in datacheck:
+                        integrated_listoflists_BEpositive_names.append(str(y))
+                        graphtitle2 = str(filename)[:-12]
+                        print "\n" + "___________________________________________________________________" + "\n"
+                        print "\n" + "*******************************"
+                        print "Processing Planet: " + str(y) + "..."
+                        print "*******************************" + "\n"
+                        print "Planet " + str(y) + " is favorable for a basalt-eclogite transition!\n"
+                        integrated_delta_rho = integrate.cumtrapz(thedata3, x=depth_trans_zone)
+                        integrated_listoflists_BEpositive.append(integrated_delta_rho)
+                        print "Printing delta rho values...\n"
+                        print thedata3
+                        print "\n"
+                        print "Printing integrated delta rho values as a function of depth...\n"
+                        print integrated_delta_rho
+                        print "\n"
+                        output1 = []
+                        output1.append(str(y)+",POS")
+                        output2 = ",".join(str(q) for q in integrated_delta_rho)
+                        output1.append(output2)
+                        output3 = ",".join(str(o) for o in output1)
+                        integrated_output_file.write("%s\n" % output3)
+                        stat1 = []
+                        stat1.append(str(y)+",POS")
+                        be_status_file.write("%s\n" % str(y))
+                    else:
+                        integrated_listoflists_BEnegative_names.append(str(y))
+                        graphtitle2 = str(filename)[:-12]
+                        print "\n" + "___________________________________________________________________" + "\n"
+                        print "\n" + "*******************************"
+                        print "Processing Planet: " + str(y) + "..."
+                        print "*******************************" + "\n"
+                        print "Planet " + str(y) + " is NOT favorable for a basalt-eclogite transition!\n"
+                        integrated_delta_rho = integrate.cumtrapz(thedata3, x=depth_trans_zone)
+                        integrated_listoflists_BEnegative.append(integrated_delta_rho)
+                        print "Printing delta rho values...\n"
+                        print thedata3
+                        print "\n"
+                        print "Printing integrated delta rho values as a function of depth...\n"
+                        print integrated_delta_rho
+                        print "\n"
+                        output1 = []
+                        output1.append(str(y)+",NEG")
+                        output2 = ",".join(str(q) for q in integrated_delta_rho)
+                        output1.append(output2)
+                        output3 = ",".join(str(o) for o in output1)
+                        integrated_output_file.write("%s\n" % output3)
+                        stat1 = []
+                        stat1.append(str(y)+",NEG")
+                        be_status_file.write("%s\n" % str(y))
+                    time.sleep(1)
+                    os.remove("temp.csv")
+                else:
+                    pass
+    integrated_output_file.close()
+    print "\n\n\n\n"
+    print "\n" + "___________________________________________________________________" + "\n"
+    print "Finished integrating...\n"
+    be_fav = ", ".join(str(i) for i in integrated_listoflists_BEpositive_names)
+    be_unfav = ", ".join(str(i) for i in integrated_listoflists_BEnegative_names)
+    print "Planets FAVORABLE for basalt eclogite transition:"
+    print be_fav
+    print "\n"
+    print "Planets UNFAVORABLE for basalt eclogite transition:"
+    print be_unfav
+    print "\n"
+    print "Plotting integration results.  Please wait..."
+    print "\n"
+    font = {'weight' : 'bold',
+            'size' : 14}
+    matplotlib.rc('font', **font)
+    plt.figure(num=1)
+    dtz = np.array(depth_trans_zone[:-1])
+    label_added = False
+    for i in integrated_listoflists_BEnegative:
+        z2 = np.array(i)
+        if not label_added:
+            #if z2.shape == '(80L)':
+            plt.hold(True)
+            plt.plot(dtz, z2, "r", linewidth=2, label="BE-trans unfavorable")
+            plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=3)
+            plt.title("Integrated Delta Rho vs Depth")
+            plt.xlabel("Integrated Delta Rho")
+            plt.ylabel("Depth")
+            plt.grid()
+            label_added = True
+        else:
+            plt.plot(dtz, z2, "r", linewidth=2)
+    label_added = False
+    for i in integrated_listoflists_BEpositive:
+        z2 = np.array(i)
+        if not label_added:
+            #if z2.shape == '(80L)':
+            plt.hold(True)
+            plt.plot(dtz, z2, "b", linewidth=2, label="BE-trans favorable")
+            plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=2)
+            plt.title("Integrated Delta Rho vs Depth")
+            plt.xlabel("Integrated Delta Rho")
+            plt.ylabel("Depth")
+            plt.grid()
+            label_added = True
+        else:
+            plt.plot(dtz, z2, "b", linewidth=2)
+    plt.plot(dtz, simple_earth_integrated_deltarho, "g", linewidth=3, label="Simple Earth")
+    plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=2)
+    plt.title("Integrated Delta Rho vs Depth")
+    plt.xlabel("Integrated Delta Rho")
+    plt.ylabel("Depth")
+    plt.grid()
+    plt.legend(loc="upper left")
+    plt.savefig("Integrated_DeltaRho.png", format='png')
+    plt.close()
+    if "Integrated_DeltaRho.png" in os.listdir(home_dir_list[0] + "/Delta_Rho_CSV_Outputs"):
+        fdir1 = home_dir_list[0] + "/Delta_Rho_CSV_Outputs/Integrated_DeltaRho.png"
+        fdir2 = home_dir_list[0] + "/Integrated_DeltaRho.png"
+        shutil.move(fdir1, fdir2)
     exitscript()
-
-
-
-
-
-
-
 
 
 
