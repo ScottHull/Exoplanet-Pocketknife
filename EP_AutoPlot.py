@@ -54,20 +54,20 @@ simple_earth_morb = [2.89708, 2.92792, 2.94455, 3.04297, 3.17487, 3.19574, 3.253
                      3.85119,3.85991, 3.86906, 3.8787, 3.88887, 3.89961, 3.91094, 3.9229, 3.9355, 3.94971, 3.97115,
                      3.99127, 4.01053, 4.02931, 4.04793]
 
-simple_earth_integrated_deltarho = [-0.457983511, -1.542959736, -2.177855918, -2.446160257, -2.555639127, -2.593449716,
-                                    -2.459027679, -2.201137325, -1.932684051, -1.662998873, -1.401128917, -1.126137423,
-                                    -0.835773866, -0.5444199, -0.250626327, 0.044889365, 0.339409207, 0.633158702,
-                                    0.925934849, 1.217941505, 1.508231893, 1.797041022, 2.084642134, 2.369407199,
-                                    2.650909376, 2.930621348, 3.208478061, 3.484458448, 3.754876934, 4.020854231,
-                                    4.284582678, 4.546773448, 4.806697514, 5.06504398, 5.320392154, 5.642959826,
-                                    6.033233158, 6.421119968, 6.80656509, 7.188975288, 7.567233107, 7.931961546,
-                                    8.288728407, 8.638470139, 8.985415545, 9.329397436, 9.670197468, 10.00751567,
-                                    10.34141464, 10.6704125, 10.99423977, 11.31189257, 11.62204921, 11.92161156,
-                                    12.14372919, 12.26304297, 12.34066184, 12.40796738, 12.47135312, 12.5315898,
-                                    12.5887274, 12.64124724, 12.69212081, 12.74149886, 12.79053983, 12.84320916,
-                                    12.90275642, 12.96990528, 13.04315801, 13.12374276, 13.21405196, 13.31503122,
-                                    13.42767175, 13.54955334, 13.67155013, 13.79110142, 13.92154482, 14.07377004,
-                                    14.25071685, 14.45151495]
+simple_earth_integrated_deltarho = [0, -0.457983511, -1.542959736, -2.177855918, -2.446160257, -2.555639127,
+                                    -2.593449716, -2.459027679, -2.201137325, -1.932684051, -1.662998873, -1.401128917,
+                                    -1.126137423, -0.835773866, -0.5444199, -0.250626327, 0.044889365, 0.339409207,
+                                    0.633158702, 0.925934849, 1.217941505, 1.508231893, 1.797041022, 2.084642134,
+                                    2.369407199, 2.650909376, 2.930621348, 3.208478061, 3.484458448, 3.754876934,
+                                    4.020854231, 4.284582678, 4.546773448, 4.806697514, 5.06504398, 5.320392154,
+                                    5.642959826, 6.033233158, 6.421119968, 6.80656509, 7.188975288, 7.567233107,
+                                    7.931961546, 8.288728407, 8.638470139, 8.985415545, 9.329397436, 9.670197468,
+                                    10.00751567, 10.34141464, 10.6704125, 10.99423977, 11.31189257, 11.62204921,
+                                    11.92161156, 12.14372919, 12.26304297, 12.34066184, 12.40796738, 12.47135312,
+                                    12.5315898, 12.5887274, 12.64124724, 12.69212081, 12.74149886, 12.79053983,
+                                    12.84320916, 12.90275642, 12.96990528, 13.04315801, 13.12374276, 13.21405196,
+                                    13.31503122, 13.42767175, 13.54955334, 13.67155013, 13.79110142, 13.92154482,
+                                    14.07377004, 14.25071685, 14.45151495]
 
 
 home_dir_list = []
@@ -703,7 +703,7 @@ def integrated_density():
                         print "Processing Planet: " + str(y) + "..."
                         print "*******************************" + "\n"
                         print "Planet " + str(y) + " is favorable for a basalt-eclogite transition!\n"
-                        integrated_delta_rho = integrate.cumtrapz(thedata3, x=depth_trans_zone)
+                        integrated_delta_rho = integrate.cumtrapz(thedata3, x=depth_trans_zone, initial=0)
                         integrated_listoflists_BEpositive.append(integrated_delta_rho)
                         print "Printing delta rho values...\n"
                         print thedata3
@@ -728,7 +728,7 @@ def integrated_density():
                         print "Processing Planet: " + str(y) + "..."
                         print "*******************************" + "\n"
                         print "Planet " + str(y) + " is NOT favorable for a basalt-eclogite transition!\n"
-                        integrated_delta_rho = integrate.cumtrapz(thedata3, x=depth_trans_zone)
+                        integrated_delta_rho = integrate.cumtrapz(thedata3, x=depth_trans_zone, initial=0)
                         integrated_listoflists_BEnegative.append(integrated_delta_rho)
                         print "Printing delta rho values...\n"
                         print thedata3
@@ -767,18 +767,21 @@ def integrated_density():
             'size' : 14}
     matplotlib.rc('font', **font)
     plt.figure(num=1)
-    dtz = np.array(depth_trans_zone[:-1])
+    dtz = np.array(depth_trans_zone)
     label_added = False
     for i in integrated_listoflists_BEnegative:
         z2 = np.array(i)
+        # print z2.shape
+        # print dtz.shape
+        # print "______________________"
         if not label_added:
             #if z2.shape == '(80L)':
             plt.hold(True)
             plt.plot(dtz, z2, "r", linewidth=2, label="BE-trans unfavorable")
             plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=3)
             plt.title("Integrated Delta Rho vs Depth")
-            plt.xlabel("Integrated Delta Rho")
-            plt.ylabel("Depth")
+            plt.ylabel("Integrated Delta Rho")
+            plt.xlabel("Depth")
             plt.grid()
             label_added = True
         else:
@@ -792,8 +795,8 @@ def integrated_density():
             plt.plot(dtz, z2, "b", linewidth=2, label="BE-trans favorable")
             plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=2)
             plt.title("Integrated Delta Rho vs Depth")
-            plt.xlabel("Integrated Delta Rho")
-            plt.ylabel("Depth")
+            plt.ylabel("Integrated Delta Rho")
+            plt.xlabel("Depth")
             plt.grid()
             label_added = True
         else:
@@ -801,8 +804,8 @@ def integrated_density():
     plt.plot(dtz, simple_earth_integrated_deltarho, "g", linewidth=3, label="Simple Earth")
     plt.hlines(0, 1, 574, colors="k", linestyle="dashed",  linewidth=2)
     plt.title("Integrated Delta Rho vs Depth")
-    plt.xlabel("Integrated Delta Rho")
-    plt.ylabel("Depth")
+    plt.ylabel("Integrated Delta Rho")
+    plt.xlabel("Depth")
     plt.grid()
     plt.legend(loc="upper left")
     plt.savefig("Integrated_DeltaRho.png", format='png')
