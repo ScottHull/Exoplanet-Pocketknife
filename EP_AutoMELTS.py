@@ -145,9 +145,8 @@ def run_bsp():
     seconddir = home_dir_list[0] + "/BSP_MELTS_Files/BSP_Env_File"
     os.chdir(home_dir_list[0] + "/BSP_MELTS_Files")
     shutil.copy(firstdir, seconddir)
-    working_dir = bhome_dir_list[0] + '/BSP_MELTS_Files'
+    working_dir = home_dir_list[0] + '/BSP_MELTS_Files'
     os.chdir(home_dir_list[0] + "/BSP_MELTS_Files")
-    working_dir = bhome_dir_list[0] + '/BSP_MELTS_Files'
     def automate_bsp():
         for filename in glob(b"*.MELTS"):
             print "\n" + "**************************"
@@ -258,9 +257,8 @@ def run_morb():
     seconddir = home_dir_list[0] + "/MORB_MELTS_Files/MORB_Env_File"
     os.chdir(home_dir_list[0] + "/MORB_MELTS_Files")
     shutil.copy(firstdir, seconddir)
-    working_dir = bhome_dir_list[0] + '/MORB_MELTS_Files'
+    working_dir = home_dir_list[0] + '/MORB_MELTS_Files'
     os.chdir(home_dir_list[0] + "/MORB_MELTS_Files")
-    working_dir = bhome_dir_list[0] + '/MORB_MELTS_Files'
     def automate_morb():
         for filename in glob(b"*.MELTS"):
             print "\n" + "**************************"
