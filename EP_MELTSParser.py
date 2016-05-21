@@ -49,8 +49,6 @@ def initialization():
             bsp_align()
         elif y == 'morb':
             morb_align()
-        elif y == 'deltarho':
-            deltarho_align()
         else:
             print "Oops!  That's not a valid command!"
             initialization()
@@ -247,7 +245,7 @@ def bsp_align():
                 print "Failed to find: " + x + "\n"
                 wr = ""
                 aligned_out.write("%s\n" % wr)
-    print "Finished matching values!\n"
+    print "\n\nFinished matching values!\n"
 
 
 
@@ -326,24 +324,7 @@ def morb_align():
                 print "Failed to find: " + x + "\n"
                 wr = ""
                 aligned_out.write("%s\n" % wr)
-    print "Finished matching values!\n"
-    
-
-def deltarho_align():
-    print "\n"
-    if "Aligned_Delta_Rho_Outputs.csv" in os.listdir(home_dir_list[0]):
-        os.remove("Aligned_Delta_Rho_Outputs.csv")
-    else:
-        pass
-    aligned_out = open("Aligned_Delta_Rho_Outputs.csv", 'a')
-    data1 = raw_input("Please enter your .csv filename: ")
-    with open(data1, 'rU') as infile:
-        reader = csv.reader(infile, delimiter=",")
-        for row in reader:
-            try:
-                print row[1:]
-            except:
-                pass
+    print "\n\nFinished matching values!\n"
 
 
 
