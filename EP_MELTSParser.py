@@ -1,7 +1,4 @@
-import os, sys, csv, glob, re, repr, operator, shutil, time, string
-import numpy as np
-import pandas as pd
-from itertools import islice
+import os, sys, csv, glob, operator, shutil, time, string
 
 
 
