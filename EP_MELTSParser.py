@@ -1,4 +1,22 @@
-import os, sys, csv, glob, time
+import os, sys, csv, glob, re, repr, operator, shutil, time, string
+import numpy as np
+import pandas as pd
+from itertools import islice
+
+
+
+# depth_trans_zone = [0, 6, 19.7, 28.9, 36.4, 43.88, 51.34, 58.81, 66.36, 73.94, 81.5, 88.97, 96.45, 103.93, 111.41,
+#                     118.92, 126.47, 134.01, 141.55, 149.09, 156.64, 164.18, 171.72, 179.27, 186.79, 194.27, 201.75,
+#                     209.23, 216.71, 224.09, 231.4, 238.7, 246.01, 253.31, 260.62, 267.9, 275.16, 282.42, 289.68,
+#                     296.94, 304.19, 311.41, 318.44, 325.47, 332.5, 339.53, 346.56, 353.59, 360.62, 367.66, 374.69,
+#                     381.72, 388.75, 395.78, 402.78, 409.72, 416.67, 423.61, 430.56, 437.5, 444.44, 451.32, 457.89,
+#                     464.47, 471.05, 477.63, 484.21, 490.79, 497.37, 503.75, 510, 516.25, 522.5, 528.75, 535, 541.25,
+#                     547.5, 553.95, 560.53, 567.11, 573.68]
+
+
+
+
+
 
 
 home_dir_list = []
@@ -22,11 +40,23 @@ def initialization():
     print "\n\n\n\n\n\n\n\n\n\n\n\n"
     print "Would you like to parse bsp or morb files?"
     print "\n"
-    x = raw_input("Please enter 'bsp' or 'morb' to begin scraping: ")
+    x = raw_input("Please enter 'bsp' or 'morb' to begin parsing, or enter 'align' to align outputs: ")
     if x == 'bsp':
         file_parse_bsp()
     elif x == 'morb':
         file_parse_morb()
+    elif x == 'align':
+        print "Would you like to align bsp or morb data?"
+        y = raw_input("Please enter 'bsp' or 'morb': ")
+        if y == 'bsp':
+            bsp_align()
+        elif y == 'morb':
+            morb_align()
+        elif y == 'deltarho':
+            deltarho_align()
+        else:
+            print "Oops!  That's not a valid command!"
+            initialization()
     else:
         print "Oops!  That's not a valid command!"
         initialization()
@@ -184,6 +214,139 @@ def file_parse_morb():
         else:
             pass
 
+
+
+def bsp_align():
+    print "\n"
+    if "Aligned_BSP_Outputs.csv" in os.listdir(home_dir_list[0]):
+        os.remove("Aligned_BSP_Outputs.csv")
+    else:
+        pass
+    aligned_out = open("Aligned_BSP_Outputs.csv", 'a')
+    data1 = raw_input("Please enter your .csv filename: ")
+    with open(data1, 'rb') as infile:
+        val1 = []
+        val2 = []
+        val3 = []
+        reader = csv.reader(infile, delimiter=",")
+        for row in reader:
+            try:
+                val1.append(row[0].rstrip())
+                val2.append(row[1].rstrip())
+                val3.append(row[2])
+            except:
+                val2.append('-')
+                val3.append('-')
+                pass
+        for x in val1:
+            temp = []
+            if x in val2:
+                temp.append(x)
+                ind = val2.index(temp[0])
+                print "Got match: " + x + "\n"
+                wr = x + "," + val3[ind]
+                aligned_out.write("%s\n" % wr)
+            else:
+                print "Failed to find: " + x + "\n"
+                wr = ""
+                aligned_out.write("%s\n" % wr)
+    print "Finished matching values!\n"
+
+
+
+
+def morb_align():
+    print "\n"
+    if "Aligned_MORB_Outputs.csv" in os.listdir(home_dir_list[0]):
+        os.remove("Aligned_MORB_Outputs.csv")
+    else:
+        pass
+    aligned_out = open("Aligned_MORB_Outputs.csv", 'a')
+    data1 = raw_input("Please enter your .csv filename: ")
+    with open(data1, 'rb') as infile:
+        val1 = []
+        val2 = []
+        val3 = []
+        val4 = []
+        val5 = []
+        val6 = []
+        val7 = []
+        val8 = []
+        val9 = []
+        val10 = []
+        val11 = []
+        val12 = []
+        val13 = []
+        val14 = []
+        val15 = []
+        val16 = []
+        reader = csv.reader(infile, delimiter=",")
+        for row in reader:
+            try:
+                val1.append(row[0].rstrip())
+                val2.append(row[1].rstrip())
+                val3.append(row[2])
+                val4.append(row[3])
+                val5.append(row[4])
+                val6.append(row[5])
+                val7.append(row[6])
+                val8.append(row[7])
+                val9.append(row[8])
+                val10.append(row[9])
+                val11.append(row[10])
+                val12.append(row[11])
+                val13.append(row[12])
+                val14.append(row[13])
+                # val15.append(row[14])
+            except:
+                val2.append('-')
+                val3.append('-')
+                val4.append('-')
+                val5.append('-')
+                val6.append('-')
+                val7.append('-')
+                val8.append('-')
+                val9.append('-')
+                val10.append('-')
+                val11.append('-')
+                val12.append('-')
+                val13.append('-')
+                val14.append('-')
+                # val15.append('-')
+                pass
+        for x in val1:
+            temp = []
+            if x in val2:
+                temp.append(x)
+                ind = val2.index(temp[0])
+                print "Got match: " + x + "\n"
+                print val10[ind]
+                print val4[ind]
+                wr = x + "," + val3[ind] + "," + val4[ind] + "," + val5[ind] + "," + val6[ind] + "," + val7[ind] + "," + val8[ind] + "," + val9[ind] + "," + val10[ind] + "," + val11[ind] + "," + val12[ind] + "," + val13[ind] + "," + val14[ind]
+                print wr
+                aligned_out.write("%s\n" % wr)
+            else:
+                print "Failed to find: " + x + "\n"
+                wr = ""
+                aligned_out.write("%s\n" % wr)
+    print "Finished matching values!\n"
+    
+
+def deltarho_align():
+    print "\n"
+    if "Aligned_Delta_Rho_Outputs.csv" in os.listdir(home_dir_list[0]):
+        os.remove("Aligned_Delta_Rho_Outputs.csv")
+    else:
+        pass
+    aligned_out = open("Aligned_Delta_Rho_Outputs.csv", 'a')
+    data1 = raw_input("Please enter your .csv filename: ")
+    with open(data1, 'rU') as infile:
+        reader = csv.reader(infile, delimiter=",")
+        for row in reader:
+            try:
+                print row[1:]
+            except:
+                pass
 
 
 
