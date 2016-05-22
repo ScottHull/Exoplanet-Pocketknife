@@ -31,7 +31,7 @@ def initialization():
     else:
         print("MORB_ENV_FILE DETECTED!")
         pass
-    print("\n\nWelcome to AutoMELTS for Python 3!\n")
+    print("\n\nAUTOMELTS v2.0\n")
     print("Would you like to perform 'bsp' or 'morb' calculations?\n")
     x1 = raw_input("Please enter 'bsp' or 'morb': ")
     if x1 == 'bsp':
