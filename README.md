@@ -88,12 +88,13 @@ Star1,DATAFORSTAR1
 Star2,DATAFORSTAR2
 
 
-By using the 'alignment' feature, the user must first transfer the whole list of stars to which they would like to align to the first column of a CSV, and then copy the second sectioni of data (starting with star names given in the output files and then the following data in the following format (easy done in Excel):
+By using the 'alignment' feature, the user must first transfer the whole list of stars to which they would like to align to the first column of a CSV, and then copy the second sectioni of data (starting with star names given in the output files and then the following data in the following format (easy done in Excel)):
 
 
 Star1,Star1,DATAFORSTAR1
 
 Star2, Star3,DATAFORSTAR3
+
 Star3
 
 
@@ -101,7 +102,9 @@ After running the alignment feature, an output titled 'Aligned_BSP_Outputs.csv' 
 
 
 Star1,Star1,DATAFORSTAR1
+
 Star2
+
 Star3,Star3,DATAFORSTAR3
 
 
