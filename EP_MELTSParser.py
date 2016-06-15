@@ -44,11 +44,13 @@ def initialization():
         file_parse_morb()
     elif x == 'align':
         print "Would you like to align bsp or morb data?"
-        y = raw_input("Please enter 'bsp' or 'morb': ")
+        y = raw_input("Please enter 'bsp' or 'morb', or 'universal' for data of any length: ")
         if y == 'bsp':
             bsp_align()
         elif y == 'morb':
             morb_align()
+        elif y == 'universal':
+            universalparse()
         else:
             print "Oops!  That's not a valid command!"
             initialization()
@@ -115,12 +117,9 @@ def file_parse_bsp():
                     for num, line in enumerate(reader, 1):
                         if "Phase" in line:
                             try:
-                                #print num
-                                skip_row = num + 1
-                                #print skip_row
+                                # skip_row = num + 1
                                 csv_list = list(reader)
                                 alloy_index = csv_list[0].index("alloy-solid_0")
-                                #print alloy_index
                                 for row in csv_list[1:]:
                                     with open("temp.txt", "a") as tempfile:
                                         vals = []
@@ -154,7 +153,6 @@ def file_parse_bsp():
                 meltsfile.close()
                 combined_output_file.write(",".join(data) + "\n")
                 time.sleep(0.5)
-                #print data
                 print "\n"
             else:
                 pass
@@ -245,6 +243,7 @@ def bsp_align():
                 print "Failed to find: " + x + "\n"
                 wr = ""
                 aligned_out.write("%s\n" % wr)
+    aligned_out.close()
     print "\n\nFinished matching values!\n"
 
 
@@ -273,8 +272,6 @@ def morb_align():
         val12 = []
         val13 = []
         val14 = []
-        val15 = []
-        val16 = []
         reader = csv.reader(infile, delimiter=",")
         for row in reader:
             try:
@@ -292,7 +289,6 @@ def morb_align():
                 val12.append(row[11])
                 val13.append(row[12])
                 val14.append(row[13])
-                # val15.append(row[14])
             except:
                 val2.append('-')
                 val3.append('-')
@@ -307,7 +303,6 @@ def morb_align():
                 val12.append('-')
                 val13.append('-')
                 val14.append('-')
-                # val15.append('-')
                 pass
         for x in val1:
             temp = []
@@ -315,16 +310,55 @@ def morb_align():
                 temp.append(x)
                 ind = val2.index(temp[0])
                 print "Got match: " + x + "\n"
-                print val10[ind]
-                print val4[ind]
                 wr = x + "," + val3[ind] + "," + val4[ind] + "," + val5[ind] + "," + val6[ind] + "," + val7[ind] + "," + val8[ind] + "," + val9[ind] + "," + val10[ind] + "," + val11[ind] + "," + val12[ind] + "," + val13[ind] + "," + val14[ind]
-                print wr
                 aligned_out.write("%s\n" % wr)
             else:
                 print "Failed to find: " + x + "\n"
                 wr = ""
                 aligned_out.write("%s\n" % wr)
+    aligned_out.close()
     print "\n\nFinished matching values!\n"
+
+
+
+def universalparse():
+    if "Alligned_Outputs.csv" in os.listdir(os.curdir):
+        print "\nFound 'Alligned_Outputs.csv' in working directory.  Removing...\n"
+        os.remove("Alligned_Outputs.csv")
+    else:
+        pass
+    aligned_out = open("Alligned_Outputs.csv", 'a')
+    data1 = raw_input("Please enter your .csv filename: ")
+    with open(data1, 'rb') as infile:
+        reader = csv.reader(infile, delimiter=",")
+        print "\nParsing...\n"
+        time.sleep(1)
+        success = []
+        temp1 = []
+        temp2 = []
+        temp3 = []
+        for row in reader:
+            temp1.append(str(row[0]))
+            temp2.append(str(row[1]))
+            temp3.append(row[2:])
+        for x in temp1:
+            if x in temp2:
+                success.append(x)
+                ind = temp2.index(x)
+                getthese = temp3[ind]
+                print "Got match: " + x + "\n"
+                usethese = ",".join(str(i) for i in getthese)
+                wr = x + "," + usethese
+                aligned_out.write("%s\n" % wr)
+            else:
+                print "Failed to find: " + x + "\n"
+                wr = ""
+                aligned_out.write("%s\n" % wr)
+                pass
+    aligned_out.close()
+    print "\n\nFinished matching values!\n"
+
+
 
 
 
