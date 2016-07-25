@@ -13,7 +13,7 @@ def initialization():
     print("\n\n\n\n\n\n\n\n\n\n\n\n\n")
     print("___________________________________________\n")
     print "AutoMELTS v2.0"
-    if not os.path.isfile("run_alphaMELTS.command"):
+    if not os.path.isfile("run_alphamelts.command"):
         print("\nWARNING!  ALPHAMELTS IS NOT DETECTED IN THE WORKING DIRECTORY!\n")
         pass
     else:
@@ -28,10 +28,7 @@ def initialization():
     if not os.path.isfile("MORB_Env_File"):
         print("\nWARNING!  MORB_ENV_FILE IS NOT DETECTED IN THE WORKING DIRECTORY!\n")
         pass
-    else:
-        print("MORB_ENV_FILE DETECTED!")
-        pass
-    print("\n\nAUTOMELTS v2.0\n")
+    print("\n\nWelcome to AutoMELTS for Python 3!\n")
     print("Would you like to perform 'bsp' or 'morb' calculations?\n")
     x1 = raw_input("Please enter 'bsp' or 'morb': ")
     if x1 == 'bsp':
@@ -56,11 +53,11 @@ def bsp_writefiles():
         shutil.rmtree(home_dir_list[0] + "/Completed_BSP_MELTS_Files")
         os.mkdir(home_dir_list[0] + "/Completed_BSP_MELTS_Files")
     if "BSP_MELTS_Success_Log.csv" in os.listdir(home_dir_list[0]):
-        os.remove("BSP_MELTS_Success_Log")
+        os.remove("BSP_MELTS_Success_Log.csv")
     else:
         pass
     if "MORB_MELTS_Success_Log.csv" in os.listdir(home_dir_list[0]):
-        os.remove("MORB_MELTS_Success_Log")
+        os.remove("MORB_MELTS_Success_Log.csv")
     else:
         pass
     workbook = raw_input("Please enter your .xlsx workbook filename: ")
@@ -142,6 +139,7 @@ def morb_writefiles():
 
 def run_bsp():
     os.chdir(home_dir_list[0])
+    log = open("BSP_MELTS_Success_Log.csv", 'a')
     print("\n\nPerforming BSP MELTS calculations...\n")
     os.chdir(home_dir_list[0] + "/BSP_MELTS_Files")
     for filename2 in glob("*.MELTS"):
@@ -178,8 +176,12 @@ def run_bsp():
                     infile.close()
                     outfile.close()
                     os.remove(newname)
+                    log_in = thefile[:-4]+",SUCCESS"
+                    log.write("%s\n" % log_in)
         except Exception:
             print("Problem with file: " + thefile)
+            log_in = thefile[:-4]+",FAILURE"
+            log.write("%s\n" % log_in)
             os.remove(thefile)
             pass
         print(thefile + " has been processed...\n")
@@ -191,6 +193,7 @@ def run_bsp():
 
 def run_morb():
     os.chdir(home_dir_list[0])
+    log = open("MORB_MELTS_Success_Log.csv", 'a')
     print("\n\nPerforming MORB MELTS calculations...\n")
     os.chdir(home_dir_list[0] + "/MORB_MELTS_Files")
     for filename2 in glob("*.MELTS"):
@@ -227,8 +230,12 @@ def run_morb():
                     infile.close()
                     outfile.close()
                     os.remove(newname)
+                    log_in = thefile[:-4]+",SUCCESS"
+                    log.write("%s\n" % log_in)
         except Exception:
             print("Problem with file: " + thefile)
+            log_in = thefile[:-4]+",FAILURE"
+            log.write("%s\n" % log_in)
             os.remove(thefile)
             pass
         print(thefile + " has been processed...\n")
