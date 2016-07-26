@@ -12,7 +12,7 @@ def initialization():
     print("___________________________________________")
     print("\n\n\n\n\n\n\n\n\n\n\n\n\n")
     print("___________________________________________\n")
-    print "AutoMELTS v2.0"
+    print("AutoMELTS v2.0\n")
     if not os.path.isfile("run_alphamelts.command"):
         print("\nWARNING!  ALPHAMELTS IS NOT DETECTED IN THE WORKING DIRECTORY!\n")
         pass
@@ -212,7 +212,7 @@ def run_morb():
             t = Timer(300, p.kill)
             t.start()
             print("\nTimeout timer started.  300 seconds until the loop continues...\n")
-            p.communicate(input=b"\n".join([b"1", thefile, b"8", b"alloy-liquid", b"0", b"x", b"5", b"3", b"+0.4", b"2", b"1400", b"10000", b"10", b"1", b"3", b"1", b"liquid", b"1", b"0.07", b"0", b"10", b"0", b"4", b"0"]))
+            p.communicate(input=b"\n".join([b"1", thefile, b"8", b"alloy-liquid", b"0", b"x", b"5", b"3", b"+0.4", b"2", b"1400", b"10000", b"10", b"1", b"3", b"1", b"liquid", b"1", b"0.05", b"0", b"10", b"0", b"4", b"0"]))
             t.cancel()
             print("Timeout timer cancelled...\n")
             if "alphaMELTS_tbl.txt" in os.listdir(home_dir_list[0]):
