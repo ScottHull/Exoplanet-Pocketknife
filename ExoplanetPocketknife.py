@@ -1,5 +1,5 @@
-import os, csv, time, sys, shutil
-from operator import add
+import os, csv, time, sys, shutil, subprocess
+from threading import Timer
 from math import *
 import pandas as pd
 
@@ -129,7 +129,7 @@ class createenvfiles:
             eight = "ALPHAMELTS_CELSIUS_OUTPUT true"
             nine = "ALPHAMELTS_SAVE_ALL true"
             ten = "ALPHAMELTS_SKIP_FAILURE true"
-            eleven = "Supress: alloy-liquid"
+            eleven = "Suppress: alloy-liquid"
 
             bspenvfile.write("{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n".format(one, two, three,
                                 four, five, six, seven, eight, nine, ten, eleven))
@@ -150,7 +150,7 @@ class createenvfiles:
             eight = "ALPHAMELTS_CELSIUS_OUTPUT true"
             nine = "ALPHAMELTS_SAVE_ALL true"
             ten = "ALPHAMELTS_SKIP_FAILURE true"
-            eleven = "Supress: alloy-liquid"
+            eleven = "Suppress: alloy-liquid"
 
             morbenvfile.write("{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n".format(one, two, three,
                                 four, five, six, seven, eight, nine, ten, eleven))
@@ -159,18 +159,101 @@ class createenvfiles:
 
 class runmelts:
 
-    def runmeltsbsp(self):
-        pass
+    def runmelts_bsp(self, infile_directory, inputfilename):
+
+        if "{}_Completed_BSP_MELTS_Files0".format(inputfilename) in os.listdir(os.getcwd()):
+            shutil.rmtree("{}_Completed_BSP_MELTS_Files0".format(inputfilename))
+            os.mkdir("{}_Completed_BSP_MELTS_Files0".format(inputfilename))
+        else:
+            os.mkdir("{}_Completed_BSP_MELTS_Files0".format(inputfilename))
+
+        for i in os.listdir(infile_directory):
+
+            if "alphaMELTS_tbl.txt" in os.listdir(os.getcwd()):
+                os.remove("alphaMELTS_tbl.txt")
+            else:
+                pass
+
+            shutil.copy((infile_directory + "/" + i), (home_dir[0] + "/" + i))
+            print("[~] Running BSP calculations for: {}".format(i[:-20]))
+            p = subprocess.Popen(["run_alphamelts.command", "-f", "BSP_Env_File"], stdin=subprocess.PIPE)
+            t = Timer(300, p.kill)
+            t.start()
+            print("\nTimeout timer started.  300 seconds until the loop continues...\n")
+            p.communicate(input=b"\n".join([b"1", i, b"8", b"alloy-liquid", b"0", b"x", b"5", b"4", b"-1.4", b"2", b"2500", b"4200", b"4", b"1", b"0"]))
+            t.cancel()
+            
+            if "alphaMELTS_tbl.txt" in os.listdir(os.getcwd()):
+                oldname = "alphaMELTS_tbl.txt"
+                newname = i[:-20] + "_BSP_OUTPUT"
+                os.rename(oldname, newname)
+                shutil.move(newname, home_dir[0] + "/Completed_BSP_MELTS_Files")
+                os.remove(i)
+                os.chdir(home_dir[0] + "/Completed_BSP_MELTS_Files")
+                csv_file_name = newname + ".csv"
+                with open(newname, 'rb') as infile, open(csv_file_name, 'wb') as outfile:
+                    in_txt = csv.reader(infile, delimiter=" ")
+                    out_csv = csv.writer(outfile)
+                    out_csv.writerows(in_txt)
+                    infile.close()
+                    outfile.close()
+                    os.remove(newname)
+                    print("[~] {} BSP calculation processed!".format(i[:-20]))
+
+            else:
+                print("[X] {} BSP calculation FAILED!".format(i[:-20]))
+                pass
+
+
+    def runmelts_morb(self, infile_directory, inputfilename):
+
+        if "{}_Completed_MORB_MELTS_Files0".format(inputfilename) in os.listdir(os.getcwd()):
+            shutil.rmtree("{}_Completed_MORB_MELTS_Files0".format(inputfilename))
+            os.mkdir("{}_Completed_MORB_MELTS_Files0".format(inputfilename))
+        else:
+            os.mkdir("{}_Completed_MORB_MELTS_Files0".format(inputfilename))
+
+        for i in os.listdir(infile_directory):
+
+            if "alphaMELTS_tbl.txt" in os.listdir(os.getcwd()):
+                os.remove("alphaMELTS_tbl.txt")
+            else:
+                pass
+
+            shutil.copy((infile_directory + "/" + i), (home_dir[0] + "/" + i))
+            print("[~] Running MORB calculations for: {}".format(i[:-20]))
+            p = subprocess.Popen(["run_alphamelts.command", "-f", "MORB_Env_File"], stdin=subprocess.PIPE)
+            t = Timer(300, p.kill)
+            t.start()
+            print("\nTimeout timer started.  300 seconds until the loop continues...\n")
+            p.communicate(input=b"\n".join([b"1", i, b"8", b"alloy-liquid", b"0", b"x", b"5", b"3", b"+0.4", b"2", b"1400", b"10000", b"10", b"1", b"3", b"1", b"liquid", b"1", b"0.05", b"0", b"10", b"0", b"4", b"0"]))
+            t.cancel()
+
+            if "alphaMELTS_tbl.txt" in os.listdir(os.getcwd()):
+                oldname = "alphaMELTS_tbl.txt"
+                newname = i[:-20] + "_MORB_OUTPUT"
+                os.rename(oldname, newname)
+                shutil.move(newname, home_dir[0] + "/Completed_MORB_MELTS_Files")
+                os.remove(i)
+                os.chdir(home_dir[0] + "/Completed_MORB_MELTS_Files")
+                csv_file_name = newname + ".csv"
+                with open(newname, 'rb') as infile, open(csv_file_name, 'wb') as outfile:
+                    in_txt = csv.reader(infile, delimiter=" ")
+                    out_csv = csv.writer(outfile)
+                    out_csv.writerows(in_txt)
+                    infile.close()
+                    outfile.close()
+                    os.remove(newname)
+                    print("[~] {} MORB calculation processed!".format(i[:-20]))
+
+            else:
+                print("[X] {} MORB calculation FAILED!".format(i[:-20]))
+                pass
 
 
 
 
-    def runmeltsmorb(self):
-        pass
-
-
-
-class readinputs: #FIX WITH NICKEL
+class readinputs:
 
     def logep(self, infile):
 
