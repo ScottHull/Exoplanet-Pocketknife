@@ -588,26 +588,36 @@ def __init__():
     print("Enter '1' to input [X/H] stellar abundances or '2' to input mole% stellar abundances?")
     option1 = input(">>> ")
     if option1 == '1':
-        print("\nPleaes enter your .csv formmated input file with [X/H] stellar abundances:")
-        infile = input(">>> ")
-        if infile in os.listdir(os.getcwd()):
-            print("\n{} has been found in the working directory!".format(infile))
-            inputfile_list.append(infile)
-            # time.sleep(1)
-            readinputs.logep(readinputs, infile)
+        if "run_alphamelts.command" in os.listdir(os.getcwd()):
+            print("\nPleaes enter your .csv formmated input file with [X/H] stellar abundances:")
+            infile = input(">>> ")
+            if infile in os.listdir(os.getcwd()):
+                print("\n{} has been found in the working directory!".format(infile))
+                inputfile_list.append(infile)
+                # time.sleep(1)
+                readinputs.logep(readinputs, infile)
+            else:
+                print("\n{} has NOT been found in the working directory!".format(infile))
+                __init__()
         else:
-            print("\n{} has NOT been found in the working directory!".format(infile))
+            print("[X] 'run_alphamelts.command' is not in the working directory!")
+            time.sleep(2)
             __init__()
     if option1 == '2':
         print("\nPleaes enter your .csv formmated input file with mole$ stellar abundances:")
         infile = input(">>> ")
-        if infile in os.listdir(os.getcwd()):
-            print("\n{} has been found in the working directory!".format(infile))
-            inputfile_list.append(infile)
-            # time.sleep(1)
-            readinputs.molepct(readinputs, infile)
+        if "run_alphamelts.command" in os.listdir(os.getcwd()):
+            if infile in os.listdir(os.getcwd()):
+                print("\n{} has been found in the working directory!".format(infile))
+                inputfile_list.append(infile)
+                # time.sleep(1)
+                readinputs.molepct(readinputs, infile)
+            else:
+                print("\n{} has NOT been found in the working directory!".format(infile))
+                __init__()
         else:
-            print("\n{} has NOT been found in the working directory!".format(infile))
+            print("[X] 'run_alphamelts.command' is not in the working directory!")
+            time.sleep(2)
             __init__()
     else:
         print("\nOops!  That's not a valid command!\n")
