@@ -394,6 +394,8 @@ class readinputs:
 
             print("{~} MELTS BSP Input Files Written!")
             print("{~} Launching alphaMELTS for BSP Calculations...")
+            infiledir = (os.getcwd()+"/{}_MELTS_BSP_Input_Files/".format(inputfile_list[0][:-4]))
+            runmelts.runmelts_bsp(runmelts, infile_directory=infiledir, inputfilename=infile)
 
 
 
