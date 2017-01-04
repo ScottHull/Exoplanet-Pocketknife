@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import integrate as inte
 import numpy as np
+import bisect
 
 
 bsp_run = False
@@ -947,15 +948,15 @@ class runhefesto:
 
 
 
-class hefestooutputparser:
-
-    def fort58_parser(self):
-
-        os.chdir(home_dir[0] + "/HeFESTO_BSP_Output_Files/fort.58")
-
-        for i in os.listdir(os.getcwd()):
-            infile = pd.read_csv(i, delimiter='infer')
-            depth = ""
+# class hefestooutputparser:
+#
+#     def fort58_parser(self):
+#
+#         os.chdir(home_dir[0] + "/HeFESTO_BSP_Output_Files/fort.58")
+#
+#         for i in os.listdir(os.getcwd()):
+#             infile = pd.read_csv(i, delimiter='infer')
+#             depth = ""
 
 
 
@@ -963,21 +964,104 @@ class integrationloop2:
 
     def integrationloop2(self):
 
-        hefesto_bsp_out_path = home_dir[0] + "/HeFESTO_BSP_Output_Files/"
-        hefesto_morb_out_path = home_dir[0] + "/HeFESTO_MORB_Output_Files/"
+
+        # standard_depths = []
+        #
+        # model_sun_bsp_rho = [3.1399, 3.16644, 3.21129, 3.21993, 3.22843, 3.23679, 3.24503, 3.25316, 3.26117, 3.26909, 3.28169, 3.29415,
+        #      3.30499, 3.31476, 3.3238, 3.33232, 3.34046, 3.34832, 3.35595, 3.3634, 3.3707, 3.37788, 3.38495, 3.39193,
+        #      3.39884, 3.40567, 3.41244, 3.41916, 3.42582, 3.43244, 3.43902, 3.44557, 3.45208, 3.45857, 3.46504, 3.47149,
+        #      3.47794, 3.48438, 3.49083, 3.4973, 3.50379, 3.51032, 3.51783, 3.52856, 3.5352, 3.54193, 3.54876, 3.55574,
+        #      3.56291, 3.57035, 3.57813, 3.58638, 3.59525, 3.60495, 3.61577, 3.69282, 3.7338, 3.74885, 3.75742, 3.76575,
+        #      3.77393, 3.78203, 3.79015, 3.79837, 3.80676, 3.81424, 3.81873, 3.82321, 3.82768, 3.83213, 3.83656, 3.84098,
+        #      3.84538, 3.84977, 3.85831, 3.87594, 3.89625, 3.90832, 3.91254, 3.91675, 3.92094]
+        #
+        # model_sun_crust_rho = [2.89708, 2.92792, 2.94455, 3.04297, 3.17487, 3.19574, 3.25329, 3.36196, 3.37489,
+        #                        3.38665, 3.39781, 3.40855, 3.43322, 3.4435, 3.45364, 3.46287, 3.47109, 3.47896, 3.4865,
+        #                        3.49376, 3.50079, 3.50761, 3.51426, 3.52077, 3.52715, 3.53344, 3.53963, 3.54574,	3.55179,
+        #                        3.55777,	3.56371, 3.5696, 3.57545, 3.58126, 3.58704,	3.59279, 3.66547, 3.67112, 3.67676,
+        #                        3.68238, 3.68799, 3.69359, 3.69919, 3.70479,	3.71039, 3.71601, 3.72163, 3.72728,	3.73294,
+        #                        3.73864,	3.74438, 3.75015, 3.75598, 3.76188,	3.76784, 3.77389, 3.78003, 3.78629,	3.79267,
+        #                        3.79921,	3.80591, 3.8128, 3.81991, 3.82728, 3.83492,	3.84288, 3.85119, 3.85991, 3.86906,
+        #                        3.8787, 3.88887,	3.89961, 3.91094, 3.9229, 3.9355, 3.94971, 3.97115,	3.99127, 4.01053,
+        #                        4.02931,	4.04793]
+        #
+        # model_sun_delta_rho = [a - b for a, b in zip(model_sun_crust_rho, model_sun_bsp_rho)]
+        #
+        # lit_sun_bsp_rho = []
+        #
+        # lit_sun_crust_rho = [2.96748, 2.98934, 3.02871, 3.12504, 3.2649, 3.32414, 3.40401, 3.41811, 3.43281, 3.44608,
+        #                      3.45855, 3.47031, 3.5037, 3.51281,	3.52141, 3.52955, 3.5373, 3.54472, 3.55187, 3.55881, 3.56557,
+        #                      3.57218, 3.57866, 3.58505,	3.59134, 3.59757, 3.60373, 3.60984,	3.6159, 3.62192, 3.62791,
+        #                      3.63387, 3.6398, 3.64571, 3.6516, 3.65749, 3.75811, 3.7639, 3.7697, 3.77549, 3.7813, 3.78712,
+        #                      3.79296, 3.79882, 3.80472, 3.81065, 3.81662, 3.82265, 3.82874, 3.8349, 3.84114, 3.84747, 3.85391,
+        #                      3.86047, 3.86718, 3.87404, 3.88108, 3.88832, 3.89579, 3.90353, 3.91157, 3.91994, 3.92868, 3.93784,
+        #                      3.94746, 3.95758, 3.96823,	3.97945, 3.99123, 4.00355, 4.01639,	4.02969, 4.04339, 4.05801,
+        #                      4.07212, 4.08535, 4.09777, 4.10947, 4.1205, 4.13093, 4.14081]
+
+
+
+
+        hefesto_bsp_out_path = home_dir[0] + "/HeFESTO_BSP_Output_Files"
+        hefesto_morb_out_path = home_dir[0] + "/HeFESTO_MORB_Output_Files"
 
         os.chdir(hefesto_bsp_out_path)
 
-        for i in os.listdir(os.getcwd()):
-            os.chdir(hefesto_bsp_out_path)
-            star_name = i[:-4]
-            bsp_df = pd.read_csv(i)
-            if star_name in os.listdir(hefesto_morb_out_path):
-                os.chdir(hefesto_morb_out_path)
-                morb_df = pd.read_csv("{}_{}".format(star_name, ''))
+        print("\n[~] Initiating BSP HeFESTO output file parsing...\n")
 
+        for i in os.listdir(os.getcwd()):
+            depth_list = []
+            bsp_rho_list = []
+            morb_rho_list = []
+            os.chdir(hefesto_bsp_out_path)
+            if "fort.58" in str(i):
+                print("[~] Found file: {}".format(i))
+                with open(i, 'r') as infile:
+                    # print(infile)
+                    # star_name = i[:-4]
+                    star_name = i[16:-8]
+                    # print(star_name)
+                    readthefile = pd.read_fwf(infile, colspecs='infer')
+                    depth_df = readthefile.iloc[:, [1]]
+                    depth_list2 = pd.np.array(depth_df)
+                    for list1 in depth_list2:
+                        for val in list1:
+                            depth_list.append(float(val))
+                    bsp_rho = readthefile.iloc[:, [3]]
+                    bsp_rho_list2 = pd.np.array(bsp_rho)
+                    for list1 in bsp_rho_list2:
+                        for val in list1:
+                            bsp_rho_list.append(float(val))
+                    infile.close()
+                    # print(depth_df)
+                    # print(bsp_rho)
+                    os.chdir(hefesto_morb_out_path)
+                    for z in os.listdir(os.getcwd()):
+                        if star_name in str(z):
+                            with open(z, 'r') as infile:
+                                readthefile = pd.read_fwf(infile, colspecs="infer")
+                                morb_rho = readthefile.iloc[:, [3]]
+                                morb_rho_list2 = pd.np.array(morb_rho)
+                                for list1 in morb_rho_list2:
+                                    for val in list1:
+                                        morb_rho_list.append(float(val))
+                                infile.close()
+            rho_diff = [a - b for a, b in zip(morb_rho_list, bsp_rho_list)]
+
+            crossover_index = bisect.bisect_left(rho_diff, 0)
+            print(crossover_index)
+            print(depth_list)
+            if crossover_index > 0:
+                cross_depth = depth_list[crossover_index]
+                print(cross_depth)
             else:
-                pass
+                cross_depth = 0
+                print(cross_depth)
+
+
+
+
+
+
 
 
 
@@ -1123,135 +1207,138 @@ class integrationloop:
 def __init__():
 
     home_dir.append(os.getcwd())
-    createenvfiles.createbspenvfile(createenvfiles)
-    createenvfiles.createmorbenvfile(createenvfiles)
-    print("\n_______________________________________________\n\n\n\n\n\n\n\n\n\n")
-    print("\n\n\nThe Exoplanet Pocketknife\nScott D. Hull, The Ohio State University 2016\n")
-    print("This code is meant to work in conjunction with the methods described in 'The Prevalence of"
-          " Exoplanetary Plate Tectonics' (Unterborn et. al 2016).\nPlease refer to the article and "
-          "the documentation for more information.\n"
-          "\n*Any use of this code or the methods described in Unterborn et al. 2016 requires proper"
-          " citation.*\n\n")
-    # if "Star2Oxide_Output.csv" in os.listdir(os.getcwd()):
-    #     os.remove("Star2Oxide_Output.csv")
+    integrationloop2.integrationloop2(integrationloop2)
+
+
+    # createenvfiles.createbspenvfile(createenvfiles)
+    # createenvfiles.createmorbenvfile(createenvfiles)
+    # print("\n_______________________________________________\n\n\n\n\n\n\n\n\n\n")
+    # print("\n\n\nThe Exoplanet Pocketknife\nScott D. Hull, The Ohio State University 2016\n")
+    # print("This code is meant to work in conjunction with the methods described in 'The Prevalence of"
+    #       " Exoplanetary Plate Tectonics' (Unterborn et. al 2016).\nPlease refer to the article and "
+    #       "the documentation for more information.\n"
+    #       "\n*Any use of this code or the methods described in Unterborn et al. 2016 requires proper"
+    #       " citation.*\n\n")
+    # # if "Star2Oxide_Output.csv" in os.listdir(os.getcwd()):
+    # #     os.remove("Star2Oxide_Output.csv")
+    # # else:
+    # #     pass
+    # # outputfile = open("Star2Oxide_Output.csv", 'a')
+    # # time.sleep(1)
+    # print("Enter '1' to input [X/H] stellar abundances or '2' to input stellar mole abundances.\nEnter 'o' for "
+    #       "more options.\n"
+    #       "To exit, enter 'e'.")
+    # option1 = input(">>> ")
+    # if option1 == '1':
+    #     if "run_alphamelts.command" in os.listdir(os.getcwd()):
+    #         print("\nPlease enter your .csv formatted input file with [X/H] stellar abundances:")
+    #         infile = input(">>> ")
+    #         if infile in os.listdir(os.getcwd()):
+    #             print("\n[~] {} has been found in the working directory!".format(infile))
+    #             inputfile_list.append(infile)
+    #             # time.sleep(1)
+    #             readinputs.logep(readinputs, infile, infile_type='BSP', consol_file=False, library=True)
+    #         else:
+    #             print("\n{} has NOT been found in the working directory!".format(infile))
+    #             __init__()
+    #     else:
+    #         print("\n[X] 'run_alphamelts.command' is not in the working directory!")
+    #         time.sleep(2)
+    #         __init__()
+    # elif option1 == '2':
+    #     print("\nPlease enter your .csv formatted input file with stellar mole abundances:")
+    #     infile = input(">>> ")
+    #     if "run_alphamelts.command" in os.listdir(os.getcwd()):
+    #         if infile in os.listdir(os.getcwd()):
+    #             print("\n[~] {} has been found in the working directory!".format(infile))
+    #             inputfile_list.append(infile)
+    #             # time.sleep(1)
+    #             readinputs.molepct(readinputs, infile, infile_type='BSP', consol_file=False, init_path=(os.getcwd()) ,library=True)
+    #         else:
+    #             print("\n{} has NOT been found in the working directory!".format(infile))
+    #             __init__()
+    #     else:
+    #         print("\n[X] 'run_alphamelts.command' is not in the working directory!")
+    #         time.sleep(2)
+    #         __init__()
+    # elif option1 == 'o':
+    #     print("\nPlease enter the letter of your choice.  Would you like to: \na. Write a single file with MELTS inputs\n"
+    #           "b. Write a library of MELTS input files\nc. Write a library of HeFESTo input files")
+    #     input_help = input(">>> ")
+    #     if input_help == 'a':
+    #         print("\nEnter '1' to input [X/H] stellar abundances or '2' to input stellar mole abundances.")
+    #         input_help2 = input(">>> ")
+    #         if input_help2 == "1":
+    #             print("\nPlease enter your .csv formatted input file with [X/H] stellar abundances:")
+    #             infile = input(">>> ")
+    #             if infile in os.listdir(os.getcwd()):
+    #                 print("\n[~] {} has been found in the working directory!".format(infile))
+    #                 inputfile_list.append(infile)
+    #                 # time.sleep(1)
+    #                 readinputs.logep(readinputs, infile, infile_type='file', consol_file=True, init_path=(os.getcwd()), library=False)
+    #             else:
+    #                 print("{} has NOT been found in the working directory!\n".format(infile))
+    #                 time.sleep(1)
+    #                 __init__()
+    #         elif input_help2 == "2":
+    #             print("\nPlease enter your .csv formatted input file with stellar mole abundances:")
+    #             infile = input(">>> ")
+    #             if infile in os.listdir(os.getcwd()):
+    #                 print("\n[~] {} has been found in the working directory!".format(infile))
+    #                 inputfile_list.append(infile)
+    #                 # time.sleep(1)
+    #                 readinputs.molepct(readinputs, infile, infile_type='file', consol_file=True, init_path=(os.getcwd()), library=False)
+    #             else:
+    #                 print("\n{} has NOT been found in the working directory!".format(infile))
+    #                 __init__()
+    #         else:
+    #             print("\n[X] Oops!  That's not a valid command!\n")
+    #             time.sleep(1)
+    #             __init__()
+    #     elif input_help == 'b':
+    #         print("\nEnter '1' to input [X/H] stellar abundances or '2' to input stellar mole abundances.")
+    #         input_help2 = input(">>> ")
+    #         if input_help2 == "1":
+    #             print("\nPlease enter your .csv formatted input file with [X/H] stellar abundances:")
+    #             infile = input(">>> ")
+    #             if infile in os.listdir(os.getcwd()):
+    #                 print("\n[~] {} has been found in the working directory!".format(infile))
+    #                 inputfile_list.append(infile)
+    #                 # time.sleep(1)
+    #                 readinputs.logep(readinputs, infile, infile_type='file', consol_file=False, init_path=(os.getcwd()), library=True)
+    #             else:
+    #                 print("{} has NOT been found in the working directory!\n".format(infile))
+    #                 time.sleep(1)
+    #                 __init__()
+    #         elif input_help2 == "2":
+    #             print("\nPlease enter your .csv formatted input file with stellar mole abundances:")
+    #             infile = input(">>> ")
+    #             if infile in os.listdir(os.getcwd()):
+    #                 print("\n[~] {} has been found in the working directory!".format(infile))
+    #                 inputfile_list.append(infile)
+    #                 # time.sleep(1)
+    #                 readinputs.molepct(readinputs, infile, infile_type='file', consol_file=False, init_path=(os.getcwd()), library=True)
+    #             else:
+    #                 print("\n{} has NOT been found in the working directory!".format(infile))
+    #                 __init__()
+    #         else:
+    #             print("\n[X] Oops!  That's not a valid command!\n")
+    #             time.sleep(1)
+    #             __init__()
+    #     elif input_help == 'c':
+    #         runhefesto.runhefesto(runhefesto, actual_run=False)
+    #     else:
+    #         print("\n[X] Oops!  That's not a valid command!\n")
+    #         time.sleep(1)
+    #         __init__()
+    # elif option1 == 'e':
+    #     print("\nThank you for using the Exoplanet Pocketknife!\n")
+    #     print("\n___________________________________________\n")
+    #     sys.exit()
     # else:
-    #     pass
-    # outputfile = open("Star2Oxide_Output.csv", 'a')
-    # time.sleep(1)
-    print("Enter '1' to input [X/H] stellar abundances or '2' to input stellar mole abundances.\nEnter 'o' for "
-          "more options.\n"
-          "To exit, enter 'e'.")
-    option1 = input(">>> ")
-    if option1 == '1':
-        if "run_alphamelts.command" in os.listdir(os.getcwd()):
-            print("\nPlease enter your .csv formatted input file with [X/H] stellar abundances:")
-            infile = input(">>> ")
-            if infile in os.listdir(os.getcwd()):
-                print("\n[~] {} has been found in the working directory!".format(infile))
-                inputfile_list.append(infile)
-                # time.sleep(1)
-                readinputs.logep(readinputs, infile, infile_type='BSP', consol_file=False, library=True)
-            else:
-                print("\n{} has NOT been found in the working directory!".format(infile))
-                __init__()
-        else:
-            print("\n[X] 'run_alphamelts.command' is not in the working directory!")
-            time.sleep(2)
-            __init__()
-    elif option1 == '2':
-        print("\nPlease enter your .csv formatted input file with stellar mole abundances:")
-        infile = input(">>> ")
-        if "run_alphamelts.command" in os.listdir(os.getcwd()):
-            if infile in os.listdir(os.getcwd()):
-                print("\n[~] {} has been found in the working directory!".format(infile))
-                inputfile_list.append(infile)
-                # time.sleep(1)
-                readinputs.molepct(readinputs, infile, infile_type='BSP', consol_file=False, init_path=(os.getcwd()) ,library=True)
-            else:
-                print("\n{} has NOT been found in the working directory!".format(infile))
-                __init__()
-        else:
-            print("\n[X] 'run_alphamelts.command' is not in the working directory!")
-            time.sleep(2)
-            __init__()
-    elif option1 == 'o':
-        print("\nPlease enter the letter of your choice.  Would you like to: \na. Write a single file with MELTS inputs\n"
-              "b. Write a library of MELTS input files\nc. Write a library of HeFESTo input files")
-        input_help = input(">>> ")
-        if input_help == 'a':
-            print("\nEnter '1' to input [X/H] stellar abundances or '2' to input stellar mole abundances.")
-            input_help2 = input(">>> ")
-            if input_help2 == "1":
-                print("\nPlease enter your .csv formatted input file with [X/H] stellar abundances:")
-                infile = input(">>> ")
-                if infile in os.listdir(os.getcwd()):
-                    print("\n[~] {} has been found in the working directory!".format(infile))
-                    inputfile_list.append(infile)
-                    # time.sleep(1)
-                    readinputs.logep(readinputs, infile, infile_type='file', consol_file=True, init_path=(os.getcwd()), library=False)
-                else:
-                    print("{} has NOT been found in the working directory!\n".format(infile))
-                    time.sleep(1)
-                    __init__()
-            elif input_help2 == "2":
-                print("\nPlease enter your .csv formatted input file with stellar mole abundances:")
-                infile = input(">>> ")
-                if infile in os.listdir(os.getcwd()):
-                    print("\n[~] {} has been found in the working directory!".format(infile))
-                    inputfile_list.append(infile)
-                    # time.sleep(1)
-                    readinputs.molepct(readinputs, infile, infile_type='file', consol_file=True, init_path=(os.getcwd()), library=False)
-                else:
-                    print("\n{} has NOT been found in the working directory!".format(infile))
-                    __init__()
-            else:
-                print("\n[X] Oops!  That's not a valid command!\n")
-                time.sleep(1)
-                __init__()
-        elif input_help == 'b':
-            print("\nEnter '1' to input [X/H] stellar abundances or '2' to input stellar mole abundances.")
-            input_help2 = input(">>> ")
-            if input_help2 == "1":
-                print("\nPlease enter your .csv formatted input file with [X/H] stellar abundances:")
-                infile = input(">>> ")
-                if infile in os.listdir(os.getcwd()):
-                    print("\n[~] {} has been found in the working directory!".format(infile))
-                    inputfile_list.append(infile)
-                    # time.sleep(1)
-                    readinputs.logep(readinputs, infile, infile_type='file', consol_file=False, init_path=(os.getcwd()), library=True)
-                else:
-                    print("{} has NOT been found in the working directory!\n".format(infile))
-                    time.sleep(1)
-                    __init__()
-            elif input_help2 == "2":
-                print("\nPlease enter your .csv formatted input file with stellar mole abundances:")
-                infile = input(">>> ")
-                if infile in os.listdir(os.getcwd()):
-                    print("\n[~] {} has been found in the working directory!".format(infile))
-                    inputfile_list.append(infile)
-                    # time.sleep(1)
-                    readinputs.molepct(readinputs, infile, infile_type='file', consol_file=False, init_path=(os.getcwd()), library=True)
-                else:
-                    print("\n{} has NOT been found in the working directory!".format(infile))
-                    __init__()
-            else:
-                print("\n[X] Oops!  That's not a valid command!\n")
-                time.sleep(1)
-                __init__()
-        elif input_help == 'c':
-            runhefesto.runhefesto(runhefesto, actual_run=False)
-        else:
-            print("\n[X] Oops!  That's not a valid command!\n")
-            time.sleep(1)
-            __init__()
-    elif option1 == 'e':
-        print("\nThank you for using the Exoplanet Pocketknife!\n")
-        print("\n___________________________________________\n")
-        sys.exit()
-    else:
-        print("\n[X] Oops!  That's not a valid command!\n")
-        time.sleep(1)
-        __init__()
+    #     print("\n[X] Oops!  That's not a valid command!\n")
+    #     time.sleep(1)
+    #     __init__()
 
 
 
