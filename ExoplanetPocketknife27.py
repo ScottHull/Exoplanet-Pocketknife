@@ -221,6 +221,11 @@ def runmelts_bsp(infile_directory, inputfilename):
             print("\n[X] {} BSP calculation FAILED!".format(i[:-20]))
             pass
 
+        print("[~] Scraping BSP files for alloy abundances...")
+
+
+    return ("{}_Completed_BSP_MELTS_Files".format(inputfilename))
+
 
 
 
@@ -269,6 +274,15 @@ def logep(infile, infile_type, consol_file, init_path, library):
         os.mkdir("{}_MELTS_{}_Input_Files".format(inputfile_list[0][:-4], infile_type))
     else:
         os.mkdir("{}_MELTS_{}_Input_Files".format(inputfile_list[0][:-4], infile_type))
+
+    if "{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type) in os.listdir(os.getcwd()):
+        os.remove("{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type))
+    else:
+        pass
+
+    chem_outfile = open("{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type), 'a')
+
+    chem_outfile.write("Star,FeO,CaO,Al2O3,Na2O,MgO,SiO2,TiO2,Cr2O3,NiO,Mass_Alloy\n")
 
     # try:
     with open(infile, 'r') as inputfile:
@@ -418,6 +432,12 @@ def logep(infile, infile_type, consol_file, init_path, library):
                         (os.getcwd() + "/{}_MELTS_{}_Input_Files/".format(inputfile_list[0][:-4], infile_type)
                          + star_name + "_MELTS_{}_INFILE.txt".format(infile_type)))
 
+            chem_outfile.write("{},{},{},{},{},{},{},{},{},{}\n".format(star_name, norm_wt_feo, norm_wt_cao, norm_wt_al2o3,
+                    norm_wt_na2o, norm_wt_mgo, norm_wt_sio2, norm_wt_tio2, norm_wt_cr2o3, norm_wt_nio))
+
+
+        chem_outfile.close()
+
         if library is True:
             infiledir = (os.getcwd() + "/{}_MELTS_{}_Input_Files/".format(inputfile_list[0][:-4], infile_type))
             print("[~] MELTS {} Input Files Written!".format(infile_type))
@@ -451,6 +471,15 @@ def molepct(infile, infile_type, consol_file, init_path, library):
         os.mkdir("{}_MELTS_{}_Input_Files".format(inputfile_list[0][:-4], infile_type))
     else:
         os.mkdir("{}_MELTS_{}_Input_Files".format(inputfile_list[0][:-4], infile_type))
+
+    if "{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type) in os.listdir(os.getcwd()):
+        os.remove("{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type))
+    else:
+        pass
+
+    chem_outfile = open("{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type), 'a')
+
+    chem_outfile.write("Star,FeO,CaO,Al2O3,Na2O,MgO,SiO2,TiO2,Cr2O3,NiO,Mass_Alloy\n")
 
     # try:
     with open(infile, 'r') as inputfile:
@@ -612,6 +641,11 @@ def molepct(infile, infile_type, consol_file, init_path, library):
                                                                                                   dpdt, mode,
                                                                                                   mode2))
 
+            chem_outfile.write(
+                "{},{},{},{},{},{},{},{},{},{}\n".format(star_name, norm_wt_feo, norm_wt_cao, norm_wt_al2o3,
+                                                         norm_wt_na2o, norm_wt_mgo, norm_wt_sio2, norm_wt_tio2,
+                                                         norm_wt_cr2o3, norm_wt_nio))
+
             melts_input_file.close()
 
             shutil.move((os.getcwd() + "/" + star_name + "_MELTS_{}_INFILE.txt".format(infile_type)),
@@ -630,11 +664,16 @@ def molepct(infile, infile_type, consol_file, init_path, library):
         print("[~] Launching alphaMELTS for {} Calculations...".format(infile_type))
         runmelts_bsp(infile_directory=infiledir, inputfilename=infile)
 
+        chem_outfile.close()
 
         if consol_file is True:
             file_consolidate(path=infiledir, init_path=init_path)
         else:
-            pass
+            file_consolidate(path=infiledir, init_path=init_path)
+            scrapebsp2(infiledirectory="{}_Completed_BSP_MELTS_Files".format(infile[:-4]), inputfilename=infile)
+            bsprecalc(bspmeltsfilesdir="{}_Completed_BSP_MELTS_Files".format(infile[:-4]),
+                      infilename=infile, alloy_mass_infile="alloy_mass.csv",
+                      bsp_chem_infile="{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type))
 
     # except:
     #     raise Exception
@@ -643,7 +682,8 @@ def molepct(infile, infile_type, consol_file, init_path, library):
     #     time.sleep(8)
     #     initialization()
 
-    sys.exit()
+
+    # sys.exit()
 
 def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
 
@@ -657,114 +697,119 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
     # need to build in the MELTS file parser to extract alloy info
     # construct it so that it extracts alloy and chemistry, and the write to file with predictable headers
 
-    for i in os.listdir(os.getcwd()):
-        bsp_infile = pd.read_csv(i)
-        star_name = bsp_infile['star']
-        feo_in = bsp_infile['feo']
-        na2o_in = bsp_infile['na2o']
-        mgo_in = bsp_infile['mgo']
-        al2o3_in = bsp_infile['al2o3']
-        sio2_in = bsp_infile['sio2']
-        cao_in = bsp_infile['cao']
-        nio_in = bsp_infile['nio']
-        tio2_in = bsp_infile['tio2']
-        cr2o3_in = bsp_infile['cr2o3']
-        alloy_mass = bsp_infile['alloy mass']
+    # for i in os.listdir(os.getcwd()):
+    df_chem = pd.read_csv(bsp_chem_infile)
+    df_alloy = pd.read_csv(alloy_mass_infile)
+    for row in df_chem.index:
+        star_name = row['star']
+        feo_in = row['feo']
+        na2o_in = row['na2o']
+        mgo_in = row['mgo']
+        al2o3_in = row['al2o3']
+        sio2_in = row['sio2']
+        cao_in = row['cao']
+        nio_in = row['nio']
+        tio2_in = row['tio2']
+        cr2o3_in = row['cr2o3']
 
-        feo_moles = feo_in / feo_molwt
-        na2o_moles = na2o_in / na2o_molwt
-        mgo_moles = mgo_in / mgo_molwt
-        al2o3_moles = al2o3_in / al2o3_molwt
-        sio2_moles = sio2_in / sio2_molwt
-        cao_moles = cao_in / cao_molwt
-        nio_moles = nio_in / nio_molwt
-        tio2_moles = tio2_in / tio2_molwt
-        cr2o3_moles = cr2o3_in / cr2o3_molwt
+        for row in df_alloy.index:
+            if row[0] == star_name:
+                alloy_mass = float(row[1])
 
-        fe_moles = feo_moles / num_feo_cations
-        na_moles = na2o_moles / num_na2o_cations
-        mg_moles = mgo_moles / num_mgo_cations
-        al_moles = al2o3_moles / num_al2o3_cations
-        si_moles = sio2_moles / num_sio2_cations
-        ca_moles = cao_moles / num_cao_cations
-        ni_moles = nio_moles / num_nio_cations
-        ti_moles = tio2_moles / num_tio2_cations
-        cr_moles = cr2o3_moles / num_cr2o3_cations
+                feo_moles = feo_in / feo_molwt
+                na2o_moles = na2o_in / na2o_molwt
+                mgo_moles = mgo_in / mgo_molwt
+                al2o3_moles = al2o3_in / al2o3_molwt
+                sio2_moles = sio2_in / sio2_molwt
+                cao_moles = cao_in / cao_molwt
+                nio_moles = nio_in / nio_molwt
+                tio2_moles = tio2_in / tio2_molwt
+                cr2o3_moles = cr2o3_in / cr2o3_molwt
 
-        fe_mass = fe_moles * fe_atwt
-        na_mass = na_moles * na_atwt
-        mg_mass = mg_moles * mg_atwt
-        al_mass = al_moles * al_atwt
-        si_mass = si_moles * si_atwt
-        ca_mass = ca_moles * ca_atwt
-        ni_mass = ni_moles * ni_atwt
-        ti_mass = ti_moles * ti_atwt
-        cr_mass = cr_moles * cr_atwt
+                fe_moles = feo_moles / num_feo_cations
+                na_moles = na2o_moles / num_na2o_cations
+                mg_moles = mgo_moles / num_mgo_cations
+                al_moles = al2o3_moles / num_al2o3_cations
+                si_moles = sio2_moles / num_sio2_cations
+                ca_moles = cao_moles / num_cao_cations
+                ni_moles = nio_moles / num_nio_cations
+                ti_moles = tio2_moles / num_tio2_cations
+                cr_moles = cr2o3_moles / num_cr2o3_cations
 
-        alloy_subt_ni_mass = alloy_mass - ni_mass
-        if alloy_subt_ni_mass < 0:
-            print("NI MASS ERROR!")
-            sys.exit()
-        else:
-            pass
+                fe_mass = fe_moles * fe_atwt
+                na_mass = na_moles * na_atwt
+                mg_mass = mg_moles * mg_atwt
+                al_mass = al_moles * al_atwt
+                si_mass = si_moles * si_atwt
+                ca_mass = ca_moles * ca_atwt
+                ni_mass = ni_moles * ni_atwt
+                ti_mass = ti_moles * ti_atwt
+                cr_mass = cr_moles * cr_atwt
 
-        new_mass_fe = fe_mass - alloy_subt_ni_mass
+                alloy_subt_ni_mass = alloy_mass - ni_mass
+                if alloy_subt_ni_mass < 0:
+                    print("NI MASS ERROR!")
+                    sys.exit()
+                else:
+                    pass
 
-        if new_mass_fe < 0:
-            print("FE MASS ERROR!")
-            sys.exit()
+                new_mass_fe = fe_mass - alloy_subt_ni_mass
 
-        remaining_moles_fe = new_mass_fe / fe_atwt
-        remaining_moles_feo = remaining_moles_fe * num_feo_cations
-        remaining_mass_feo = remaining_moles_feo * feo_molwt
+                if new_mass_fe < 0:
+                    print("FE MASS ERROR!")
+                    sys.exit()
 
-        unnormalized_sum = (remaining_mass_feo + na_mass + mg_mass + al_mass + si_mass + ca_mass +
-                            ti_mass + cr_mass)
+                remaining_moles_fe = new_mass_fe / fe_atwt
+                remaining_moles_feo = remaining_moles_fe * num_feo_cations
+                remaining_mass_feo = remaining_moles_feo * feo_molwt
 
-        norm_feo = remaining_mass_feo / unnormalized_sum * 100.0
-        norm_na2o = na2o_in / unnormalized_sum * 100.0
-        norm_mgo = mgo_in / unnormalized_sum * 100.0
-        norm_al2o3 = al2o3_in / unnormalized_sum * 100.0
-        norm_sio2 = sio2_in / unnormalized_sum * 100.0
-        norm_cao = cao_in / unnormalized_sum * 100.0
-        norm_tio2 = tio2_in / unnormalized_sum * 100.0
-        norm_cr2o3 = cr2o3_in / unnormalized_sum * 100.0
-        norm_sum = norm_feo + norm_na2o + norm_mgo + norm_al2o3 + norm_sio2 + norm_cao + norm_tio2 + norm_cr2o3
+                unnormalized_sum = (remaining_mass_feo + na_mass + mg_mass + al_mass + si_mass + ca_mass +
+                                    ti_mass + cr_mass)
 
-        if norm_sum != 100.0:
-            print("ERROR!  NORMALIZED SUM IS NOT 100.0!")
-            sys.exit()
+                norm_feo = remaining_mass_feo / unnormalized_sum * 100.0
+                norm_na2o = na2o_in / unnormalized_sum * 100.0
+                norm_mgo = mgo_in / unnormalized_sum * 100.0
+                norm_al2o3 = al2o3_in / unnormalized_sum * 100.0
+                norm_sio2 = sio2_in / unnormalized_sum * 100.0
+                norm_cao = cao_in / unnormalized_sum * 100.0
+                norm_tio2 = tio2_in / unnormalized_sum * 100.0
+                norm_cr2o3 = cr2o3_in / unnormalized_sum * 100.0
+                norm_sum = norm_feo + norm_na2o + norm_mgo + norm_al2o3 + norm_sio2 + norm_cao + norm_tio2 + norm_cr2o3
 
-        title = "Title: {}".format(star_name)
-        bsp_feo = "Initial Composition: {}".format(norm_feo)
-        bsp_na2o = "Initial Composition: {}".format(norm_na2o)
-        bsp_mgo = "Initial Composition: {}".format(norm_mgo)
-        bsp_al2o3 = "Initial Composition: {}".format(norm_al2o3)
-        bsp_sio2 = "Initial Composition: {}".format(norm_sio2)
-        bsp_cao = "Initial Composition: {}".format(norm_cao)
-        bsp_tio2 = "Initial Composition: {}".format(norm_tio2)
-        bsp_cr2o3 = "Initial Composition: {}".format(norm_cr2o3)
-        init_temp = 'Initial Temperature: 2000'
-        final_temp = "Final Temperature: 800"
-        inc_temp = "Increment Temperature: -5"
-        init_press = "Initial Pressure: 10000"
-        final_press = "Final Pressure: 10000"
-        dpdt = "dp/dt: 0"
-        mode = "Mode: Fractionate Solids"
-        mode2 = "Mode: Isobaric"
+                if norm_sum != 100.0:
+                    print("ERROR!  NORMALIZED SUM IS NOT 100.0!")
+                    sys.exit()
 
-        melts_morb_input_file_vars = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
-            title,
-            bsp_feo, bsp_na2o, bsp_mgo, bsp_al2o3, bsp_sio2, bsp_cao, bsp_tio2, bsp_cr2o3,
-            init_temp, init_temp, final_temp, inc_temp, init_press, final_press, dpdt, mode, mode2)
+                title = "Title: {}".format(star_name)
+                bsp_feo = "Initial Composition: {}".format(norm_feo)
+                bsp_na2o = "Initial Composition: {}".format(norm_na2o)
+                bsp_mgo = "Initial Composition: {}".format(norm_mgo)
+                bsp_al2o3 = "Initial Composition: {}".format(norm_al2o3)
+                bsp_sio2 = "Initial Composition: {}".format(norm_sio2)
+                bsp_cao = "Initial Composition: {}".format(norm_cao)
+                bsp_tio2 = "Initial Composition: {}".format(norm_tio2)
+                bsp_cr2o3 = "Initial Composition: {}".format(norm_cr2o3)
+                init_temp = 'Initial Temperature: 2000'
+                final_temp = "Final Temperature: 800"
+                inc_temp = "Increment Temperature: -5"
+                init_press = "Initial Pressure: 10000"
+                final_press = "Final Pressure: 10000"
+                dpdt = "dp/dt: 0"
+                mode = "Mode: Fractionate Solids"
+                mode2 = "Mode: Isobaric"
 
-        morb_outfile = open("{}_MELTS_{}_INFILE.txt".format(star_name, "MORB"), 'w')
-        morb_outfile.write(melts_morb_input_file_vars)
-        morb_outfile.close()
+                melts_morb_input_file_vars = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
+                    title,
+                    bsp_feo, bsp_na2o, bsp_mgo, bsp_al2o3, bsp_sio2, bsp_cao, bsp_tio2, bsp_cr2o3,
+                    init_temp, init_temp, final_temp, inc_temp, init_press, final_press, dpdt, mode, mode2)
 
-        fdir = os.getcwd() + "/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
-        tdir = home_dir[0] + "/MELTS_MORB_Input_Files/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
-        shutil.move(fdir, tdir)
+                morb_outfile = open("{}_MELTS_{}_INFILE.txt".format(star_name, "MORB"), 'w')
+                morb_outfile.write(melts_morb_input_file_vars)
+                morb_outfile.close()
+
+                fdir = os.getcwd() + "/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
+                tdir = home_dir[0] + "/MELTS_MORB_Input_Files/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
+                shutil.move(fdir, tdir)
 
 
 def runmelts_morb(infile_directory, inputfilename):
@@ -814,19 +859,22 @@ def runmelts_morb(infile_directory, inputfilename):
             print("[X] {} MORB calculation FAILED!".format(i[:-20]))
             pass
 
+    return ("{}_Completed_MORB_MELTS_Files".format(inputfilename))
+
 
 def scrapebsp2(infiledirectory, inputfilename):
 
-    if "bsp_rho.csv" in os.listdir(os.getcwd()):
-        os.remove("bsp_rho.csv")
+    if "alloy_mass.csv" in os.listdir(os.getcwd()):
+        os.remove("alloy_mass.csv")
     else:
         pass
 
-    bsp_rho_outfile = open("bsp_rho.csv", 'a')
+    alloy_mass_outfile = open("alloy_mass.csv", 'a')
 
     os.chdir(infiledirectory)
 
     for i in os.listdir(os.getcwd()):
+        os.chdir(infiledirectory)
         if enumerate(i, 1) >= 100:
             alloy_abundance = []
             with open(i, 'r') as infile:
@@ -847,67 +895,69 @@ def scrapebsp2(infiledirectory, inputfilename):
                                 break
                     else:
                         pass
+            os.chdir(home_dir[0])
             alloy_abundance_sum = sum(float(alloy_abundance[1:]))
-            bsp_rho_outfile.write("{},{}".format(alloy_abundance[0], alloy_abundance_sum))
+            alloy_mass_outfile.write("{},{}".format(alloy_abundance[0], alloy_abundance_sum))
         else:
             pass
 
 
 
-def scrapebsp(infiledirectory, inputfilename):
 
-    if "bsp_rho.csv" in os.listdir(os.getcwd()):
-        os.remove("bsp_rho.csv")
-    else:
-        pass
-
-    bsp_rho_outfile = open("bsp_rho.csv", 'a')
-
-    os.chdir(infiledirectory)
-
-    for i in os.listdir(os.getcwd()):
-
-        if enumerate(i, 1) >= 100:
-            data = []
-            with open(i, "r") as meltsfile2:
-                try:
-                    reader2 = csv.reader(meltsfile2, delimiter=",")
-                    reader2 = list(reader2)
-                    title = reader2[0][1]
-                    data.append(str(title))
-                except:
-                    pass
-            meltsfile2.close()
-            with open(i, "rb") as meltsfile:
-                reader = csv.reader(meltsfile, delimiter=",")
-                for num, line in enumerate(reader, 1):
-                    if "Phase" in line:
-                        try:
-                            # skip_row = num + 1
-                            csv_list = list(reader)
-                            alloy_index = csv_list[0].index("alloy-solid_0")
-                            vals = []
-                            for row in csv_list[1:]:
-                                if not row == []:
-                                    a = row[alloy_index]
-                                    x = str(float(a))
-                                    vals.append(x)
-                                else:
-                                    break
-                            somevals = []
-                            thesum = str(float(sum(somevals)))
-                            data.append(thesum)
-                        except:
-                            data.append("ERROR!")
-                            bsp_rho_outfile.write(",".join(data) + "\n")
-                            pass
-                    else:
-                        pass
-            meltsfile.close()
-            bsp_rho_outfile.write(",".join(data) + "\n")
-            time.sleep(0.5)
-        else:
-            pass
+# def scrapebsp(infiledirectory, inputfilename):
+#
+#     if "bsp_rho.csv" in os.listdir(os.getcwd()):
+#         os.remove("bsp_rho.csv")
+#     else:
+#         pass
+#
+#     bsp_rho_outfile = open("bsp_rho.csv", 'a')
+#
+#     os.chdir(infiledirectory)
+#
+#     for i in os.listdir(os.getcwd()):
+#
+#         if enumerate(i, 1) >= 100:
+#             data = []
+#             with open(i, "r") as meltsfile2:
+#                 try:
+#                     reader2 = csv.reader(meltsfile2, delimiter=",")
+#                     reader2 = list(reader2)
+#                     title = reader2[0][1]
+#                     data.append(str(title))
+#                 except:
+#                     pass
+#             meltsfile2.close()
+#             with open(i, "rb") as meltsfile:
+#                 reader = csv.reader(meltsfile, delimiter=",")
+#                 for num, line in enumerate(reader, 1):
+#                     if "Phase" in line:
+#                         try:
+#                             # skip_row = num + 1
+#                             csv_list = list(reader)
+#                             alloy_index = csv_list[0].index("alloy-solid_0")
+#                             vals = []
+#                             for row in csv_list[1:]:
+#                                 if not row == []:
+#                                     a = row[alloy_index]
+#                                     x = str(float(a))
+#                                     vals.append(x)
+#                                 else:
+#                                     break
+#                             somevals = []
+#                             thesum = str(float(sum(somevals)))
+#                             data.append(thesum)
+#                         except:
+#                             data.append("ERROR!")
+#                             bsp_rho_outfile.write(",".join(data) + "\n")
+#                             pass
+#                     else:
+#                         pass
+#             meltsfile.close()
+#             bsp_rho_outfile.write(",".join(data) + "\n")
+#             time.sleep(0.5)
+#         else:
+#             pass
 
 
 def runhefesto(actual_run):
