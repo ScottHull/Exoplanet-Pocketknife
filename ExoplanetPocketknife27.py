@@ -221,7 +221,13 @@ def runmelts_bsp(infile_directory, inputfilename):
             print("\n[X] {} BSP calculation FAILED!".format(i[:-20]))
             pass
 
-        print("[~] Scraping BSP files for alloy abundances...")
+        if i in home_dir[0]:
+            os.remove(home_dir[0] + "/{}".format(i))
+        else:
+            pass
+
+
+    print("[~] Scraping BSP files for alloy abundances...")
 
 
     return ("{}_Completed_BSP_MELTS_Files".format(inputfilename))
@@ -670,8 +676,8 @@ def molepct(infile, infile_type, consol_file, init_path, library):
             file_consolidate(path=infiledir, init_path=init_path)
         else:
             file_consolidate(path=infiledir, init_path=init_path)
-            scrapebsp2(infiledirectory="{}_Completed_BSP_MELTS_Files".format(infile[:-4]), inputfilename=infile)
-            bsprecalc(bspmeltsfilesdir="{}_Completed_BSP_MELTS_Files".format(infile[:-4]),
+            scrapebsp2(infiledirectory=(home_dir[0] + "/{}_Completed_BSP_MELTS_Files".format(infile[:-4])), inputfilename=infile)
+            bsprecalc(bspmeltsfilesdir=(home_dir[0] + "{}_Completed_BSP_MELTS_Files".format(infile[:-4])),
                       infilename=infile, alloy_mass_infile="alloy_mass.csv",
                       bsp_chem_infile="{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type))
 
@@ -701,20 +707,24 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
     df_chem = pd.read_csv(bsp_chem_infile)
     df_alloy = pd.read_csv(alloy_mass_infile)
     for row in df_chem.index:
-        star_name = row['star']
-        feo_in = row['feo']
-        na2o_in = row['na2o']
-        mgo_in = row['mgo']
-        al2o3_in = row['al2o3']
-        sio2_in = row['sio2']
-        cao_in = row['cao']
-        nio_in = row['nio']
-        tio2_in = row['tio2']
-        cr2o3_in = row['cr2o3']
+        print(df_chem)
+        print(df_chem.index)
+        star_name = df_chem['Star'][row]
+        feo_in = df_chem['FeO'][row]
+        na2o_in = df_chem['Na2O'][row]
+        mgo_in = df_chem['MgO'][row]
+        al2o3_in = df_chem['Al2O3'][row]
+        sio2_in = df_chem['SiO2'][row]
+        cao_in = df_chem['CaO'][row]
+        nio_in = df_chem['NiO'][row]
+        tio2_in = df_chem['TiO2'][row]
+        cr2o3_in = df_chem['Cr2O3'][row]
 
         for row in df_alloy.index:
-            if row[0] == star_name:
-                alloy_mass = float(row[1])
+            star_name2 = df_alloy['star'][row]
+            alloy_mass = df_alloy['alloy mass'][row]
+
+            if star_name == star_name2:
 
                 feo_moles = feo_in / feo_molwt
                 na2o_moles = na2o_in / na2o_molwt
@@ -776,19 +786,23 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
                 norm_cr2o3 = cr2o3_in / unnormalized_sum * 100.0
                 norm_sum = norm_feo + norm_na2o + norm_mgo + norm_al2o3 + norm_sio2 + norm_cao + norm_tio2 + norm_cr2o3
 
-                if norm_sum != 100.0:
-                    print("ERROR!  NORMALIZED SUM IS NOT 100.0!")
-                    sys.exit()
+
+                # print(norm_feo)
+                # print(norm_sum)
+                #
+                # if norm_sum != 100.0:
+                #     print("ERROR!  NORMALIZED SUM IS NOT 100.0!")
+                #     sys.exit()
 
                 title = "Title: {}".format(star_name)
-                bsp_feo = "Initial Composition: {}".format(norm_feo)
-                bsp_na2o = "Initial Composition: {}".format(norm_na2o)
-                bsp_mgo = "Initial Composition: {}".format(norm_mgo)
-                bsp_al2o3 = "Initial Composition: {}".format(norm_al2o3)
-                bsp_sio2 = "Initial Composition: {}".format(norm_sio2)
-                bsp_cao = "Initial Composition: {}".format(norm_cao)
-                bsp_tio2 = "Initial Composition: {}".format(norm_tio2)
-                bsp_cr2o3 = "Initial Composition: {}".format(norm_cr2o3)
+                bsp_feo = "Initial Composition: FeO {}".format(norm_feo)
+                bsp_na2o = "Initial Composition: Na2O {}".format(norm_na2o)
+                bsp_mgo = "Initial Composition: MgO {}".format(norm_mgo)
+                bsp_al2o3 = "Initial Composition: Al2O3 {}".format(norm_al2o3)
+                bsp_sio2 = "Initial Composition: SiO2 {}".format(norm_sio2)
+                bsp_cao = "Initial Composition: CaO {}".format(norm_cao)
+                bsp_tio2 = "Initial Composition: TiO2 {}".format(norm_tio2)
+                bsp_cr2o3 = "Initial Composition: Cr2O3 {}".format(norm_cr2o3)
                 init_temp = 'Initial Temperature: 2000'
                 final_temp = "Final Temperature: 800"
                 inc_temp = "Increment Temperature: -5"
@@ -811,6 +825,8 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
                 tdir = home_dir[0] + "/MELTS_MORB_Input_Files/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
                 shutil.move(fdir, tdir)
 
+    runmelts_morb(infile_directory=(home_dir[0] + "/MELTS_MORB_Input_Files"), inputfilename=infilename)
+
 
 def runmelts_morb(infile_directory, inputfilename):
 
@@ -821,6 +837,8 @@ def runmelts_morb(infile_directory, inputfilename):
         os.mkdir("{}_Completed_MORB_MELTS_Files".format(inputfilename))
 
     for i in os.listdir(infile_directory):
+
+        os.chdir(home_dir[0])
 
         if "alphaMELTS_tbl.txt" in os.listdir(os.getcwd()):
             os.remove("alphaMELTS_tbl.txt")
@@ -842,9 +860,9 @@ def runmelts_morb(infile_directory, inputfilename):
             oldname = "alphaMELTS_tbl.txt"
             newname = i[:-20] + "_MORB_OUTPUT"
             os.rename(oldname, newname)
-            shutil.move(newname, home_dir[0] + "/Completed_MORB_MELTS_Files")
+            shutil.move(newname, home_dir[0] + "/{}_Completed_MORB_MELTS_Files".format(inputfilename))
             os.remove(i)
-            os.chdir(home_dir[0] + "/Completed_MORB_MELTS_Files")
+            os.chdir(home_dir[0] + "/{}_Completed_MORB_MELTS_Files".format(inputfilename))
             csv_file_name = newname + ".csv"
             with open(newname, 'rb') as infile, open(csv_file_name, 'wb') as outfile:
                 in_txt = csv.reader(infile, delimiter=" ")
@@ -859,6 +877,11 @@ def runmelts_morb(infile_directory, inputfilename):
             print("[X] {} MORB calculation FAILED!".format(i[:-20]))
             pass
 
+        if i in home_dir[0]:
+            os.remove(home_dir[0] + "/{}".format(i))
+        else:
+            pass
+
     return ("{}_Completed_MORB_MELTS_Files".format(inputfilename))
 
 
@@ -871,6 +894,8 @@ def scrapebsp2(infiledirectory, inputfilename):
 
     alloy_mass_outfile = open("alloy_mass.csv", 'a')
 
+    alloy_mass_outfile.write("{},{}\n".format("star", "alloy mass"))
+
     os.chdir(infiledirectory)
 
     for i in os.listdir(os.getcwd()):
@@ -880,7 +905,7 @@ def scrapebsp2(infiledirectory, inputfilename):
             with open(i, 'r') as infile:
                 reader = csv.reader(infile)
                 row1 = next(reader)
-                star_name = row1[0]
+                star_name = row1[1]
                 alloy_abundance.append(star_name)
                 for num, line in enumerate(reader, 1):
                     if "Phase" in line:
@@ -896,8 +921,13 @@ def scrapebsp2(infiledirectory, inputfilename):
                     else:
                         pass
             os.chdir(home_dir[0])
-            alloy_abundance_sum = sum(float(alloy_abundance[1:]))
-            alloy_mass_outfile.write("{},{}".format(alloy_abundance[0], alloy_abundance_sum))
+            # print(alloy_abundance[1:])
+            alloy_abundance_nums = []
+            for z in alloy_abundance[1:]:
+                alloy_abundance_nums.append(float(z))
+            alloy_abundance_sum = sum(alloy_abundance_nums)
+            print("Alloy abundance for {}: {}".format(alloy_abundance[0], alloy_abundance_sum))
+            alloy_mass_outfile.write("{},{}\n".format(alloy_abundance[0], alloy_abundance_sum))
         else:
             pass
 
