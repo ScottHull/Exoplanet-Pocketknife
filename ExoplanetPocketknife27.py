@@ -1269,7 +1269,7 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
 
         sio2_wtpct = norm_wt_sio2 / norm_sum_mgofix
         tio2_wtpct = norm_wt_tio2 / norm_sum_mgofix
-        al2o3_wtpct = norm_wt_a2o3 / norm_sum_mgofix
+        al2o3_wtpct = norm_wt_al2o3 / norm_sum_mgofix
         feo_wtpct = norm_wt_feo / norm_sum_mgofix
         cr2o3_wtpct = norm_wt_cr2o3 / norm_sum_mgofix
         mgo_wtpct = norm_wt_mgo_fix / norm_sum_mgofix
