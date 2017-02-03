@@ -38,6 +38,7 @@ tio2_molwt = 79.8650
 cr2o3_molwt = 151.9892
 feo_molwt = 71.8440
 nio_molwt = 74.6924
+fe2o3_molwt = 159.687
 
 num_na2o_cations = 2
 num_mgo_cations = 1
@@ -48,6 +49,7 @@ num_tio2_cations = 1
 num_cr2o3_cations = 2
 num_feo_cations = 1
 num_nio_cations = 1
+num_fe2o3_cations = 2
 
 asplund_na = 1479108.388
 asplund_mg = 33884415.61
@@ -76,6 +78,10 @@ mcd_navsfe = mcd_earth_na / mcd_earth_fe
 
 adjust_si = mcd_sivsfe / asplund_sivsfe
 adjust_na = mcd_navsfe / asplund_navsfe
+
+modelearth_mgo = 11.84409812845
+gale_mgo = 7.65154964069009
+mgo_fix = gale_mgo / modelearth_mgo
 
 inputfile_list = []
 home_dir = []
@@ -707,8 +713,8 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
     df_chem = pd.read_csv(bsp_chem_infile)
     df_alloy = pd.read_csv(alloy_mass_infile)
     for row in df_chem.index:
-        print(df_chem)
-        print(df_chem.index)
+        # print(df_chem)
+        # print(df_chem.index)
         star_name = df_chem['Star'][row]
         feo_in = df_chem['FeO'][row]
         na2o_in = df_chem['Na2O'][row]
@@ -1127,6 +1133,218 @@ def runhefesto(actual_run):
                   "Please see {} for your files!\n".format(os.getcwd()))
         except:
             pass
+
+
+
+
+def scrapemorb(infiledirectory, infilename):
+
+    if "{}_MORB_Consolidated_Chem_File".format(infilename) in os.listdir(home_dir[0]):
+        os.remove(home_dir[0] + "{}_MORB_Consolidated_Chem_File".format(infilename))
+    else:
+        pass
+
+    morb_outfile = open((home_dir[0] + "{}_MORB_Consolidated_Chem_File".format(infilename)), 'a') # need a header
+    morb_outfile_header = "Star Name,Pressure,Temperature,mass,SiO2,TiO2,Al2O3,Fe2O3,Cr2O3,FeO,MgO,CaO,Na2O\n"
+    morb_outfile.write(morb_outfile_header)
+
+    os.chdir(infiledirectory)
+
+    for i in os.getcwd():
+
+        with open(i, 'r') as infile:
+            star_name = []
+            if enumerate(i, 1) >= 100:
+                data = []
+                reader = csv.reader(infile, delimiter=',')
+                reader2 = list(reader)
+                star_name.append(reader2[0][1])
+                for num, line in enumerate(reader2, 1):
+                    if "Liquid" in line:
+                        skip_row2 = num + 1
+                        liquid_comp = reader2[skip_row2]
+                        for item in liquid_comp:
+                            data.append(item)
+                    else:
+                        pass
+                    data_formatted = ",".join(str(z) for z in data)
+                    morb_outfile.write("{},{}\n".format(star_name[0], data_formatted))
+            else:
+                morb_outfile.write("{},ERROR!\n".format(star_name[0]))
+
+    morb_outfile.close()
+
+    os.chdir(home_dir[0])
+
+
+
+
+def morbrecalc(infiledirectory, infilename, bulkfilename):
+
+    if "{}_MORB_Recalc_Bulkfile.csv".format(infilename) in os.listdir(os.getcwd())
+        os.remove("{}_MORB_Recalc_Bulkfile.csv".format(infilename))
+    else:
+        pass
+
+    morb_recalc_outfile = open("{}_MORB_Recalc_Bulkfile.csv".format(infilename), 'a')
+    morb_recalc_outfile_header = "Star,Pressure,Temperature,Mass,SiO2,TiO2,Al2O3,Cr2O3,FeO,MgO,CaO,Na2O"
+    morb_recalc_outfile.write(morb_recalc_outfile_header)
+
+    df_morb_chem = pd.read_csv(bulkfilename)
+    for row in df_morb_chem.index:
+        star_name = df_morb_chem["Star Name"][row]
+        pressure = float(df_morb_chem["Pressure"][row])
+        temperature = float(df_morb_chem["Temperature"][row])
+        mass = float(df_morb_chem["mass"][row])
+        sio2_in = float(df_morb_chem["SiO2"][row])
+        tio2_in = float(df_morb_chem["TiO2"][row])
+        al2o3_in = float(df_morb_chem["Al2O3"][row])
+        fe2o3_in = float(df_morb_chem["Fe2O3"][row])
+        cr2o3_in = float(df_morb_chem["Cr2O3"][row])
+        feo_in = float(df_morb_chem["FeO"][row])
+        mgo_in = float(df_morb_chem["MgO"][row])
+        cao_in = float(df_morb_chem["CaO"][row])
+        na2o_in = float(df_morb_chem["Na2O"][row])
+        chem_in_sum = sum(sio2_in, tio2_in, al2o3_in, fe2o3_in, cr2o3_in, feo_in, mgo_in, cao_in, na2o_in)
+
+        wt_sio2_in = (sio2_in/100.0) * mass
+        wt_tio2_in = (tio2_in / 100.0) * mass
+        wt_al2o3_in = (al2o3_in / 100.0) * mass
+        wt_fe2o3_in = (fe2o3_in / 100.0) * mass
+        wt_cr2o3_in = (cr2o3_in / 100.0) * mass
+        wt_feo_in = (feo_in / 100.0) * mass
+        wt_mgo_in = (mgo_in / 100.0) * mass
+        wt_cao_in = (cao_in / 100.0) * mass
+        wt_na2o_in = (na2o_in / 100.0) * mass
+        sum_wt_in = sum(wt_sio2_in, wt_tio2_in, wt_al2o3_in, wt_fe2o3_in, wt_cr2o3_in, wt_feo_in, wt_mgo_in, wt_cao_in, wt_na2o_in)
+
+        sio2_moles = wt_sio2_in / sio2_molwt
+        tio2_moles = wt_tio2_in / tio2_molwt
+        al2o3_moles = wt_al2o3_in / al2o3_molwt
+        fe2o3_moles = wt_fe2o3_in / fe2o3_molwt
+        cr2o3_moles = wt_cr2o3_in / cr2o3_molwt
+        feo_moles = wt_feo_in / feo_molwt
+        mgo_moles = wt_mgo_in / mgo_molwt
+        cao_moles = wt_cao_in / cao_molwt
+        na2o_moles = wt_na2o_in / na2o_molwt
+        sum_oxide_moles = sum(sio2_moles, tio2_moles, al2o3_moles, fe2o3_moles, cr2o3_moles, feo_moles, mgo_moles, cao_moles, na2o_moles)
+
+        si_cations = sio2_moles * num_sio2_cations
+        ti_cations = tio2_moles * num_tio2_cations
+        al_cations = al2o3_moles * num_al2o3_cations
+        fe_fe2o3_cations = fe2o3_moles * num_fe2o3_cations
+        cr_cations = cr2o3_moles * num_cr2o3_cations
+        fe_feo_cations = feo_moles * num_feo_cations
+        mg_cations = mgo_moles * num_mgo_cations
+        ca_cations = cao_moles * num_cao_cations
+        na_cations = na2o_moles * num_na2o_cations
+        sum_cations = sum(si_cations, ti_cations, al_cations, fe_fe2o3_cations, cr_cations, fe_feo_cations, mg_cations, ca_cations, na_cations)
+
+        # fe2o3 --> feo recalc
+        total_mol_fe = sum(fe_feo_cations, fe_fe2o3_cations)
+        total_wt_fe = total_mol_fe * fe_atwt
+        total_wt_feo = total_mol_fe * feo_molwt
+
+        # unnormalized wt%
+        unnorm_sum = sum(wt_sio2_in, wt_tio2_in, wt_al2o3_in, total_wt_feo, wt_cr2o3_in, wt_mgo_in, wt_cao_in, wt_na2o_in)
+
+        # normalized oxide wt% w/o mgo fix
+        norm_wt_sio2 = wt_sio2_in / unnorm_sum
+        norm_wt_tio2 = wt_tio2_in / unnorm_sum
+        norm_wt_al2o3 = wt_al2o3_in / unnorm_sum
+        norm_wt_feo = total_wt_feo / unnorm_sum
+        norm_wt_cr2o3 = wt_cr2o3_in / unnorm_sum
+        norm_wt_mgo = wt_mgo_in / unnorm_sum
+        norm_wt_cao = wt_mgo_in / unnorm_sum
+        norm_wt_na2o = wt_na2o_in / unnorm_sum
+        norm_sum_nomgofix = sum(norm_wt_sio2, norm_wt_tio2, norm_wt_al2o3, norm_wt_feo, norm_wt_cr2o3, norm_wt_mgo,
+                                norm_wt_cao, norm_wt_na2o)
+
+        # mgo fix
+        norm_wt_mgo_fix = norm_wt_mgo * mgo_fix
+        norm_sum_mgofix = sum(norm_wt_sio2, norm_wt_tio2, norm_wt_al2o3, norm_wt_feo, norm_wt_cr2o3, norm_wt_mgo_fix,
+                                norm_wt_cao, norm_wt_na2o)
+
+        # normaized oxide wt% abundances --- what we want!
+
+        sio2_wtpct = norm_wt_sio2 / norm_sum_mgofix
+        tio2_wtpct = norm_wt_tio2 / norm_sum_mgofix
+        al2o3_wtpct = norm_wt_a2o3 / norm_sum_mgofix
+        feo_wtpct = norm_wt_feo / norm_sum_mgofix
+        cr2o3_wtpct = norm_wt_cr2o3 / norm_sum_mgofix
+        mgo_wtpct = norm_wt_mgo_fix / norm_sum_mgofix
+        cao_wtpct = norm_wt_cao / norm_sum_mgofix
+        na2o_wtpct = norm_wt_na2o / norm_sum_mgofix
+        sum_wtpct = sum(sio2_wtpct, tio2_wtpct, al2o3_wtpct, feo_wtpct, cr2o3_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct)
+
+        chem_to_outfile = "{},{},{},{},{},{},{},{},{},{},{},{}\n".format(star_name, pressure, temperature, mass, sio2_wtpct,
+                                tio2_wtpct, al2o3_wtpct, cr2o3_wtpct, feo_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct)
+
+        morb_recalc_outfile.write(chem_to_outfile)
+
+
+    morb_recalc_outfile.close()
+
+
+
+
+
+
+
+
+
+        # def file_parse_morb():
+        #     if "MORB_Data.csv" in os.listdir(os.getcwd()):
+        #         os.remove("MORB_Data.csv")
+        #     else:
+        #         pass
+        #     # working_dir = os.getcwd()
+        #     combined_output_file = open("MORB_Data.csv", "a")
+        #     combined_output_file.write(",".join(header_structure_morb) + "\n")
+        #     for filename in glob.glob("*.csv"):
+        #         if not filename == "MORB_Data.csv":
+        #             if enumerate(filename, 1) >= 100:
+        #                 with open(filename, "rb") as meltsfile2:
+        #                     data = []
+        #                     try:
+        #                         reader2 = csv.reader(meltsfile2, delimiter=",")
+        #                         reader2 = list(reader2)
+        #                         title = reader2[0][1]
+        #                         data.append(str(title))
+        #                         print
+        #                         "\n\n" + "__________________________________________________________________" + "\n"
+        #                         print
+        #                         "\n" + "**********************************************" + "\n" + \
+        #                         "This is the MORB alphaMELTS output file for: " + str(title) + " ..." + "\n" + \
+        #                         "**********************************************"
+        #                         for num, line in enumerate(reader2, 1):
+        #                             if "Liquid" in line:
+        #                                 # print num
+        #                                 skip_row2 = num + 1
+        #                                 liquid_comp = reader2[skip_row2]
+        #                                 print
+        #                                 ""
+        #                                 for item in liquid_comp:
+        #                                     data.append(item)
+        #                             else:
+        #                                 pass
+        #                     except:
+        #                         pass
+        #                 meltsfile2.close()
+        #                 print
+        #                 "The liquid composition at 5% melt is: " + "\n" + str(header_structure_morb) + "\n" + \
+        #                 str(data) + "\n"
+        #                 combined_output_file.write(",".join(data) + "\n")
+        #                 time.sleep(0.5)
+        #             else:
+        #                 pass
+        #         else:
+        #             pass
+
+
+
+
+
 
 
 # class hefestooutputparser:
