@@ -1,7 +1,9 @@
 # python /usr/bin/env/python
 
 # /// The Exoplanet Pocketknife
-# /// Scott D. Hull, The Ohio State University
+# /// Scott D. Hull, The Ohio State University 2017
+# /// All usage must include proper citation and a link to the Github repository
+# /// https://github.com/ScottHull/Exoplanet-Pocketknife
 
 
 import os, csv, time, sys, shutil, subprocess
