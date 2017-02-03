@@ -699,7 +699,7 @@ def molepct(infile, infile_type, consol_file, init_path, library):
 
     # sys.exit()
 
-def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile, bulkfile):
+def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
 
     if os.path.exists(home_dir[0] + "/MELTS_MORB_Input_Files"):
         shutil.rmtree(home_dir[0] + "/MELTS_MORB_Input_Files")
@@ -833,7 +833,7 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile, 
                 tdir = home_dir[0] + "/MELTS_MORB_Input_Files/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
                 shutil.move(fdir, tdir)
 
-    hefestofilewriter_bsp(bulkfile=bsp_chem_infile)
+    hefestofilewriter_bsp(bulkfile=bsp_chem_infile, infilename=infilename)
     runmelts_morb(infile_directory=(home_dir[0] + "/MELTS_MORB_Input_Files"), inputfilename=infilename[:-4])
 
 
@@ -943,16 +943,16 @@ def scrapebsp2(infiledirectory, inputfilename):
 
 
 
-def hefestofilewriter_bsp(bulkfile):
+def hefestofilewriter_bsp(bulkfile, infilename):
 
     os.chdir(home_dir[0])
 
-    if os.path.exists("BSP_HeFESTo_Input_Files"):
-        os.remove("BSP_HeFESTo_Input_Files")
+    if os.path.exists("{}_BSP_HeFESTo_Input_Files".format(infilename)):
+        shutil.rmtree("{}_BSP_HeFESTo_Input_Files".format(infilename))
     else:
         pass
 
-    os.mkdir("BSP_HeFESTo_Input_Files")
+    os.mkdir("{}_BSP_HeFESTo_Input_Files".format(infilename))
 
     bulkfile_df = pd.read_csv(bulkfile)
 
@@ -965,37 +965,36 @@ def hefestofilewriter_bsp(bulkfile):
         al = bulkfile_df["Al2O3"][row]
         na = bulkfile_df["Na2O"][row]
 
-        hefesto_bsp_file = open("{}_BSP_HeFESTO_Infile.txt".format(star))
+        hefesto_bsp_file = open("{}_BSP_HeFESTO_Infile.txt".format(star), 'a')
 
-        format_of_file = "{}\n0,20,80,1600,0,-2,0\n6,2,4,2\noxides\nSi          {}      5.39386    0\nMg          {}     2.71075    0\n" \
+        format_of_file = "0,20,80,1600,0,-2,0\n6,2,4,2\noxides\nSi          {}      5.39386    0\nMg          {}     2.71075    0\n" \
                          "Fe          {}      .79840    0\nCa            {}      .31431    0\nAl            {}      .96680    0\n" \
                          "Na            {}      .40654    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\nhc\n" \
                          "phase opx\n1\n\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\n\nhe\ncen\ncats\n\njd\n" \
                          "phase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\nmgwa\nfewa\n" \
                          "phase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\nphase ppv\n0\nmppv\n" \
                          "fppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n1\nqtz\nphase coes\n0\ncoes\n" \
-                         "phase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n0\nneph".format(star, si,
+                         "phase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n0\nneph".format(si,
                             mg, fe, ca, al, na)
 
         hefesto_bsp_file.write(format_of_file)
         hefesto_bsp_file.close()
         fdir = home_dir[0] + "/{}".format("{}_BSP_HeFESTO_Infile.txt".format(star))
-        tdir = home_dir[0] + "/BSP_HeFESTo_Input_Files/{}".format("{}_BSP_HeFESTO_Infile.txt".format(star))
+        tdir = home_dir[0] + "/{}/{}".format("{}_BSP_HeFESTo_Input_Files".format(infilename),
+                                             "{}_BSP_HeFESTO_Infile.txt".format(star))
         shutil.move(fdir, tdir)
 
 
-def hefestofilewriter_morb(bulkfile):
+def hefestofilewriter_morb(bulkfile, infilename):
 
     os.chdir(home_dir[0])
 
-    bulkfile_name = bulkfile[:-4]
-
-    if os.path.exists("{}_MORB_HeFESTo_Input_Files".format(bulkfile_name)):
-        os.remove("{}_MORB_HeFESTo_Input_Files".format(bulkfile_name))
+    if os.path.exists("{}_MORB_HeFESTo_Input_Files".format(infilename)):
+        shutil.rmtree("{}_MORB_HeFESTo_Input_Files".format(infilename))
     else:
         pass
 
-    os.mkdir("{}_MORB_HeFESTo_Input_Files".format(bulkfile_name))
+    os.mkdir("{}_MORB_HeFESTo_Input_Files".format(infilename))
 
     bulkfile_df = pd.read_csv(bulkfile)
 
@@ -1008,9 +1007,9 @@ def hefestofilewriter_morb(bulkfile):
         al = bulkfile_df["Al2O3"][row]
         na = bulkfile_df["Na2O"][row]
 
-        hefesto_morb_file = open("{}_MORB_HeFESTO_Infile.txt".format(star))
+        hefesto_morb_file = open("{}_MORB_HeFESTO_Infile.txt".format(star), 'a')
 
-        format_of_file = "{}\n0,20,80,1200,0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
+        format_of_file = ",20,80,1200,0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
                          "Mg           {}     1.37685    0\nFe           {}      .55527    0\n" \
                          "Ca           {}     1.33440    0\nAl           {}     1.82602    0\n" \
                          "Na           {}     0.71860    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\n" \
@@ -1019,12 +1018,13 @@ def hefestofilewriter_morb(bulkfile):
                          "mgwa\nfewa\nphase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\n" \
                          "phase ppv\n0\nmppv\nfppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n" \
                          "1\nqtz\nphase coes\n0\ncoes\nphase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n" \
-                         "0\nneph".format(star, si, mg, fe, ca, al, na)
+                         "0\nneph".format(si, mg, fe, ca, al, na)
 
         hefesto_morb_file.write(format_of_file)
         hefesto_morb_file.close()
         fdir = home_dir[0] + "/{}".format("{}_MORB_HeFESTO_Infile.txt".format(star))
-        tdir = home_dir[0] + "/MORB_HeFESTo_Input_Files/{}".format("{}_MORB_HeFESTO_Infile.txt".format(star))
+        tdir = home_dir[0] + "/{}/{}".format("{}_MORB_HeFESTo_Input_Files".format(infilename)
+                                                                      , "{}_MORB_HeFESTO_Infile.txt".format(star))
         shutil.move(fdir, tdir)
 
 
@@ -1334,77 +1334,11 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
 
     morb_recalc_outfile.close()
 
+    hefestofilewriter_morb(bulkfile="{}_MORB_Recalc_Bulkfile.csv".format(infilename), infilename=infilename)
 
 
 
 
-
-
-
-
-        # def file_parse_morb():
-        #     if "MORB_Data.csv" in os.listdir(os.getcwd()):
-        #         os.remove("MORB_Data.csv")
-        #     else:
-        #         pass
-        #     # working_dir = os.getcwd()
-        #     combined_output_file = open("MORB_Data.csv", "a")
-        #     combined_output_file.write(",".join(header_structure_morb) + "\n")
-        #     for filename in glob.glob("*.csv"):
-        #         if not filename == "MORB_Data.csv":
-        #             if enumerate(filename, 1) >= 100:
-        #                 with open(filename, "rb") as meltsfile2:
-        #                     data = []
-        #                     try:
-        #                         reader2 = csv.reader(meltsfile2, delimiter=",")
-        #                         reader2 = list(reader2)
-        #                         title = reader2[0][1]
-        #                         data.append(str(title))
-        #                         print
-        #                         "\n\n" + "__________________________________________________________________" + "\n"
-        #                         print
-        #                         "\n" + "**********************************************" + "\n" + \
-        #                         "This is the MORB alphaMELTS output file for: " + str(title) + " ..." + "\n" + \
-        #                         "**********************************************"
-        #                         for num, line in enumerate(reader2, 1):
-        #                             if "Liquid" in line:
-        #                                 # print num
-        #                                 skip_row2 = num + 1
-        #                                 liquid_comp = reader2[skip_row2]
-        #                                 print
-        #                                 ""
-        #                                 for item in liquid_comp:
-        #                                     data.append(item)
-        #                             else:
-        #                                 pass
-        #                     except:
-        #                         pass
-        #                 meltsfile2.close()
-        #                 print
-        #                 "The liquid composition at 5% melt is: " + "\n" + str(header_structure_morb) + "\n" + \
-        #                 str(data) + "\n"
-        #                 combined_output_file.write(",".join(data) + "\n")
-        #                 time.sleep(0.5)
-        #             else:
-        #                 pass
-        #         else:
-        #             pass
-
-
-
-
-
-
-
-# class hefestooutputparser:
-#
-#     def fort58_parser(self):
-#
-#         os.chdir(home_dir[0] + "/HeFESTO_BSP_Output_Files/fort.58")
-#
-#         for i in os.listdir(os.getcwd()):
-#             infile = pd.read_csv(i, delimiter='infer')
-#             depth = ""
 
 
 
