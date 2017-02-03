@@ -699,7 +699,7 @@ def molepct(infile, infile_type, consol_file, init_path, library):
 
     # sys.exit()
 
-def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
+def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile, bulkfile):
 
     if os.path.exists(home_dir[0] + "/MELTS_MORB_Input_Files"):
         shutil.rmtree(home_dir[0] + "/MELTS_MORB_Input_Files")
@@ -833,7 +833,8 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
                 tdir = home_dir[0] + "/MELTS_MORB_Input_Files/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
                 shutil.move(fdir, tdir)
 
-    runmelts_morb(infile_directory=(home_dir[0] + "/MELTS_MORB_Input_Files"), inputfilename=infilename)
+    hefestofilewriter_bsp(bulkfile=bsp_chem_infile)
+    runmelts_morb(infile_directory=(home_dir[0] + "/MELTS_MORB_Input_Files"), inputfilename=infilename[:-4])
 
 
 def runmelts_morb(infile_directory, inputfilename):
@@ -879,7 +880,7 @@ def runmelts_morb(infile_directory, inputfilename):
                 infile.close()
                 outfile.close()
                 os.remove(newname)
-                print("[~] {} MORB calculation processed!".format(i[:-20]))
+                print("[~] {} MORB calculation processed!".format(i[:-17]))
 
         else:
             print("[X] {} MORB calculation FAILED!".format(i[:-20]))
@@ -890,7 +891,7 @@ def runmelts_morb(infile_directory, inputfilename):
         else:
             pass
 
-    return ("{}_Completed_MORB_MELTS_Files".format(inputfilename))
+    scrapemorb(infiledirectory=(home_dir[0] + "/{}_Completed_MORB_MELTS_Files".format(inputfilename)), infilename=inputfilename)
 
 
 def scrapebsp2(infiledirectory, inputfilename):
@@ -942,60 +943,94 @@ def scrapebsp2(infiledirectory, inputfilename):
 
 
 
-# def scrapebsp(infiledirectory, inputfilename):
-#
-#     if "bsp_rho.csv" in os.listdir(os.getcwd()):
-#         os.remove("bsp_rho.csv")
-#     else:
-#         pass
-#
-#     bsp_rho_outfile = open("bsp_rho.csv", 'a')
-#
-#     os.chdir(infiledirectory)
-#
-#     for i in os.listdir(os.getcwd()):
-#
-#         if enumerate(i, 1) >= 100:
-#             data = []
-#             with open(i, "r") as meltsfile2:
-#                 try:
-#                     reader2 = csv.reader(meltsfile2, delimiter=",")
-#                     reader2 = list(reader2)
-#                     title = reader2[0][1]
-#                     data.append(str(title))
-#                 except:
-#                     pass
-#             meltsfile2.close()
-#             with open(i, "rb") as meltsfile:
-#                 reader = csv.reader(meltsfile, delimiter=",")
-#                 for num, line in enumerate(reader, 1):
-#                     if "Phase" in line:
-#                         try:
-#                             # skip_row = num + 1
-#                             csv_list = list(reader)
-#                             alloy_index = csv_list[0].index("alloy-solid_0")
-#                             vals = []
-#                             for row in csv_list[1:]:
-#                                 if not row == []:
-#                                     a = row[alloy_index]
-#                                     x = str(float(a))
-#                                     vals.append(x)
-#                                 else:
-#                                     break
-#                             somevals = []
-#                             thesum = str(float(sum(somevals)))
-#                             data.append(thesum)
-#                         except:
-#                             data.append("ERROR!")
-#                             bsp_rho_outfile.write(",".join(data) + "\n")
-#                             pass
-#                     else:
-#                         pass
-#             meltsfile.close()
-#             bsp_rho_outfile.write(",".join(data) + "\n")
-#             time.sleep(0.5)
-#         else:
-#             pass
+def hefestofilewriter_bsp(bulkfile):
+
+    os.chdir(home_dir[0])
+
+    if os.path.exists("BSP_HeFESTo_Input_Files"):
+        os.remove("BSP_HeFESTo_Input_Files")
+    else:
+        pass
+
+    os.mkdir("BSP_HeFESTo_Input_Files")
+
+    bulkfile_df = pd.read_csv(bulkfile)
+
+    for row in bulkfile_df.index:
+        star = bulkfile_df["Star"][row]
+        si = bulkfile_df["SiO2"][row]
+        mg = bulkfile_df["MgO"][row]
+        fe = bulkfile_df["FeO"][row]
+        ca = bulkfile_df["CaO"][row]
+        al = bulkfile_df["Al2O3"][row]
+        na = bulkfile_df["Na2O"][row]
+
+        hefesto_bsp_file = open("{}_BSP_HeFESTO_Infile.txt".format(star))
+
+        format_of_file = "{}\n0,20,80,1600,0,-2,0\n6,2,4,2\noxides\nSi          {}      5.39386    0\nMg          {}     2.71075    0\n" \
+                         "Fe          {}      .79840    0\nCa            {}      .31431    0\nAl            {}      .96680    0\n" \
+                         "Na            {}      .40654    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\nhc\n" \
+                         "phase opx\n1\n\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\n\nhe\ncen\ncats\n\njd\n" \
+                         "phase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\nmgwa\nfewa\n" \
+                         "phase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\nphase ppv\n0\nmppv\n" \
+                         "fppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n1\nqtz\nphase coes\n0\ncoes\n" \
+                         "phase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n0\nneph".format(star, si,
+                            mg, fe, ca, al, na)
+
+        hefesto_bsp_file.write(format_of_file)
+        hefesto_bsp_file.close()
+        fdir = home_dir[0] + "/{}".format("{}_BSP_HeFESTO_Infile.txt".format(star))
+        tdir = home_dir[0] + "/BSP_HeFESTo_Input_Files/{}".format("{}_BSP_HeFESTO_Infile.txt".format(star))
+        shutil.move(fdir, tdir)
+
+
+def hefestofilewriter_morb(bulkfile):
+
+    os.chdir(home_dir[0])
+
+    bulkfile_name = bulkfile[:-4]
+
+    if os.path.exists("{}_MORB_HeFESTo_Input_Files".format(bulkfile_name)):
+        os.remove("{}_MORB_HeFESTo_Input_Files".format(bulkfile_name))
+    else:
+        pass
+
+    os.mkdir("{}_MORB_HeFESTo_Input_Files".format(bulkfile_name))
+
+    bulkfile_df = pd.read_csv(bulkfile)
+
+    for row in bulkfile_df.index:
+        star = bulkfile_df["Star"][row]
+        si = bulkfile_df["SiO2"][row]
+        mg = bulkfile_df["MgO"][row]
+        fe = bulkfile_df["FeO"][row]
+        ca = bulkfile_df["CaO"][row]
+        al = bulkfile_df["Al2O3"][row]
+        na = bulkfile_df["Na2O"][row]
+
+        hefesto_morb_file = open("{}_MORB_HeFESTO_Infile.txt".format(star))
+
+        format_of_file = "{}\n0,20,80,1200,0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
+                         "Mg           {}     1.37685    0\nFe           {}      .55527    0\n" \
+                         "Ca           {}     1.33440    0\nAl           {}     1.82602    0\n" \
+                         "Na           {}     0.71860    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\n" \
+                         "hc\nphase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\n" \
+                         "jd\nphase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\n" \
+                         "mgwa\nfewa\nphase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\n" \
+                         "phase ppv\n0\nmppv\nfppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n" \
+                         "1\nqtz\nphase coes\n0\ncoes\nphase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n" \
+                         "0\nneph".format(star, si, mg, fe, ca, al, na)
+
+        hefesto_morb_file.write(format_of_file)
+        hefesto_morb_file.close()
+        fdir = home_dir[0] + "/{}".format("{}_MORB_HeFESTO_Infile.txt".format(star))
+        tdir = home_dir[0] + "/MORB_HeFESTo_Input_Files/{}".format("{}_MORB_HeFESTO_Infile.txt".format(star))
+        shutil.move(fdir, tdir)
+
+
+
+
+
 
 
 def runhefesto(actual_run):
@@ -1142,25 +1177,25 @@ def runhefesto(actual_run):
 def scrapemorb(infiledirectory, infilename):
 
     if "{}_MORB_Consolidated_Chem_File".format(infilename) in os.listdir(home_dir[0]):
-        os.remove(home_dir[0] + "{}_MORB_Consolidated_Chem_File".format(infilename))
+        os.remove(home_dir[0] + "/{}_MORB_Consolidated_Chem_File".format(infilename))
     else:
         pass
 
-    morb_outfile = open((home_dir[0] + "{}_MORB_Consolidated_Chem_File".format(infilename)), 'a') # need a header
+    morb_outfile = open((home_dir[0] + "/{}_MORB_Consolidated_Chem_File".format(infilename)), 'a') # need a header
     morb_outfile_header = "Star Name,Pressure,Temperature,mass,SiO2,TiO2,Al2O3,Fe2O3,Cr2O3,FeO,MgO,CaO,Na2O\n"
     morb_outfile.write(morb_outfile_header)
 
-    os.chdir(infiledirectory)
 
-    for i in os.getcwd():
-
+    for i in os.listdir(infiledirectory):
+        print("\n[~] Scraping MORB output file: {}".format(i))
+        os.chdir(infiledirectory)
         with open(i, 'r') as infile:
             star_name = []
+            data = []
+            reader = csv.reader(infile, delimiter=',')
+            reader2 = list(reader)
+            star_name.append(reader2[0][1])
             if enumerate(i, 1) >= 100:
-                data = []
-                reader = csv.reader(infile, delimiter=',')
-                reader2 = list(reader)
-                star_name.append(reader2[0][1])
                 for num, line in enumerate(reader2, 1):
                     if "Liquid" in line:
                         skip_row2 = num + 1
@@ -1169,27 +1204,35 @@ def scrapemorb(infiledirectory, infilename):
                             data.append(item)
                     else:
                         pass
-                    data_formatted = ",".join(str(z) for z in data)
-                    morb_outfile.write("{},{}\n".format(star_name[0], data_formatted))
+                data_formatted = ",".join(str(z) for z in data)
+                os.chdir(home_dir[0])
+                morb_outfile.write("{},{}\n".format(star_name[0], data_formatted))
             else:
+                os.chdir(home_dir[0])
                 morb_outfile.write("{},ERROR!\n".format(star_name[0]))
 
     morb_outfile.close()
 
     os.chdir(home_dir[0])
 
+    consol_file = (home_dir[0] + "/{}_MORB_Consolidated_Chem_File".format(infilename))
+    morbrecalc(infiledirectory=infiledirectory, infilename=infilename, bulkfilename=consol_file)
+
+
 
 
 
 def morbrecalc(infiledirectory, infilename, bulkfilename):
 
-    if "{}_MORB_Recalc_Bulkfile.csv".format(infilename) in os.listdir(os.getcwd())
+    os.chdir(home_dir[0])
+
+    if "{}_MORB_Recalc_Bulkfile.csv".format(infilename) in os.listdir(os.getcwd()):
         os.remove("{}_MORB_Recalc_Bulkfile.csv".format(infilename))
     else:
         pass
 
     morb_recalc_outfile = open("{}_MORB_Recalc_Bulkfile.csv".format(infilename), 'a')
-    morb_recalc_outfile_header = "Star,Pressure,Temperature,Mass,SiO2,TiO2,Al2O3,Cr2O3,FeO,MgO,CaO,Na2O"
+    morb_recalc_outfile_header = "Star,Pressure,Temperature,Mass,SiO2,TiO2,Al2O3,Cr2O3,FeO,MgO,CaO,Na2O,SUM\n"
     morb_recalc_outfile.write(morb_recalc_outfile_header)
 
     df_morb_chem = pd.read_csv(bulkfilename)
@@ -1207,7 +1250,7 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         mgo_in = float(df_morb_chem["MgO"][row])
         cao_in = float(df_morb_chem["CaO"][row])
         na2o_in = float(df_morb_chem["Na2O"][row])
-        chem_in_sum = sum(sio2_in, tio2_in, al2o3_in, fe2o3_in, cr2o3_in, feo_in, mgo_in, cao_in, na2o_in)
+        chem_in_sum = (sio2_in + tio2_in + al2o3_in + fe2o3_in + cr2o3_in + feo_in + mgo_in + cao_in + na2o_in)
 
         wt_sio2_in = (sio2_in/100.0) * mass
         wt_tio2_in = (tio2_in / 100.0) * mass
@@ -1218,7 +1261,8 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         wt_mgo_in = (mgo_in / 100.0) * mass
         wt_cao_in = (cao_in / 100.0) * mass
         wt_na2o_in = (na2o_in / 100.0) * mass
-        sum_wt_in = sum(wt_sio2_in, wt_tio2_in, wt_al2o3_in, wt_fe2o3_in, wt_cr2o3_in, wt_feo_in, wt_mgo_in, wt_cao_in, wt_na2o_in)
+        sum_wt_in = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + wt_fe2o3_in + wt_cr2o3_in + wt_feo_in + 
+                     wt_mgo_in + wt_cao_in + wt_na2o_in)
 
         sio2_moles = wt_sio2_in / sio2_molwt
         tio2_moles = wt_tio2_in / tio2_molwt
@@ -1229,7 +1273,8 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         mgo_moles = wt_mgo_in / mgo_molwt
         cao_moles = wt_cao_in / cao_molwt
         na2o_moles = wt_na2o_in / na2o_molwt
-        sum_oxide_moles = sum(sio2_moles, tio2_moles, al2o3_moles, fe2o3_moles, cr2o3_moles, feo_moles, mgo_moles, cao_moles, na2o_moles)
+        sum_oxide_moles = (sio2_moles + tio2_moles + al2o3_moles + fe2o3_moles + cr2o3_moles + feo_moles + 
+                           mgo_moles + cao_moles + na2o_moles)
 
         si_cations = sio2_moles * num_sio2_cations
         ti_cations = tio2_moles * num_tio2_cations
@@ -1240,15 +1285,17 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         mg_cations = mgo_moles * num_mgo_cations
         ca_cations = cao_moles * num_cao_cations
         na_cations = na2o_moles * num_na2o_cations
-        sum_cations = sum(si_cations, ti_cations, al_cations, fe_fe2o3_cations, cr_cations, fe_feo_cations, mg_cations, ca_cations, na_cations)
+        sum_cations = (si_cations + ti_cations + al_cations + fe_fe2o3_cations + cr_cations + fe_feo_cations + mg_cations + 
+                          ca_cations + na_cations)
 
         # fe2o3 --> feo recalc
-        total_mol_fe = sum(fe_feo_cations, fe_fe2o3_cations)
+        total_mol_fe = (fe_feo_cations + fe_fe2o3_cations)
         total_wt_fe = total_mol_fe * fe_atwt
         total_wt_feo = total_mol_fe * feo_molwt
 
         # unnormalized wt%
-        unnorm_sum = sum(wt_sio2_in, wt_tio2_in, wt_al2o3_in, total_wt_feo, wt_cr2o3_in, wt_mgo_in, wt_cao_in, wt_na2o_in)
+        unnorm_sum = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + total_wt_feo + 
+                      wt_cr2o3_in + wt_mgo_in + wt_cao_in + wt_na2o_in)
 
         # normalized oxide wt% w/o mgo fix
         norm_wt_sio2 = wt_sio2_in / unnorm_sum
@@ -1259,28 +1306,28 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         norm_wt_mgo = wt_mgo_in / unnorm_sum
         norm_wt_cao = wt_mgo_in / unnorm_sum
         norm_wt_na2o = wt_na2o_in / unnorm_sum
-        norm_sum_nomgofix = sum(norm_wt_sio2, norm_wt_tio2, norm_wt_al2o3, norm_wt_feo, norm_wt_cr2o3, norm_wt_mgo,
-                                norm_wt_cao, norm_wt_na2o)
+        norm_sum_nomgofix = (norm_wt_sio2 + norm_wt_tio2 + norm_wt_al2o3 + norm_wt_feo + norm_wt_cr2o3 + norm_wt_mgo +
+                                norm_wt_cao + norm_wt_na2o)
 
         # mgo fix
         norm_wt_mgo_fix = norm_wt_mgo * mgo_fix
-        norm_sum_mgofix = sum(norm_wt_sio2, norm_wt_tio2, norm_wt_al2o3, norm_wt_feo, norm_wt_cr2o3, norm_wt_mgo_fix,
-                                norm_wt_cao, norm_wt_na2o)
+        norm_sum_mgofix = (norm_wt_sio2 + norm_wt_tio2 + norm_wt_al2o3 + norm_wt_feo + norm_wt_cr2o3 + norm_wt_mgo_fix +
+                                norm_wt_cao + norm_wt_na2o)
 
         # normaized oxide wt% abundances --- what we want!
 
-        sio2_wtpct = norm_wt_sio2 / norm_sum_mgofix
-        tio2_wtpct = norm_wt_tio2 / norm_sum_mgofix
-        al2o3_wtpct = norm_wt_al2o3 / norm_sum_mgofix
-        feo_wtpct = norm_wt_feo / norm_sum_mgofix
-        cr2o3_wtpct = norm_wt_cr2o3 / norm_sum_mgofix
-        mgo_wtpct = norm_wt_mgo_fix / norm_sum_mgofix
-        cao_wtpct = norm_wt_cao / norm_sum_mgofix
-        na2o_wtpct = norm_wt_na2o / norm_sum_mgofix
-        sum_wtpct = sum(sio2_wtpct, tio2_wtpct, al2o3_wtpct, feo_wtpct, cr2o3_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct)
+        sio2_wtpct = (norm_wt_sio2 / norm_sum_mgofix) * 100
+        tio2_wtpct = (norm_wt_tio2 / norm_sum_mgofix) * 100
+        al2o3_wtpct = (norm_wt_al2o3 / norm_sum_mgofix) * 100
+        feo_wtpct = (norm_wt_feo / norm_sum_mgofix) * 100
+        cr2o3_wtpct = (norm_wt_cr2o3 / norm_sum_mgofix) * 100
+        mgo_wtpct = (norm_wt_mgo_fix / norm_sum_mgofix) * 100
+        cao_wtpct = (norm_wt_cao / norm_sum_mgofix) * 100
+        na2o_wtpct = (norm_wt_na2o / norm_sum_mgofix) * 100
+        sum_wtpct = (sio2_wtpct + tio2_wtpct + al2o3_wtpct + feo_wtpct + cr2o3_wtpct + mgo_wtpct + cao_wtpct + na2o_wtpct)
 
-        chem_to_outfile = "{},{},{},{},{},{},{},{},{},{},{},{}\n".format(star_name, pressure, temperature, mass, sio2_wtpct,
-                                tio2_wtpct, al2o3_wtpct, cr2o3_wtpct, feo_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct)
+        chem_to_outfile = "{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(star_name, pressure, temperature, mass, sio2_wtpct,
+                                tio2_wtpct, al2o3_wtpct, cr2o3_wtpct, feo_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct, sum_wtpct)
 
         morb_recalc_outfile.write(chem_to_outfile)
 
