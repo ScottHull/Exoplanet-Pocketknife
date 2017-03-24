@@ -907,6 +907,8 @@ def scrapebsp2(infiledirectory, inputfilename):
 
     os.chdir(infiledirectory)
 
+
+
     for i in os.listdir(os.getcwd()):
         os.chdir(infiledirectory)
         if enumerate(i, 1) >= 100:
@@ -947,6 +949,8 @@ def hefestofilewriter_bsp(bulkfile, infilename):
 
     os.chdir(home_dir[0])
 
+    infilename = infilename[:-4]
+
     if os.path.exists("{}_BSP_HeFESTo_Input_Files".format(infilename)):
         shutil.rmtree("{}_BSP_HeFESTo_Input_Files".format(infilename))
     else:
@@ -965,12 +969,12 @@ def hefestofilewriter_bsp(bulkfile, infilename):
         al = bulkfile_df["Al2O3"][row]
         na = bulkfile_df["Na2O"][row]
 
-        hefesto_bsp_file = open("{}_BSP_HeFESTO_Infile.txt".format(star), 'a')
+        hefesto_bsp_file = open("{}_BSP_HeFESTo_Infile.txt".format(star), 'a')
 
         format_of_file = "0,20,80,1600,0,-2,0\n6,2,4,2\noxides\nSi          {}      5.39386    0\nMg          {}     2.71075    0\n" \
                          "Fe          {}      .79840    0\nCa            {}      .31431    0\nAl            {}      .96680    0\n" \
                          "Na            {}      .40654    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\nhc\n" \
-                         "phase opx\n1\n\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\n\nhe\ncen\ncats\n\njd\n" \
+                         "phase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\njd\n" \
                          "phase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\nmgwa\nfewa\n" \
                          "phase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\nphase ppv\n0\nmppv\n" \
                          "fppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n1\nqtz\nphase coes\n0\ncoes\n" \
@@ -979,10 +983,12 @@ def hefestofilewriter_bsp(bulkfile, infilename):
 
         hefesto_bsp_file.write(format_of_file)
         hefesto_bsp_file.close()
-        fdir = home_dir[0] + "/{}".format("{}_BSP_HeFESTO_Infile.txt".format(star))
+        fdir = home_dir[0] + "/{}".format("{}_BSP_HeFESTo_Infile.txt".format(star))
         tdir = home_dir[0] + "/{}/{}".format("{}_BSP_HeFESTo_Input_Files".format(infilename),
-                                             "{}_BSP_HeFESTO_Infile.txt".format(star))
+                                             "{}_BSP_HeFESTo_Infile.txt".format(star))
         shutil.move(fdir, tdir)
+
+    print("\n[~] BSP HeFESTo input files available in '{}'".format("{}_BSP_HeFESTo_Input_Files".format(infilename)))
 
 
 def hefestofilewriter_morb(bulkfile, infilename):
@@ -1007,7 +1013,7 @@ def hefestofilewriter_morb(bulkfile, infilename):
         al = bulkfile_df["Al2O3"][row]
         na = bulkfile_df["Na2O"][row]
 
-        hefesto_morb_file = open("{}_MORB_HeFESTO_Infile.txt".format(star), 'a')
+        hefesto_morb_file = open("{}_MORB_HeFESTo_Infile.txt".format(star), 'a')
 
         format_of_file = ",20,80,1200,0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
                          "Mg           {}     1.37685    0\nFe           {}      .55527    0\n" \
@@ -1022,154 +1028,359 @@ def hefestofilewriter_morb(bulkfile, infilename):
 
         hefesto_morb_file.write(format_of_file)
         hefesto_morb_file.close()
-        fdir = home_dir[0] + "/{}".format("{}_MORB_HeFESTO_Infile.txt".format(star))
-        tdir = home_dir[0] + "/{}/{}".format("{}_MORB_HeFESTo_Input_Files".format(infilename)
-                                                                      , "{}_MORB_HeFESTO_Infile.txt".format(star))
+        fdir = home_dir[0] + "/{}".format("{}_MORB_HeFESTo_Infile.txt".format(star))
+        tdir = home_dir[0] + "/{}/{}".format("{}_MORB_HeFESTo_Input_Files".format(infilename),
+                                             "{}_MORB_HeFESTo_Infile.txt".format(star))
         shutil.move(fdir, tdir)
 
+    print("\n[~] Crust HeFESTo input files available in '{}'".format("{}_MORB_HeFESTo_Input_Files".format(infilename)))
+
+    consol_hefestofolders(infilename=infilename)
+
+
+
+
+def consol_hefestofolders(infilename):
+
+    print('\n[~] Consolidating HeFESTo input file folders...')
+
+    bsp_folder = "/{}_BSP_HeFESTo_Input_Files".format(infilename)
+    morb_folder = "/{}_MORB_HeFESTo_Input_Files".format(infilename)
+
+    print("[~] Got HeFESTo BSP folder '{}'".format(bsp_folder))
+    print("[~] Got HeFESTo Crust folder '{}'".format(morb_folder))
+
+    if "{}_HeFESTo_Input_Files".format(infilename) in os.listdir(os.getcwd()):
+        shutil.rmtree("{}_HeFESTo_Input_Files".format(infilename))
+    else:
+        pass
+
+
+    consol_folder = (home_dir[0] + "/{}_HeFESTo_Input_Files".format(infilename))
+
+    print("\n[~] Created consolidated HeFESTo input file folder: {}".format(consol_folder))
+
+    fdir_bsp = (home_dir[0] + bsp_folder)
+    fdir_morb = (home_dir[0] + morb_folder)
+    tdir_bsp = consol_folder + bsp_folder
+    tdir_morb = consol_folder + morb_folder
+
+    shutil.move(fdir_bsp, tdir_bsp)
+    shutil.move(fdir_morb, tdir_morb)
+
+    print("\n[~] HeFESTo Input files are now available in {} for transfer to a HeFESTo VM".format(consol_folder))
+
+    print("\n[~] Please move this script and folder '{}' to a working HeFESTo directory!".format(consol_folder))
+    print("[~] Exiting the Exoplanet Pocketknife's active processes...")
+
+    time.sleep(6)
+
+    initialization()
 
 
 
 
 
 
-def runhefesto(actual_run):
+
+def runhefesto(infiledir, actual_run, runname):
 
     os.chdir(home_dir[0])
 
     if actual_run is True:
-        try:
+        # try:
             if 'main' not in os.listdir(os.getcwd()):
-                print("[X] ERROR!  HeFESTO's 'main' not detected in the working directory!\n")
+                print("[X] ERROR!  HeFESTo's 'main' not detected in the working directory!\n")
                 time.sleep(4)
                 initialization()
             else:
                 print("[~] HeFESTo detected in the working directory!\n")
                 pass
+            # os.chdir(home_dir[0])
+            # print("\nPlease enter the name of your BSP HeFESTo input .csv sheet:")
+            # hefesto_input_bsp = input(">>> ")
+            # if hefesto_input_bsp in os.listdir(os.getcwd()):
+            #     print("[~] {} has been found in the working directory!".format(hefesto_input_bsp))
+            # else:
+            #     print("[X] {} has NOT been found in the working directory!".format(hefesto_input_bsp))
+            #     time.sleep(4)
+            #     initialization()
+            # print("\nPlease enter the name of your crust HeFESTo input .csv sheet:")
+            # hefesto_input_morb = input(">>> ")
+            # if hefesto_input_morb in os.listdir(os.getcwd()):
+            #     print("[~] {} has been found in the working directory!".format(hefesto_input_morb))
+            # else:
+            #     print("[X] {} has NOT been found in the working directory!".format(hefesto_input_morb))
+            #     time.sleep(4)
+            #     initialization()
+            #
+            # if os.path.exists("HeFESTo_BSP_Input_Files"):
+            #     shutil.rmtree("HeFESTo_BSP_Input_Files")
+            # else:
+            #     pass
+            # if os.path.exists("HeFESTo_MORB_Input_Files"):
+            #     shutil.rmtree("HeFESTo_MORB_Input_Files")
+            # else:
+            #     pass
+            #
+            # os.mkdir("HeFESTo_BSP_Input_Files")
+
+            if os.path.exists(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname)):
+                shutil.rmtree(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname))
+            else:
+                pass
+
+            if os.path.exists(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname)):
+                shutil.rmtree(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname))
+            else:
+                pass
+
+
+            os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname))
+            os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.66".format(runname))
+            os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.58".format(runname))
+            os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.59".format(runname))
+            os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname))
+            os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.66".format(runname))
+            os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.58".format(runname))
+            os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.59".format(runname))
+
+            bsp_dir = []
+            morb_dir = []
+            os.chdir(infiledir)
+            for i in os.listdir(os.getcwd()):
+                if "BSP" in i or "bsp" in i:
+                    print("[~] Found BSP directory: {}".format(i))
+                    bsp_dir.append(i)
+                elif "MORB" in i or "morb" in i:
+                    print("[~] Found MORB directory: {}".format(i))
+                    morb_dir.append(i)
+                # else:
+                #     print("\n[X] HeFESTo cumulative input directory not properly formatted!")
+                #     initialization()
+
+            if len(bsp_dir) > 1 or len(morb_dir) > 1:
+                print("\n[X] HeFESTo cumulative input directory not properly formatted!")
+                time.sleep(2)
+                initialization()
+
+
+            bsp_dir = home_dir[0] + "/{}/{}".format(infiledir, bsp_dir[0])
+            morb_dir = home_dir[0] + "/{}/{}".format(infiledir, morb_dir[0])
+        
+            
+            print("\b[~] Initiating HeFESTo BSP calculations...")
+
+
+            for i in os.listdir(bsp_dir):
+
+                star_name = i[:-24]
+
+                os.chdir(home_dir[0])
+                if "fort.66" in os.listdir(os.getcwd()):
+                    try:
+                        os.remove("fort.66")
+                    except:
+                        pass
+                    try:
+                        shutil.rmtree("fort.66")
+                    except:
+                        pass
+                else:
+                    pass
+                if "fort.58" in os.listdir(os.getcwd()):
+                    try:
+                        os.remove("fort.58")
+                    except:
+                        pass
+                    try:
+                        shutil.rmtree("fort.58")
+                    except:
+                        pass
+                else:
+                    pass
+                if "fort.59" in os.listdir(os.getcwd()):
+                    try:
+                        os.remove("fort.59")
+                    except:
+                        pass
+                    try:
+                        shutil.rmtree("fort.59")
+                    except:
+                        pass
+                else:
+                    pass
+                if "control" in os.listdir(os.getcwd()):
+                    try:
+                        os.remove("control")
+                    except:
+                        pass
+                    try:
+                        shutil.rmtree("control")
+                    except:
+                        pass
+                else:
+                    pass
+                os.chdir(bsp_dir)
+                shutil.copy((bsp_dir + "/{}".format(i)), (home_dir[0] + "/{}".format("control")))
+                print("\n[~] Performing HeFESTo BSP calculations on: {}".format(i))
+                os.chdir(home_dir[0])
+                argz = (home_dir[0] + "/main")
+                p = subprocess.Popen(argz, stdin=None, stdout=None)
+                t = Timer(800, p.kill)
+                t.start()
+                p.communicate()
+                t.cancel()
+                if "fort.66" in os.listdir(os.getcwd()):
+                    print("\n[~] 'fort.66' found!")
+                    shutil.move("fort.66", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.66/{}".format(runname, star_name + "_fort66")))
+                if "fort.58" in os.listdir(os.getcwd()):
+                    print("\n[~] 'fort.58' found!")
+                    shutil.move("fort.58", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.58/{}".format(runname, star_name + "_fort58")))
+                if "fort.59" in os.listdir(os.getcwd()):
+                    print("\n[~] 'fort.59' found!")
+                    shutil.move("fort.59", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
+                if "control" in os.listdir(os.getcwd()):
+                    os.remove("control")
+
+            print("\b[~] Initiating HeFESTo crust calculations...")
+
+
+            for i in os.listdir(morb_dir):
+
+                star_name = i[:-24]
+
+                os.chdir(home_dir[0])
+                if "fort.66" in os.listdir(os.getcwd()):
+                    os.remove("fort.66")
+                if "fort.58" in os.listdir(os.getcwd()):
+                    os.remove("fort.58")
+                if "fort.59" in os.listdir(os.getcwd()):
+                    os.remove("fort.59")
+                if "control" in os.listdir(os.getcwd()):
+                    os.remove("control")
+                os.chdir(morb_dir)
+                shutil.copy((morb_dir + "/{}".format(i)), (home_dir[0] + "/{}".format("control")))
+                print("\n[~] Performing HeFESTo crust calculations on: {}".format(i))
+                os.chdir(home_dir[0])
+                argz = (home_dir[0] + "/main")
+                p = subprocess.Popen(argz, stdin=None, stdout=None)
+                t = Timer(800, p.kill)
+                t.start()
+                p.communicate()
+                t.cancel()
+                if "fort.66" in os.listdir(os.getcwd()):
+                    print("\n[~] 'fort.66; found!")
+                    shutil.move("fort.66", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.66/{}".format(runname, star_name + "_fort66")))
+                if "fort.58" in os.listdir(os.getcwd()):
+                    print("\n[~] 'fort.58' found!")
+                    shutil.move("fort.58", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.58/{}".format(runname, star_name + "_fort58")))
+                if "fort.59" in os.listdir(os.getcwd()):
+                    print("\n[~] 'fort.59 found!")
+                    shutil.move("fort.59", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
+                if "control" in os.listdir(os.getcwd()):
+                    os.remove("control")
+
             os.chdir(home_dir[0])
-            print("\nPlease enter the name of your BSP HeFESTo input .csv sheet:")
-            hefesto_input_bsp = input(">>> ")
-            if hefesto_input_bsp in os.listdir(os.getcwd()):
-                print("[~] {} has been found in the working directory!".format(hefesto_input_bsp))
-            else:
-                print("[X] {} has NOT been found in the working directory!".format(hefesto_input_bsp))
-                time.sleep(4)
-                initialization()
-            print("\nPlease enter the name of your crust HeFESTo input .csv sheet:")
-            hefesto_input_morb = input(">>> ")
-            if hefesto_input_morb in os.listdir(os.getcwd()):
-                print("[~] {} has been found in the working directory!".format(hefesto_input_morb))
-            else:
-                print("[X] {} has NOT been found in the working directory!".format(hefesto_input_morb))
-                time.sleep(4)
-                initialization()
+            if os.path.exists("{}_HeFESTo_Output_Files".format(runname)):
+                shutil.rmtree("{}_HeFESTo_Output_Files".format(runname))
+            os.mkdir("{}_HeFESTo_Output_Files".format(runname))
+            shutil.move(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname), home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname))
+            shutil.move(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname), home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname))
 
-            if os.path.exists("HeFESTO_BSP_Input_Files"):
-                shutil.rmtree("HeFESTO_BSP_Input_Files")
-            else:
-                pass
-            if os.path.exists("HeFESTO_MORB_Input_Files"):
-                shutil.rmtree("HeFESTO_MORB_Input_Files")
-            else:
-                pass
-
-            os.mkdir("HeFESTO_BSP_Input_Files")
-            os.mkdir("HeFESTo_BSP_Output_Files")
-            os.mkdir(os.getcwd() + "/HeFESTO_BSP_Output_Files/fort.66")
-            os.mkdir(os.getcwd() + "/HeFESTO_BSP_Output_Files/fort.58")
-            os.mkdir(os.getcwd() + "/HeFESTO_BSP_Output_Files/fort.59")
-            os.mkdir("HeFESTO_MORB_Input_Files")
-            os.mkdir(os.getcwd() + "/HeFESTO_MORB_Output_Files/fort.66")
-            os.mkdir(os.getcwd() + "/HeFESTO_MORB_Output_Files/fort.58")
-            os.mkdir(os.getcwd() + "/HeFESTO_MORB_Output_Files/fort.59")
-
-            bsp_infile_init = (home_dir[0] + "/{}".format(hefesto_input_bsp))
-            bsp_infile_to = (home_dir[0] + "/HeFESTO_BSP_Input_Files/{}".format(hefesto_input_bsp))
-            morb_infile_init = (home_dir[0] + "/{}".format(hefesto_input_morb))
-            morb_infile_to = (home_dir[0] + "/HeFESTO_MORB_Input_Files/{}".format(hefesto_input_morb))
-            shutil.copy(bsp_infile_init, bsp_infile_to)
-            shutil.copy(morb_infile_init, morb_infile_to)
-
-            os.chdir(home_dir[0] + "/HeFESTO_BSP_Input_Files")
-            with open(hefesto_input_bsp, 'r') as infile:
-                reader = csv.reader(infile, delimiter=",")
-                for row in reader:
-                    list_formatted = []
-                    for z in row:
-                        list_formatted.append(z)
-                    title = list_formatted[0].strip()
-                    output_file = open("{}_HeFESTo_BSP_nput.txt".format(title), 'a')
-                    for z in list_formatted[1:]:
-                        output_file.write("{}\n".format(z))
-                    output_file.close()
-
-            os.chdir(home_dir[0] + "/HeFESTO_MORB_Input_Files")
-            with open(hefesto_input_morb, 'r') as infile:
-                reader = csv.reader(infile, delimiter=",")
-                for row in reader:
-                    list_formatted = []
-                    for z in row:
-                        list_formatted.append(z)
-                    title = list_formatted[0].strip()
-                    output_file = open("{}_HeFESTo_MORB_Input.txt".format(title), 'a')
-                    for z in list_formatted[1:]:
-                        output_file.write("{}\n".format(z))
-                    output_file.close()
-            print("[~] HeFESTo files written!\n"
-                  "Please see {} for your files!\n".format(os.getcwd()))
-        except:
-            pass
-
-        os.chdir(home_dir[0] + "/HeFESTO_BSP_Input_Files")
-        print("[~] Launching HeFESTo simulations...")
-        # curr_planet = ""
-        # for i in os.listdir(os.getcwd()):
-        # curr_planet.update(i)
-        # print("[~] Currently simulating BSP for: {}".format(curr_planet.get()))
+            print("\n[~] HeFESTo Output Files available at '{}'".format(home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname)))
+            print("\n[~] Finished with HeFESTo calculations!")
 
 
 
-    else:
-        try:
-            if os.path.exists(home_dir[0] + "/HeFESTo_Inputs"):
-                shutil.rmtree(home_dir[0] + "/HeFESTo_Inputs")
-            else:
-                pass
-            os.mkdir(home_dir[0] + "/HeFESTo_Inputs")
-            os.chdir(home_dir[0])
-            print("\nPlease enter the name of your HeFESTo input .csv sheet:")
-            hefesto_input = input(">>> ")
-            if hefesto_input in os.listdir(os.getcwd()):
-                print("[~] {} has been found in the working directory!".format(hefesto_input))
-            else:
-                print("[X] {} has NOT been found in the working directory!".format(hefesto_input))
-                time.sleep(4)
-                initialization()
 
-            infile_init = (home_dir[0] + "/{}".format(hefesto_input))
-            infile_to = (home_dir[0] + "/HeFESTO_Inputs/{}".format(hefesto_input))
-            shutil.copy(infile_init, infile_to)
+            # bsp_infile_init = (home_dir[0] + "/{}".format(hefesto_input_bsp))
+            # bsp_infile_to = (home_dir[0] + "/HeFESTo_BSP_Input_Files/{}".format(hefesto_input_bsp))
+            # morb_infile_init = (home_dir[0] + "/{}".format(hefesto_input_morb))
+            # morb_infile_to = (home_dir[0] + "/HeFESTo_MORB_Input_Files/{}".format(hefesto_input_morb))
+            # shutil.copy(bsp_infile_init, bsp_infile_to)
+            # shutil.copy(morb_infile_init, morb_infile_to)
 
-            os.chdir(home_dir[0] + "/HeFESTO_Inputs")
-            with open(hefesto_input, 'r') as infile:
-                reader = csv.reader(infile, delimiter=",")
-                for row in reader:
-                    list_formatted = []
-                    for z in row:
-                        list_formatted.append(z)
-                    title = list_formatted[0].strip()
-                    output_file = open("{}_HeFESTo_Input.txt".format(title), 'a')
-                    for z in list_formatted[1:]:
-                        output_file.write("{}\n".format(z))
-                        # if z.isalpha() == True:
-                        #     output_file.write("{}\n".format(z))
-                        # else:
-                        #     output_file.write("{}\n".format(z))
-                    output_file.close()
-            print("[~] HeFESTo files written!\n"
-                  "Please see {} for your files!\n".format(os.getcwd()))
-        except:
-            pass
+            # os.chdir(bsp_dir)
+            # with open(hefesto_input_bsp, 'r') as infile:
+            #     reader = csv.reader(infile, delimiter=",")
+            #     for row in reader:
+            #         list_formatted = []
+            #         for z in row:
+            #             list_formatted.append(z)
+            #         title = list_formatted[0].strip()
+            #         output_file = open("{}_HeFESTo_BSP_nput.txt".format(title), 'a')
+            #         for z in list_formatted[1:]:
+            #             output_file.write("{}\n".format(z))
+            #         output_file.close()
+            #
+            # os.chdir(home_dir[0] + "/HeFESTo_MORB_Input_Files")
+            # with open(hefesto_input_morb, 'r') as infile:
+            #     reader = csv.reader(infile, delimiter=",")
+            #     for row in reader:
+            #         list_formatted = []
+            #         for z in row:
+            #             list_formatted.append(z)
+            #         title = list_formatted[0].strip()
+            #         output_file = open("{}_HeFESTo_MORB_Input.txt".format(title), 'a')
+            #         for z in list_formatted[1:]:
+            #             output_file.write("{}\n".format(z))
+            #         output_file.close()
+            # print("[~] HeFESTo files written!\n"
+            #       "Please see {} for your files!\n".format(os.getcwd()))
+        # except:
+        #     pass
+
+    #     os.chdir(home_dir[0] + "/HeFESTo_BSP_Input_Files")
+    #     print("[~] Launching HeFESTo simulations...")
+    #     # curr_planet = ""
+    #     # for i in os.listdir(os.getcwd()):
+    #     # curr_planet.update(i)
+    #     # print("[~] Currently simulating BSP for: {}".format(curr_planet.get()))
+    #
+    #
+    #
+    # else:
+    #     try:
+    #         if os.path.exists(home_dir[0] + "/HeFESTo_Inputs"):
+    #             shutil.rmtree(home_dir[0] + "/HeFESTo_Inputs")
+    #         else:
+    #             pass
+    #         os.mkdir(home_dir[0] + "/HeFESTo_Inputs")
+    #         os.chdir(home_dir[0])
+    #         print("\nPlease enter the name of your HeFESTo input .csv sheet:")
+    #         hefesto_input = input(">>> ")
+    #         if hefesto_input in os.listdir(os.getcwd()):
+    #             print("[~] {} has been found in the working directory!".format(hefesto_input))
+    #         else:
+    #             print("[X] {} has NOT been found in the working directory!".format(hefesto_input))
+    #             time.sleep(4)
+    #             initialization()
+    #
+    #         infile_init = (home_dir[0] + "/{}".format(hefesto_input))
+    #         infile_to = (home_dir[0] + "/HeFESTo_Inputs/{}".format(hefesto_input))
+    #         shutil.copy(infile_init, infile_to)
+    #
+    #         os.chdir(home_dir[0] + "/HeFESTo_Inputs")
+    #         with open(hefesto_input, 'r') as infile:
+    #             reader = csv.reader(infile, delimiter=",")
+    #             for row in reader:
+    #                 list_formatted = []
+    #                 for z in row:
+    #                     list_formatted.append(z)
+    #                 title = list_formatted[0].strip()
+    #                 output_file = open("{}_HeFESTo_Input.txt".format(title), 'a')
+    #                 for z in list_formatted[1:]:
+    #                     output_file.write("{}\n".format(z))
+    #                     # if z.isalpha() == True:
+    #                     #     output_file.write("{}\n".format(z))
+    #                     # else:
+    #                     #     output_file.write("{}\n".format(z))
+    #                 output_file.close()
+    #         print("[~] HeFESTo files written!\n"
+    #               "Please see {} for your files!\n".format(os.getcwd()))
+    #     except:
+    #         pass
 
 
 
@@ -1342,7 +1553,7 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
 
 
 
-def integrationloop2():
+def integrationloop2(hefestodir, runname):
 
     # standard_depths = []
     #
@@ -1379,72 +1590,86 @@ def integrationloop2():
 
 
 
+    print("\n")
 
-    hefesto_bsp_out_path = home_dir[0] + "/HeFESTO_BSP_Output_Files"
-    hefesto_morb_out_path = home_dir[0] + "/HeFESTO_MORB_Output_Files"
+    hefesto_dir = home_dir[0] + "/" + hefestodir
 
-    os.chdir(hefesto_bsp_out_path)
+    output_folder = home_dir[0] + "/{}_Buoyancy_Outputs".format(runname)
 
-    print("\n[~] Initiating BSP HeFESTO output file parsing...\n")
+    if os.path.exists(output_folder):
+        shutil.rmtree(output_folder)
+    else:
+        pass
 
-    for i in os.listdir(os.getcwd()):
-        depth_list = []
-        bsp_rho_list = []
-        morb_rho_list = []
-        os.chdir(hefesto_bsp_out_path)
-        cross_depth_list = []
-        if "fort.58" in str(i):
-            print("[~] Found file: {}".format(i))
-            with open(i, 'r') as infile:
-                # print(infile)
-                # star_name = i[:-4]
-                star_name = i[16:-8]
-                # print(star_name)
-                readthefile = pd.read_fwf(infile, colspecs='infer')
-                depth_df = readthefile.iloc[:, [1]]
-                depth_list2 = pd.np.array(depth_df)
-                for list1 in depth_list2:
-                    for val in list1:
-                        depth_list.append(float(val))
-                bsp_rho = readthefile.iloc[:, [3]]
-                bsp_rho_list2 = pd.np.array(bsp_rho)
-                for list1 in bsp_rho_list2:
-                    for val in list1:
-                        bsp_rho_list.append(float(val))
-                infile.close()
-                # print(depth_df)
-                # print(bsp_rho)
-                os.chdir(hefesto_morb_out_path)
-                for z in os.listdir(os.getcwd()):
-                    if star_name in str(z):
-                        with open(z, 'r') as infile:
-                            readthefile = pd.read_fwf(infile, colspecs="infer")
-                            morb_rho = readthefile.iloc[:, [3]]
-                            morb_rho_list2 = pd.np.array(morb_rho)
-                            for list1 in morb_rho_list2:
-                                for val in list1:
-                                    morb_rho_list.append(float(val))
-                            infile.close()
-        rho_diff = [a - b for a, b in
-                    zip(morb_rho_list, bsp_rho_list)]  # the difference in density between BSP and crust
+    os.mkdir(output_folder)
 
-        crossover_index = bisect.bisect_left(rho_diff, 0)
-        # print(crossover_index)
-        # print(depth_list)
-        if crossover_index > 0:
-            cross_depth = depth_list[crossover_index]
-            cross_depth_list.append(float(cross_depth))
-            # print(cross_depth)
-        else:
-            cross_depth = 0
-            cross_depth_list.append(0.0)
-            # print(cross_depth)
+    bsp_and_morb_dir = [] # BSP dir at index 0, MORB dir at index 1
 
-        integrated_rho = []
-        for t in range(len(rho_diff) - 1):
-            x = depth_list[:(t + 2)]
-            y = rho_diff[:(t + 2)]
-            integrated_rho.append(inte.simps(y, x))
+    for i in os.listdir(hefesto_dir):
+        if "BSP" in str(i):
+            bsp_and_morb_dir.append(str(hefesto_dir + "/" + i + "/fort.58"))
+        elif "MORB" in str(i):
+            bsp_and_morb_dir.append(str(hefesto_dir + "/" + i + "/fort.58"))
+
+    if len(bsp_and_morb_dir) != 2:
+        print("\n[X] The directory '{}' is not formatted properly!".format(hefesto_dir))
+        time.sleep(2)
+        initialization()
+    else:
+        print("[~] Found BSP HeFESTo File directory: '{}'!".format(bsp_and_morb_dir[0]))
+        print("[~] Found MORB HeFESTo File directory: '{}'!".format(bsp_and_morb_dir[1]))
+
+    if "{}_Integrated_Values.csv".format(runname) in os.listdir(home_dir[0]):
+        os.remove("{}_Integrated_Values.csv".format(runname))
+
+    integrated_output_file = open("{}_Integrated_Values.csv".format(runname), 'a')
+    integrated_output_file.write("Star,Net Buoyant Force")
+
+
+    print("\n[~] Initiating HeFESTo output file parsing...")
+
+    for i in os.listdir(bsp_and_morb_dir[0]):
+        star_name = i[:-7]
+        for z in os.listdir(bsp_and_morb_dir[1]):
+            if star_name in str(z):
+                print("\n\n[~] Matched BSP and MORB files for star: {}".format(star_name))
+                os.chdir(bsp_and_morb_dir[0])
+                with open(i, 'r') as bsp_infile:
+                    os.chdir(bsp_and_morb_dir[1])
+                    with open(z, 'r') as morb_infile:
+                        bsp_readfile = pd.read_fwf(bsp_infile, colspecs='infer')
+                        morb_readfile = pd.read_fwf(morb_infile, colspecs='infer')
+                        bsp_df = bsp_readfile.iloc[:, [1, 3]]
+                        morb_df = morb_readfile.iloc[:, [1, 3]]
+                        depths = []
+                        bsp_rho = []
+                        morb_rho = []
+                        morb_minus_bsp_rho = []
+                        integrated_values = []
+                        for y in bsp_df['depth']:
+                            depths.append(float(y))
+                        for y in bsp_df['rho']:
+                            bsp_rho.append(float(y))
+                        for y in morb_df['rho']:
+                            morb_rho.append(float(y))
+                        bsp_infile.close()
+                        morb_infile.close()
+                        cur_index = 0
+                        for q in morb_rho:
+                            corresponding_bsp = bsp_rho[cur_index]
+                            morb_minus_bsp_rho.append(q - corresponding_bsp)
+                            cur_index += 1
+                        for t in range(len(morb_minus_bsp_rho) - 1):
+                            x = depths[:(t + 2)]
+                            y = morb_minus_bsp_rho[:(t + 2)]
+                            integrated_values.append(inte.simps(y, x))
+                        print("[~] Calculated a net bouyancy force of {} for star {}!".format(integrated_values[-1], star_name))
+                        os.chdir(home_dir[0])
+                        # integrated_vals_formatted = ",".join(str(i) for i in integrated_values)
+                        integrated_output_file.write("\n{},{}".format(star_name, str(integrated_values[-1])))
+
+    integrated_output_file.close()
+    print("\n[~] Net buoyant force output file '{}' available in '{}'!".format("{}_Integrated_Values.csv".format(runname), home_dir[0]))
 
 
 
@@ -1472,9 +1697,13 @@ def initialization():
     #     pass
     # outputfile = open("Star2Oxide_Output.csv", 'a')
     # time.sleep(1)
-    print("Enter '1' to raw_input [X/H] stellar abundances or '2' to raw_input stellar mole abundances.\nEnter 'o' for "
-          "more options.\n"
-          "To exit, enter 'e'.")
+    print("Enter:\n"
+          "'1' to raw_input [X/H] stellar abundances,\n"
+          "'2' to raw_input stellar mole abundances,\n"
+          "'3' to launch HeFESTo calculations\n"
+          "'4' to perform buoyancy force calculations & visualize\n"
+          "Enter 'o' for more options.\n"
+          "To exit, enter 'e'.\n")
     option1 = str(raw_input(">>> "))
     if option1 == '1':
         if "run_alphamelts.command" in os.listdir(os.getcwd()):
@@ -1508,9 +1737,38 @@ def initialization():
             print("\n[X] 'run_alphamelts.command' is not in the working directory!")
             time.sleep(2)
             initialization()
+    elif option1 == "3":
+        print("Please enter the name of the HeFESTo cumulative input file directory")
+        option3 = str(raw_input(">>> "))
+        print("What would you like to name this run?")
+        option4 = str(raw_input(">>> "))
+        if os.path.exists(home_dir[0] + "/{}".format(option3)):
+            runhefesto(infiledir=option3, actual_run=True, runname=option4)
+        else:
+            print("\n[X] '{}' does not exist in working directory: "
+                  "'{}'!".format((home_dir[0] + "/{}".format(option3)), home_dir[0]))
+            time.sleep(2)
+            pass
+    elif option1 == "4":
+        print("\nPlease enter the name of your HeFESTo Output File directory...")
+        option5 = raw_input(">>> ")
+        if not os.path.exists(option5):
+            print("That directory does not exist in the working directory!")
+            time.sleep(2)
+            initialization()
+        realform_dir = home_dir[0] + "/" + option5
+        # if len(os.listdir(realform_dir)) != 2:
+            # print("\n[X] Warning!  The HeFESTo directory '{}' is not properly formatted! (Length != 2, but is length {})".format(realform_dir, len(os.listdir(realform_dir))))
+            # for i in os.listdir(realform_dir):
+            #     print(i)
+            # time.sleep(2)
+            # initialization()
+        print("What would you like to name this run?")
+        option6 = raw_input(">>> ")
+        integrationloop2(hefestodir=option5, runname=option6)
     elif option1 == 'o':
         print("\nPlease enter the letter of your choice.  Would you like to: \na. Write a single file with MELTS raw_inputs\n"
-              "b. Write a library of MELTS raw_input files\nc. Write a library of HeFESTo raw_input files")
+              "b. Write a library of MELTS raw_input files\nc. Write a library of HeFESTo raw input files")
         raw_input_help = raw_input(">>> ")
         if raw_input_help == 'a':
             print("\nEnter '1' to raw_input [X/H] stellar abundances or '2' to raw_input stellar mole abundances.")
