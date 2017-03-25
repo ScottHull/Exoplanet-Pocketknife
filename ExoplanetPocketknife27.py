@@ -85,6 +85,14 @@ modelearth_mgo = 11.84409812845
 gale_mgo = 7.65154964069009
 mgo_fix = gale_mgo / modelearth_mgo
 
+depth_trans_zone = [0, 6, 19.7, 28.9, 36.4, 43.88, 51.34, 58.81, 66.36, 73.94, 81.5, 88.97, 96.45, 103.93, 111.41,
+                    118.92, 126.47, 134.01, 141.55, 149.09, 156.64, 164.18, 171.72, 179.27, 186.79, 194.27, 201.75,
+                    209.23, 216.71, 224.09, 231.4, 238.7, 246.01, 253.31, 260.62, 267.9, 275.16, 282.42, 289.68,
+                    296.94, 304.19, 311.41, 318.44, 325.47, 332.5, 339.53, 346.56, 353.59, 360.62, 367.66, 374.69,
+                    381.72, 388.75, 395.78, 402.78, 409.72, 416.67, 423.61, 430.56, 437.5, 444.44, 451.32, 457.89,
+                    464.47, 471.05, 477.63, 484.21, 490.79, 497.37, 503.75, 510, 516.25, 522.5, 528.75, 535, 541.25,
+                    547.5, 553.95, 560.53, 567.11, 573.68]
+
 inputfile_list = []
 home_dir = []
 
@@ -1616,14 +1624,14 @@ def integrationloop2(hefestodir, runname):
         time.sleep(2)
         initialization()
     else:
-        print("[~] Found BSP HeFESTo File directory: '{}'!".format(bsp_and_morb_dir[0]))
+        print("\n[~] Found BSP HeFESTo File directory: '{}'!".format(bsp_and_morb_dir[0]))
         print("[~] Found MORB HeFESTo File directory: '{}'!".format(bsp_and_morb_dir[1]))
 
     if "{}_Integrated_Values.csv".format(runname) in os.listdir(home_dir[0]):
         os.remove("{}_Integrated_Values.csv".format(runname))
 
     integrated_output_file = open("{}_Integrated_Values.csv".format(runname), 'a')
-    integrated_output_file.write("Star,Net Buoyant Force")
+    integrated_output_file.write("Star,Net Buoyant Force,{}".format(",".join(str(i) for i in depth_trans_zone)))
 
 
     print("\n[~] Initiating HeFESTo output file parsing...")
@@ -1662,14 +1670,80 @@ def integrationloop2(hefestodir, runname):
                         for t in range(len(morb_minus_bsp_rho) - 1):
                             x = depths[:(t + 2)]
                             y = morb_minus_bsp_rho[:(t + 2)]
-                            integrated_values.append(inte.simps(y, x))
+                            # integrated_values.append(inte.simps(y, x))
+                            integrated_values.append((inte.simps(y, x)) * gravity * plate_thickness)
                         print("[~] Calculated a net bouyancy force of {} for star {}!".format(integrated_values[-1], star_name))
                         os.chdir(home_dir[0])
-                        # integrated_vals_formatted = ",".join(str(i) for i in integrated_values)
-                        integrated_output_file.write("\n{},{}".format(star_name, str(integrated_values[-1])))
+                        integrated_vals_formatted = ",".join(str(i) for i in integrated_values)
+                        integrated_output_file.write("\n{},{},{}".format(star_name, str(integrated_values[-1]), integrated_vals_formatted))
 
     integrated_output_file.close()
     print("\n[~] Net buoyant force output file '{}' available in '{}'!".format("{}_Integrated_Values.csv".format(runname), home_dir[0]))
+
+
+    def visualize_outputs(integrated_output_file, runname):
+
+
+        os.chdir(home_dir[0])
+
+        print("\n[~] Preparing to plot integrated buoyancy force results...")
+
+        if os.path.exists("{}_Buoyancy_Force_Graphs".format(runname)):
+            shutil.rmtree("{}_Buoyancy_Force_Graphs".format(runname))
+
+        os.mkdir("{}_Buoyancy_Force_Graphs".format(runname))
+
+        loop_num = 1
+
+        integrated_output_file_df = pd.read_csv(integrated_output_file)
+        for row in integrated_output_file_df.index:
+            integrated_buoyant_vals = []
+            star_name = integrated_output_file_df['Star'][row]
+            print("\n[~] Plotting integrated buoyancy force results for star: {}".format(star_name))
+            if "{}.png".format(star_name) in os.listdir(home_dir[0]):
+                os.remove(home_dir[0] + "/{}_Buoyancy_Force_Graphs/{}.png".format(runname, star_name))
+            buoyant_force = integrated_output_file_df['Net Buoyant Force'][row]
+            with open(integrated_output_file, 'r') as inte_output:
+                reader = csv.reader(inte_output)
+                for i, row in enumerate(reader):
+                    if i == loop_num:
+                        for z in row[2:]:
+                            integrated_buoyant_vals.append(float(z))
+            loop_num += 1
+            inte_output.close()
+            plt.plot(depth_trans_zone[1:], integrated_buoyant_vals)
+            plt.title("{} Net Buoyant Forces".format(star_name))
+            plt.xlabel("Depth (km)")
+            plt.ylabel("Buoyant Force (N/m)")
+            plt.xlim(0, 574)
+            plt.grid()
+            plt.savefig("{}.png".format(star_name), format='png')
+            plt.close()
+            fdir = home_dir[0] + "/{}.png".format(star_name)
+            tdir = home_dir[0] + "/{}_Buoyancy_Force_Graphs/{}.png".format(runname, star_name)
+            shutil.move(fdir, tdir)
+        print("[~] Buoyant force plot for star {} available in directory '{}'!".format(star_name, tdir))
+        print("\n[~] Thank you for using the Exoplanet Pocketknife!\n[~] Returning to main menu...")
+        time.sleep(2)
+        initialization()
+
+
+    def decideplot():
+        print("\n[~] Would you like to graph the integrated buoyancy force results?\nPlease enter 'y' or 'n' for 'yes' or 'no', respectively")
+        plot_input = raw_input(">>> ")
+        if plot_input == 'y':
+            visualize_outputs(integrated_output_file="{}_Integrated_Values.csv".format(runname), runname=runname)
+        elif plot_input == 'n':
+            print("\n[~] Thank you for using the Exoplanet Pocketknife!\nReturning to the main menu...")
+            time.sleep(2)
+            initialization()
+        else:
+            print("\n[X] Oops!  That's not a valid command!")
+            time.sleep(2)
+            decideplot()
+
+    decideplot()
+
 
 
 
