@@ -2,7 +2,7 @@
 
 THE EXOPLANET POCKETKNIFE
 
-Written by Scott D. Hull, The Ohio State University (2015-2016)
+Written by Scott D. Hull, The Ohio State University (2015-2017)
 
 
 
