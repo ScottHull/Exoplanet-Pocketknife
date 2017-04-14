@@ -470,11 +470,17 @@ def logep(infile, infile_type, consol_file, init_path, library):
         print("[~] Launching alphaMELTS for {} Calculations...".format(infile_type))
         runmelts_bsp(infile_directory=infiledir, inputfilename=infile)
 
+        chem_outfile.close()
 
         if consol_file is True:
             file_consolidate(path=infiledir, init_path=init_path)
         else:
-            pass
+            file_consolidate(path=infiledir, init_path=init_path)
+            scrapebsp2(infiledirectory=(home_dir[0] + "/{}_Completed_BSP_MELTS_Files".format(infile[:-4])),
+                       inputfilename=infile)
+            bsprecalc(bspmeltsfilesdir=(home_dir[0] + "{}_Completed_BSP_MELTS_Files".format(infile[:-4])),
+                      infilename=infile, alloy_mass_infile="alloy_mass.csv",
+                      bsp_chem_infile="{}_{}_ConsolidatedChemFile.csv".format(infile[:-4], infile_type))
 
     # except:
     #     # raise Exception
@@ -1635,6 +1641,8 @@ def integrationloop2(hefestodir, runname):
 
 
     print("\n[~] Initiating HeFESTo output file parsing...")
+
+    # planet_grav = (6.674*10**-11) * (planet_mass / planet_radius**2)
 
     for i in os.listdir(bsp_and_morb_dir[0]):
         star_name = i[:-7]
