@@ -21,14 +21,14 @@ morb_run = False
 gravity = 9.8
 plate_thickness = 10.0
 
-na_atwt = 22.9898
-mg_atwt = 24.3050
-al_atwt = 26.9815
+na_atwt = 22.98976928
+mg_atwt = 24.305
+al_atwt = 26.9815386
 si_atwt = 28.0855
-ca_atwt = 40.0780
-ti_atwt = 47.8670
+ca_atwt = 40.078
+ti_atwt = 47.867
 cr_atwt = 51.9961
-fe_atwt = 55.8450
+fe_atwt = 55.845
 ni_atwt = 58.6934
 
 na2o_molwt = 61.9785
@@ -715,6 +715,22 @@ def molepct(infile, infile_type, consol_file, init_path, library):
 
 def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
 
+
+
+    if "{}_BSP_Composition.csv".format(infilename[:-4]) in os.listdir(home_dir[0]):
+        os.remove(home_dir[0] + "/{}_BSP_Composition.csv".format(infilename[:-4]))
+
+    bsp_chemfile = open("{}_BSP_Composition.csv".format(infilename[:-4]), 'a')
+    bsp_comp_header = "Star,FeO,Na2O,MgO,Al2O3,SiO2,CaO,TiO2,Cr2O3"
+    bsp_chemfile.write("{}\n".format(bsp_comp_header))
+
+
+    if "bsp_debug.csv" in os.listdir(os.getcwd()):
+        os.remove("bsp_debug.csv")
+
+    bsp_debug = open("bsp_debug.csv", 'a')
+
+
     if os.path.exists(home_dir[0] + "/MELTS_MORB_Input_Files"):
         shutil.rmtree(home_dir[0] + "/MELTS_MORB_Input_Files")
     else:
@@ -742,6 +758,10 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
         tio2_in = df_chem['TiO2'][row]
         cr2o3_in = df_chem['Cr2O3'][row]
 
+        in1_header = "1,feo,na2o,mgo,al2o3,sio2,cao,nio,tio2,cr2o3"
+        in1 = ",{},{},{},{},{},{},{},{},{}".format(feo_in, na2o_in, mgo_in, al2o3_in, sio2_in, cao_in, nio_in, tio2_in, cr2o3_in)
+        bsp_debug.write("{}\n{}\n".format(in1_header, in1))
+
         for row in df_alloy.index:
             star_name2 = df_alloy['star'][row]
             alloy_mass = df_alloy['alloy mass'][row]
@@ -758,15 +778,25 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
                 tio2_moles = tio2_in / tio2_molwt
                 cr2o3_moles = cr2o3_in / cr2o3_molwt
 
-                fe_moles = feo_moles / num_feo_cations
-                na_moles = na2o_moles / num_na2o_cations
-                mg_moles = mgo_moles / num_mgo_cations
-                al_moles = al2o3_moles / num_al2o3_cations
-                si_moles = sio2_moles / num_sio2_cations
-                ca_moles = cao_moles / num_cao_cations
-                ni_moles = nio_moles / num_nio_cations
-                ti_moles = tio2_moles / num_tio2_cations
-                cr_moles = cr2o3_moles / num_cr2o3_cations
+                in2_header = "2,feo,na2o,mgo,al2o3,sio2,cao,nio,tio2,cr2o3"
+                in2 = ",{},{},{},{},{},{},{},{},{}".format(feo_moles, na2o_moles, mgo_moles, al2o3_moles, sio2_moles, cao_moles, nio_moles, tio2_moles, cr2o3_moles)
+                bsp_debug.write("{}\n{}\n".format(in2_header, in2))
+
+
+                fe_moles = feo_moles * num_feo_cations
+                na_moles = na2o_moles * num_na2o_cations
+                mg_moles = mgo_moles * num_mgo_cations
+                al_moles = al2o3_moles * num_al2o3_cations
+                si_moles = sio2_moles * num_sio2_cations
+                ca_moles = cao_moles * num_cao_cations
+                ni_moles = nio_moles * num_nio_cations
+                ti_moles = tio2_moles * num_tio2_cations
+                cr_moles = cr2o3_moles * num_cr2o3_cations
+
+                in3_header = "3,fe,na,mg,al,si,ca,ni,ti,cr"
+                in3 = ",{},{},{},{},{},{},{},{},{}".format(fe_moles, na_moles, mg_moles, al_moles,
+                        si_moles, ca_moles, ni_moles, ti_moles, cr_moles)
+                bsp_debug.write("{}\n{}\n".format(in3_header, in3))
 
                 fe_mass = fe_moles * fe_atwt
                 na_mass = na_moles * na_atwt
@@ -778,25 +808,36 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
                 ti_mass = ti_moles * ti_atwt
                 cr_mass = cr_moles * cr_atwt
 
+                in4_header = "4,fe,na,mg,al,si,ca,ni,ti,cr"
+                in4 = ",{},{},{},{},{},{},{},{},{}".format(fe_mass, na_mass, mg_mass, al_mass,
+                            si_mass, ca_mass, ni_mass, ti_mass, cr_mass)
+                bsp_debug.write("{}\n{}\n".format(in4_header, in4))
+
                 alloy_subt_ni_mass = alloy_mass - ni_mass
                 if alloy_subt_ni_mass < 0:
-                    print("NI MASS ERROR!")
+                    print("Ni MASS ERROR!")
                     sys.exit()
                 else:
                     pass
 
+
                 new_mass_fe = fe_mass - alloy_subt_ni_mass
 
                 if new_mass_fe < 0:
-                    print("FE MASS ERROR!")
+                    print("Fe MASS ERROR!")
                     sys.exit()
 
                 remaining_moles_fe = new_mass_fe / fe_atwt
                 remaining_moles_feo = remaining_moles_fe * num_feo_cations
                 remaining_mass_feo = remaining_moles_feo * feo_molwt
 
-                unnormalized_sum = (remaining_mass_feo + na_mass + mg_mass + al_mass + si_mass + ca_mass +
-                                    ti_mass + cr_mass)
+                in5_header = "5,alloy_but_ni_mass,new_mass_fe,remaining_moles_fe,remaining_moles_feo,remaining_mass_feo"
+                in5 = ",{},{},{},{},{}".format(alloy_subt_ni_mass, new_mass_fe, remaining_moles_fe, remaining_moles_feo,
+                                               remaining_mass_feo)
+                bsp_debug.write("{}\n{}\n".format(in5_header, in5))
+
+                unnormalized_sum = (remaining_mass_feo + na2o_in + mgo_in + al2o3_in + sio2_in + cao_in +
+                                    tio2_in + cr2o3_in)
 
                 norm_feo = remaining_mass_feo / unnormalized_sum * 100.0
                 norm_na2o = na2o_in / unnormalized_sum * 100.0
@@ -807,6 +848,17 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
                 norm_tio2 = tio2_in / unnormalized_sum * 100.0
                 norm_cr2o3 = cr2o3_in / unnormalized_sum * 100.0
                 norm_sum = norm_feo + norm_na2o + norm_mgo + norm_al2o3 + norm_sio2 + norm_cao + norm_tio2 + norm_cr2o3
+
+                in6_header = "6,feo,na2o,mgo,al2o3,sio2,cao,tio2,cr2o3,unnorm_sum,norm_sum"
+                in6 = ",{},{},{},{},{},{},{},{},{},{}".format(norm_feo, norm_na2o, norm_mgo, norm_al2o3,
+                        norm_sio2, norm_cao, norm_tio2, norm_cr2o3, unnormalized_sum, norm_sum)
+                bsp_debug.write("{}\n{}\n".format(in6_header, in6))
+
+                bsp_comp = "{},{},{},{},{},{},{},{},{}".format(star_name, norm_feo, norm_na2o, norm_mgo, norm_al2o3,
+                        norm_sio2, norm_cao, norm_tio2, norm_cr2o3)
+                bsp_chemfile.write("{}\n".format(bsp_comp))
+
+
 
 
                 # print(norm_feo)
@@ -847,7 +899,10 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
                 tdir = home_dir[0] + "/MELTS_MORB_Input_Files/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
                 shutil.move(fdir, tdir)
 
-    hefestofilewriter_bsp(bulkfile=bsp_chem_infile, infilename=infilename)
+    bsp_debug.close()
+    bsp_chemfile.close()
+
+    hefestofilewriter_bsp(bulkfile=(home_dir[0] + "/{}_BSP_Composition.csv".format(infilename[:-4])), infilename=infilename)
     runmelts_morb(infile_directory=(home_dir[0] + "/MELTS_MORB_Input_Files"), inputfilename=infilename[:-4])
 
 
@@ -1188,7 +1243,7 @@ def runhefesto(infiledir, actual_run, runname):
 
             for i in os.listdir(bsp_dir):
 
-                star_name = i[:-24]
+                star_name = i[:-23]
 
                 os.chdir(home_dir[0])
                 if "fort.66" in os.listdir(os.getcwd()):
@@ -1256,6 +1311,8 @@ def runhefesto(infiledir, actual_run, runname):
                     shutil.move("fort.59", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
                 if "control" in os.listdir(os.getcwd()):
                     os.remove("control")
+
+                time.sleep(2)
 
             print("\b[~] Initiating HeFESTo crust calculations...")
 
@@ -1456,6 +1513,11 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
     else:
         pass
 
+    if "morb_debug.csv" in os.listdir(os.getcwd()):
+        os.remove("morb_debug.csv")
+
+    morb_debug = open("morb_debug.csv", 'a')
+
     morb_recalc_outfile = open("{}_MORB_Recalc_Bulkfile.csv".format(infilename), 'a')
     morb_recalc_outfile_header = "Star,Pressure,Temperature,Mass,SiO2,TiO2,Al2O3,Cr2O3,FeO,MgO,CaO,Na2O,SUM\n"
     morb_recalc_outfile.write(morb_recalc_outfile_header)
@@ -1477,6 +1539,12 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         na2o_in = float(df_morb_chem["Na2O"][row])
         chem_in_sum = (sio2_in + tio2_in + al2o3_in + fe2o3_in + cr2o3_in + feo_in + mgo_in + cao_in + na2o_in)
 
+        md1_header = "1,sio2,tio2,al2o3,fe2o3,cr2o3,cr2o3,feo,mgo,cao,na2o"
+        md1 = ",{},{},{},{},{},{},{},{},{}".format(sio2_in, tio2_in, al2o3_in, fe2o3_in,
+                            cr2o3_in, feo_in, mgo_in, cao_in, na2o_in)
+        morb_debug.write("{}\n{}\n".format(md1_header, md1))
+
+
         wt_sio2_in = (sio2_in/100.0) * mass
         wt_tio2_in = (tio2_in / 100.0) * mass
         wt_al2o3_in = (al2o3_in / 100.0) * mass
@@ -1486,8 +1554,13 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         wt_mgo_in = (mgo_in / 100.0) * mass
         wt_cao_in = (cao_in / 100.0) * mass
         wt_na2o_in = (na2o_in / 100.0) * mass
-        sum_wt_in = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + wt_fe2o3_in + wt_cr2o3_in + wt_feo_in + 
+        sum_wt_in = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + wt_fe2o3_in + wt_cr2o3_in + wt_feo_in +
                      wt_mgo_in + wt_cao_in + wt_na2o_in)
+
+        md2_header = "2,sio2,tio2,al2o3,fe2o3,cr2o3,feo,mgo,cao,na2o"
+        md2 = ",{},{},{},{},{},{},{},{},{}".format(wt_sio2_in, wt_tio2_in, wt_al2o3_in, wt_fe2o3_in,
+                    wt_cr2o3_in, wt_feo_in, wt_mgo_in, wt_cao_in, wt_na2o_in)
+        morb_debug.write("{}\n{}\n".format(md2_header, md2))
 
         sio2_moles = wt_sio2_in / sio2_molwt
         tio2_moles = wt_tio2_in / tio2_molwt
@@ -1501,6 +1574,11 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         sum_oxide_moles = (sio2_moles + tio2_moles + al2o3_moles + fe2o3_moles + cr2o3_moles + feo_moles + 
                            mgo_moles + cao_moles + na2o_moles)
 
+        md3_header = "3,sio2,tio2,al2o3,fe2o3,feo,mgo,cao,na2o"
+        md3 = ",{},{},{},{},{},{},{},{},{}".format(sio2_moles, tio2_moles, al2o3_moles, fe2o3_moles,
+                cr2o3_moles, feo_moles, mgo_moles, cao_moles, na2o_moles)
+        morb_debug.write("{}\n{}\n".format(md3_header, md3))
+
         si_cations = sio2_moles * num_sio2_cations
         ti_cations = tio2_moles * num_tio2_cations
         al_cations = al2o3_moles * num_al2o3_cations
@@ -1513,10 +1591,21 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         sum_cations = (si_cations + ti_cations + al_cations + fe_fe2o3_cations + cr_cations + fe_feo_cations + mg_cations + 
                           ca_cations + na_cations)
 
+        md4_header = "4,si,ti,al,fe,cr,fe,mg,ca,na,sum"
+        md4 = ",{},{},{},{},{},{},{},{},{},{}".format(si_cations, ti_cations, al_cations, fe_fe2o3_cations, cr_cations,
+                fe_feo_cations, mg_cations, na_cations, na_cations, sum_cations)
+        morb_debug.write("{}\n{}\n".format(md4_header, md4))
+
         # fe2o3 --> feo recalc
         total_mol_fe = (fe_feo_cations + fe_fe2o3_cations)
         total_wt_fe = total_mol_fe * fe_atwt
         total_wt_feo = total_mol_fe * feo_molwt
+
+        md5_header = "5,total_mol_fe,total_wt_fe,total_wt_feo"
+        md5 = ",{},{},{}".format(total_mol_fe, total_wt_fe, total_wt_feo)
+        morb_debug.write("{}\n{}\n".format(md5_header, md5))
+
+
 
         # unnormalized wt%
         unnorm_sum = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + total_wt_feo + 
@@ -1529,15 +1618,24 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         norm_wt_feo = total_wt_feo / unnorm_sum
         norm_wt_cr2o3 = wt_cr2o3_in / unnorm_sum
         norm_wt_mgo = wt_mgo_in / unnorm_sum
-        norm_wt_cao = wt_mgo_in / unnorm_sum
+        norm_wt_cao = wt_cao_in / unnorm_sum
         norm_wt_na2o = wt_na2o_in / unnorm_sum
         norm_sum_nomgofix = (norm_wt_sio2 + norm_wt_tio2 + norm_wt_al2o3 + norm_wt_feo + norm_wt_cr2o3 + norm_wt_mgo +
                                 norm_wt_cao + norm_wt_na2o)
+
+        md6_header = "6,sio2,tio2,al2o3,feo,cr2o3,mgo,cao,na2o,sum"
+        md6 = ",{},{},{},{},{},{},{},{},{}".format(norm_wt_sio2, norm_wt_tio2, norm_wt_al2o3,
+                norm_wt_feo, norm_wt_cr2o3, norm_wt_mgo, norm_wt_cao, norm_wt_na2o, norm_sum_nomgofix)
+        morb_debug.write("{}\n{}\n".format(md6_header, md6))
 
         # mgo fix
         norm_wt_mgo_fix = norm_wt_mgo * mgo_fix
         norm_sum_mgofix = (norm_wt_sio2 + norm_wt_tio2 + norm_wt_al2o3 + norm_wt_feo + norm_wt_cr2o3 + norm_wt_mgo_fix +
                                 norm_wt_cao + norm_wt_na2o)
+
+        md7_header = "7,mgo_fix,norm_wt_mgo_fx,norm_sum_mgofix"
+        md7 = ",{},{},{}".format(mgo_fix, norm_wt_mgo_fix, norm_sum_mgofix)
+        morb_debug.write("{}\n{}\n".format(md7_header, md7))
 
         # normaized oxide wt% abundances --- what we want!
 
@@ -1551,12 +1649,18 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
         na2o_wtpct = (norm_wt_na2o / norm_sum_mgofix) * 100
         sum_wtpct = (sio2_wtpct + tio2_wtpct + al2o3_wtpct + feo_wtpct + cr2o3_wtpct + mgo_wtpct + cao_wtpct + na2o_wtpct)
 
+        md8_header = "8,sio2,tio2,al2o3,feo,cr2o3,mgo,cao,na2o,sum"
+        md8 = ",{},{},{},{},{},{},{},{},{}".format(sio2_wtpct, tio2_wtpct, al2o3_wtpct, feo_wtpct,
+                        cr2o3_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct, sum_wtpct)
+        morb_debug.write("{}\n{}\n".format(md8_header, md8))
+
         chem_to_outfile = "{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(star_name, pressure, temperature, mass, sio2_wtpct,
                                 tio2_wtpct, al2o3_wtpct, cr2o3_wtpct, feo_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct, sum_wtpct)
 
         morb_recalc_outfile.write(chem_to_outfile)
 
 
+    morb_debug.close()
     morb_recalc_outfile.close()
 
     hefestofilewriter_morb(bulkfile="{}_MORB_Recalc_Bulkfile.csv".format(infilename), infilename=infilename)
@@ -1771,7 +1875,7 @@ def initialization():
     print("This code is meant to work in conjunction with the methods described in 'The Prevalence of"
           " Exoplanetary Plate Tectonics' (Unterborn et. al 2017).\nPlease refer to the article and "
           "the documentation for more information.\n"
-          "\n*Any use of this code or the methods described in Unterborn et al. 2016 requires proper"
+          "\n*Any use of this code or the methods described in Unterborn et al. 2017 requires proper"
           " citation.*\n\n")
     # if "Star2Oxide_Output.csv" in os.listdir(os.getcwd()):
     #     os.remove("Star2Oxide_Output.csv")
