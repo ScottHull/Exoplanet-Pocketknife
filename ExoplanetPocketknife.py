@@ -745,159 +745,162 @@ def bsprecalc(bspmeltsfilesdir, infilename, alloy_mass_infile, bsp_chem_infile):
     df_chem = pd.read_csv(bsp_chem_infile)
     df_alloy = pd.read_csv(alloy_mass_infile)
     for row in df_chem.index:
-        # print(df_chem)
-        # print(df_chem.index)
-        star_name = df_chem['Star'][row]
-        feo_in = df_chem['FeO'][row]
-        na2o_in = df_chem['Na2O'][row]
-        mgo_in = df_chem['MgO'][row]
-        al2o3_in = df_chem['Al2O3'][row]
-        sio2_in = df_chem['SiO2'][row]
-        cao_in = df_chem['CaO'][row]
-        nio_in = df_chem['NiO'][row]
-        tio2_in = df_chem['TiO2'][row]
-        cr2o3_in = df_chem['Cr2O3'][row]
+        try:
+            # print(df_chem)
+            # print(df_chem.index)
+            star_name = df_chem['Star'][row]
+            feo_in = df_chem['FeO'][row]
+            na2o_in = df_chem['Na2O'][row]
+            mgo_in = df_chem['MgO'][row]
+            al2o3_in = df_chem['Al2O3'][row]
+            sio2_in = df_chem['SiO2'][row]
+            cao_in = df_chem['CaO'][row]
+            nio_in = df_chem['NiO'][row]
+            tio2_in = df_chem['TiO2'][row]
+            cr2o3_in = df_chem['Cr2O3'][row]
 
-        in1_header = "1,feo,na2o,mgo,al2o3,sio2,cao,nio,tio2,cr2o3"
-        in1 = ",{},{},{},{},{},{},{},{},{}".format(feo_in, na2o_in, mgo_in, al2o3_in, sio2_in, cao_in, nio_in, tio2_in, cr2o3_in)
-        bsp_debug.write("{}\n{}\n".format(in1_header, in1))
+            in1_header = "1,feo,na2o,mgo,al2o3,sio2,cao,nio,tio2,cr2o3"
+            in1 = ",{},{},{},{},{},{},{},{},{}".format(feo_in, na2o_in, mgo_in, al2o3_in, sio2_in, cao_in, nio_in, tio2_in, cr2o3_in)
+            bsp_debug.write("{}\n{}\n".format(in1_header, in1))
 
-        for row in df_alloy.index:
-            star_name2 = df_alloy['star'][row]
-            alloy_mass = df_alloy['alloy mass'][row]
+            for row in df_alloy.index:
+                star_name2 = df_alloy['star'][row]
+                alloy_mass = df_alloy['alloy mass'][row]
 
-            if star_name == star_name2:
+                if star_name == star_name2:
 
-                feo_moles = feo_in / feo_molwt
-                na2o_moles = na2o_in / na2o_molwt
-                mgo_moles = mgo_in / mgo_molwt
-                al2o3_moles = al2o3_in / al2o3_molwt
-                sio2_moles = sio2_in / sio2_molwt
-                cao_moles = cao_in / cao_molwt
-                nio_moles = nio_in / nio_molwt
-                tio2_moles = tio2_in / tio2_molwt
-                cr2o3_moles = cr2o3_in / cr2o3_molwt
+                    feo_moles = feo_in / feo_molwt
+                    na2o_moles = na2o_in / na2o_molwt
+                    mgo_moles = mgo_in / mgo_molwt
+                    al2o3_moles = al2o3_in / al2o3_molwt
+                    sio2_moles = sio2_in / sio2_molwt
+                    cao_moles = cao_in / cao_molwt
+                    nio_moles = nio_in / nio_molwt
+                    tio2_moles = tio2_in / tio2_molwt
+                    cr2o3_moles = cr2o3_in / cr2o3_molwt
 
-                in2_header = "2,feo,na2o,mgo,al2o3,sio2,cao,nio,tio2,cr2o3"
-                in2 = ",{},{},{},{},{},{},{},{},{}".format(feo_moles, na2o_moles, mgo_moles, al2o3_moles, sio2_moles, cao_moles, nio_moles, tio2_moles, cr2o3_moles)
-                bsp_debug.write("{}\n{}\n".format(in2_header, in2))
-
-
-                fe_moles = feo_moles * num_feo_cations
-                na_moles = na2o_moles * num_na2o_cations
-                mg_moles = mgo_moles * num_mgo_cations
-                al_moles = al2o3_moles * num_al2o3_cations
-                si_moles = sio2_moles * num_sio2_cations
-                ca_moles = cao_moles * num_cao_cations
-                ni_moles = nio_moles * num_nio_cations
-                ti_moles = tio2_moles * num_tio2_cations
-                cr_moles = cr2o3_moles * num_cr2o3_cations
-
-                in3_header = "3,fe,na,mg,al,si,ca,ni,ti,cr"
-                in3 = ",{},{},{},{},{},{},{},{},{}".format(fe_moles, na_moles, mg_moles, al_moles,
-                        si_moles, ca_moles, ni_moles, ti_moles, cr_moles)
-                bsp_debug.write("{}\n{}\n".format(in3_header, in3))
-
-                fe_mass = fe_moles * fe_atwt
-                na_mass = na_moles * na_atwt
-                mg_mass = mg_moles * mg_atwt
-                al_mass = al_moles * al_atwt
-                si_mass = si_moles * si_atwt
-                ca_mass = ca_moles * ca_atwt
-                ni_mass = ni_moles * ni_atwt
-                ti_mass = ti_moles * ti_atwt
-                cr_mass = cr_moles * cr_atwt
-
-                in4_header = "4,fe,na,mg,al,si,ca,ni,ti,cr"
-                in4 = ",{},{},{},{},{},{},{},{},{}".format(fe_mass, na_mass, mg_mass, al_mass,
-                            si_mass, ca_mass, ni_mass, ti_mass, cr_mass)
-                bsp_debug.write("{}\n{}\n".format(in4_header, in4))
-
-                alloy_subt_ni_mass = alloy_mass - ni_mass
-                if alloy_subt_ni_mass < 0:
-                    print("Ni MASS ERROR!")
-                    sys.exit()
-                else:
-                    pass
+                    in2_header = "2,feo,na2o,mgo,al2o3,sio2,cao,nio,tio2,cr2o3"
+                    in2 = ",{},{},{},{},{},{},{},{},{}".format(feo_moles, na2o_moles, mgo_moles, al2o3_moles, sio2_moles, cao_moles, nio_moles, tio2_moles, cr2o3_moles)
+                    bsp_debug.write("{}\n{}\n".format(in2_header, in2))
 
 
-                new_mass_fe = fe_mass - alloy_subt_ni_mass
+                    fe_moles = feo_moles * num_feo_cations
+                    na_moles = na2o_moles * num_na2o_cations
+                    mg_moles = mgo_moles * num_mgo_cations
+                    al_moles = al2o3_moles * num_al2o3_cations
+                    si_moles = sio2_moles * num_sio2_cations
+                    ca_moles = cao_moles * num_cao_cations
+                    ni_moles = nio_moles * num_nio_cations
+                    ti_moles = tio2_moles * num_tio2_cations
+                    cr_moles = cr2o3_moles * num_cr2o3_cations
 
-                if new_mass_fe < 0:
-                    print("Fe MASS ERROR!")
-                    sys.exit()
+                    in3_header = "3,fe,na,mg,al,si,ca,ni,ti,cr"
+                    in3 = ",{},{},{},{},{},{},{},{},{}".format(fe_moles, na_moles, mg_moles, al_moles,
+                            si_moles, ca_moles, ni_moles, ti_moles, cr_moles)
+                    bsp_debug.write("{}\n{}\n".format(in3_header, in3))
 
-                remaining_moles_fe = new_mass_fe / fe_atwt
-                remaining_moles_feo = remaining_moles_fe * num_feo_cations
-                remaining_mass_feo = remaining_moles_feo * feo_molwt
+                    fe_mass = fe_moles * fe_atwt
+                    na_mass = na_moles * na_atwt
+                    mg_mass = mg_moles * mg_atwt
+                    al_mass = al_moles * al_atwt
+                    si_mass = si_moles * si_atwt
+                    ca_mass = ca_moles * ca_atwt
+                    ni_mass = ni_moles * ni_atwt
+                    ti_mass = ti_moles * ti_atwt
+                    cr_mass = cr_moles * cr_atwt
 
-                in5_header = "5,alloy_but_ni_mass,new_mass_fe,remaining_moles_fe,remaining_moles_feo,remaining_mass_feo"
-                in5 = ",{},{},{},{},{}".format(alloy_subt_ni_mass, new_mass_fe, remaining_moles_fe, remaining_moles_feo,
-                                               remaining_mass_feo)
-                bsp_debug.write("{}\n{}\n".format(in5_header, in5))
+                    in4_header = "4,fe,na,mg,al,si,ca,ni,ti,cr"
+                    in4 = ",{},{},{},{},{},{},{},{},{}".format(fe_mass, na_mass, mg_mass, al_mass,
+                                si_mass, ca_mass, ni_mass, ti_mass, cr_mass)
+                    bsp_debug.write("{}\n{}\n".format(in4_header, in4))
 
-                unnormalized_sum = (remaining_mass_feo + na2o_in + mgo_in + al2o3_in + sio2_in + cao_in +
-                                    tio2_in + cr2o3_in)
-
-                norm_feo = remaining_mass_feo / unnormalized_sum * 100.0
-                norm_na2o = na2o_in / unnormalized_sum * 100.0
-                norm_mgo = mgo_in / unnormalized_sum * 100.0
-                norm_al2o3 = al2o3_in / unnormalized_sum * 100.0
-                norm_sio2 = sio2_in / unnormalized_sum * 100.0
-                norm_cao = cao_in / unnormalized_sum * 100.0
-                norm_tio2 = tio2_in / unnormalized_sum * 100.0
-                norm_cr2o3 = cr2o3_in / unnormalized_sum * 100.0
-                norm_sum = norm_feo + norm_na2o + norm_mgo + norm_al2o3 + norm_sio2 + norm_cao + norm_tio2 + norm_cr2o3
-
-                in6_header = "6,feo,na2o,mgo,al2o3,sio2,cao,tio2,cr2o3,unnorm_sum,norm_sum"
-                in6 = ",{},{},{},{},{},{},{},{},{},{}".format(norm_feo, norm_na2o, norm_mgo, norm_al2o3,
-                        norm_sio2, norm_cao, norm_tio2, norm_cr2o3, unnormalized_sum, norm_sum)
-                bsp_debug.write("{}\n{}\n".format(in6_header, in6))
-
-                bsp_comp = "{},{},{},{},{},{},{},{},{}".format(star_name, norm_feo, norm_na2o, norm_mgo, norm_al2o3,
-                        norm_sio2, norm_cao, norm_tio2, norm_cr2o3)
-                bsp_chemfile.write("{}\n".format(bsp_comp))
-
-
+                    alloy_subt_ni_mass = alloy_mass - ni_mass
+                    if alloy_subt_ni_mass < 0:
+                        print("Ni MASS ERROR!")
+                        sys.exit()
+                    else:
+                        pass
 
 
-                # print(norm_feo)
-                # print(norm_sum)
-                #
-                # if norm_sum != 100.0:
-                #     print("ERROR!  NORMALIZED SUM IS NOT 100.0!")
-                #     sys.exit()
+                    new_mass_fe = fe_mass - alloy_subt_ni_mass
 
-                title = "Title: {}".format(star_name)
-                bsp_feo = "Initial Composition: FeO {}".format(norm_feo)
-                bsp_na2o = "Initial Composition: Na2O {}".format(norm_na2o)
-                bsp_mgo = "Initial Composition: MgO {}".format(norm_mgo)
-                bsp_al2o3 = "Initial Composition: Al2O3 {}".format(norm_al2o3)
-                bsp_sio2 = "Initial Composition: SiO2 {}".format(norm_sio2)
-                bsp_cao = "Initial Composition: CaO {}".format(norm_cao)
-                bsp_tio2 = "Initial Composition: TiO2 {}".format(norm_tio2)
-                bsp_cr2o3 = "Initial Composition: Cr2O3 {}".format(norm_cr2o3)
-                init_temp = 'Initial Temperature: 2000'
-                final_temp = "Final Temperature: 800"
-                inc_temp = "Increment Temperature: -5"
-                init_press = "Initial Pressure: 10000"
-                final_press = "Final Pressure: 10000"
-                dpdt = "dp/dt: 0"
-                mode = "Mode: Fractionate Solids"
-                mode2 = "Mode: Isobaric"
+                    if new_mass_fe < 0:
+                        print("Fe MASS ERROR!")
+                        sys.exit()
 
-                melts_morb_input_file_vars = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
-                    title,
-                    bsp_feo, bsp_na2o, bsp_mgo, bsp_al2o3, bsp_sio2, bsp_cao, bsp_tio2, bsp_cr2o3,
-                    init_temp, init_temp, final_temp, inc_temp, init_press, final_press, dpdt, mode, mode2)
+                    remaining_moles_fe = new_mass_fe / fe_atwt
+                    remaining_moles_feo = remaining_moles_fe * num_feo_cations
+                    remaining_mass_feo = remaining_moles_feo * feo_molwt
 
-                morb_outfile = open("{}_MELTS_{}_INFILE.txt".format(star_name, "MORB"), 'w')
-                morb_outfile.write(melts_morb_input_file_vars)
-                morb_outfile.close()
+                    in5_header = "5,alloy_but_ni_mass,new_mass_fe,remaining_moles_fe,remaining_moles_feo,remaining_mass_feo"
+                    in5 = ",{},{},{},{},{}".format(alloy_subt_ni_mass, new_mass_fe, remaining_moles_fe, remaining_moles_feo,
+                                                   remaining_mass_feo)
+                    bsp_debug.write("{}\n{}\n".format(in5_header, in5))
 
-                fdir = os.getcwd() + "/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
-                tdir = home_dir[0] + "/MELTS_MORB_Input_Files/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
-                shutil.move(fdir, tdir)
+                    unnormalized_sum = (remaining_mass_feo + na2o_in + mgo_in + al2o3_in + sio2_in + cao_in +
+                                        tio2_in + cr2o3_in)
+
+                    norm_feo = remaining_mass_feo / unnormalized_sum * 100.0
+                    norm_na2o = na2o_in / unnormalized_sum * 100.0
+                    norm_mgo = mgo_in / unnormalized_sum * 100.0
+                    norm_al2o3 = al2o3_in / unnormalized_sum * 100.0
+                    norm_sio2 = sio2_in / unnormalized_sum * 100.0
+                    norm_cao = cao_in / unnormalized_sum * 100.0
+                    norm_tio2 = tio2_in / unnormalized_sum * 100.0
+                    norm_cr2o3 = cr2o3_in / unnormalized_sum * 100.0
+                    norm_sum = norm_feo + norm_na2o + norm_mgo + norm_al2o3 + norm_sio2 + norm_cao + norm_tio2 + norm_cr2o3
+
+                    in6_header = "6,feo,na2o,mgo,al2o3,sio2,cao,tio2,cr2o3,unnorm_sum,norm_sum"
+                    in6 = ",{},{},{},{},{},{},{},{},{},{}".format(norm_feo, norm_na2o, norm_mgo, norm_al2o3,
+                            norm_sio2, norm_cao, norm_tio2, norm_cr2o3, unnormalized_sum, norm_sum)
+                    bsp_debug.write("{}\n{}\n".format(in6_header, in6))
+
+                    bsp_comp = "{},{},{},{},{},{},{},{},{}".format(star_name, norm_feo, norm_na2o, norm_mgo, norm_al2o3,
+                            norm_sio2, norm_cao, norm_tio2, norm_cr2o3)
+                    bsp_chemfile.write("{}\n".format(bsp_comp))
+
+
+
+
+                    # print(norm_feo)
+                    # print(norm_sum)
+                    #
+                    # if norm_sum != 100.0:
+                    #     print("ERROR!  NORMALIZED SUM IS NOT 100.0!")
+                    #     sys.exit()
+
+                    title = "Title: {}".format(star_name)
+                    bsp_feo = "Initial Composition: FeO {}".format(norm_feo)
+                    bsp_na2o = "Initial Composition: Na2O {}".format(norm_na2o)
+                    bsp_mgo = "Initial Composition: MgO {}".format(norm_mgo)
+                    bsp_al2o3 = "Initial Composition: Al2O3 {}".format(norm_al2o3)
+                    bsp_sio2 = "Initial Composition: SiO2 {}".format(norm_sio2)
+                    bsp_cao = "Initial Composition: CaO {}".format(norm_cao)
+                    bsp_tio2 = "Initial Composition: TiO2 {}".format(norm_tio2)
+                    bsp_cr2o3 = "Initial Composition: Cr2O3 {}".format(norm_cr2o3)
+                    init_temp = 'Initial Temperature: 2000'
+                    final_temp = "Final Temperature: 800"
+                    inc_temp = "Increment Temperature: -5"
+                    init_press = "Initial Pressure: 10000"
+                    final_press = "Final Pressure: 10000"
+                    dpdt = "dp/dt: 0"
+                    mode = "Mode: Fractionate Solids"
+                    mode2 = "Mode: Isobaric"
+
+                    melts_morb_input_file_vars = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
+                        title,
+                        bsp_feo, bsp_na2o, bsp_mgo, bsp_al2o3, bsp_sio2, bsp_cao, bsp_tio2, bsp_cr2o3,
+                        init_temp, init_temp, final_temp, inc_temp, init_press, final_press, dpdt, mode, mode2)
+
+                    morb_outfile = open("{}_MELTS_{}_INFILE.txt".format(star_name, "MORB"), 'w')
+                    morb_outfile.write(melts_morb_input_file_vars)
+                    morb_outfile.close()
+
+                    fdir = os.getcwd() + "/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
+                    tdir = home_dir[0] + "/MELTS_MORB_Input_Files/{}_MELTS_{}_INFILE.txt".format(star_name, "MORB")
+                    shutil.move(fdir, tdir)
+        except:
+            pass
 
     bsp_debug.close()
     bsp_chemfile.close()
@@ -965,12 +968,12 @@ def runmelts_morb(infile_directory, inputfilename):
 
 def scrapebsp2(infiledirectory, inputfilename):
 
-    if "alloy_mass.csv" in os.listdir(os.getcwd()):
-        os.remove("alloy_mass.csv")
+    if "alloy_mass.csv" in os.listdir(home_dir[0]):
+        os.remove(home_dir[0] + "/alloy_mass.csv")
     else:
         pass
 
-    alloy_mass_outfile = open("alloy_mass.csv", 'a')
+    alloy_mass_outfile = open(home_dir[0] + "/alloy_mass.csv", 'a')
 
     alloy_mass_outfile.write("{},{}\n".format("star", "alloy mass"))
 
@@ -979,35 +982,38 @@ def scrapebsp2(infiledirectory, inputfilename):
 
 
     for i in os.listdir(os.getcwd()):
-        os.chdir(infiledirectory)
-        if enumerate(i, 1) >= 100:
-            alloy_abundance = []
-            with open(i, 'r') as infile:
-                reader = csv.reader(infile)
-                row1 = next(reader)
-                star_name = row1[1]
-                alloy_abundance.append(star_name)
-                for num, line in enumerate(reader, 1):
-                    if "Phase" in line:
-                        csv_list = list(reader)
-                        alloy_index = csv_list[0].index("alloy-solid_0")
-                        for row in csv_list[1:]:
-                            if not row == []:
-                                a = row[alloy_index]
-                                x = str(float(a))
-                                alloy_abundance.append(x)
-                            else:
-                                break
-                    else:
-                        pass
-            os.chdir(home_dir[0])
-            # print(alloy_abundance[1:])
-            alloy_abundance_nums = []
-            for z in alloy_abundance[1:]:
-                alloy_abundance_nums.append(float(z))
-            alloy_abundance_sum = sum(alloy_abundance_nums)
-            print("Alloy abundance for {}: {}".format(alloy_abundance[0], alloy_abundance_sum))
-            alloy_mass_outfile.write("{},{}\n".format(alloy_abundance[0], alloy_abundance_sum))
+        try:
+            os.chdir(infiledirectory)
+            if enumerate(i, 1) >= 100:
+                alloy_abundance = []
+                with open(i, 'r') as infile:
+                    reader = csv.reader(infile)
+                    row1 = next(reader)
+                    star_name = row1[1]
+                    alloy_abundance.append(star_name)
+                    for num, line in enumerate(reader, 1):
+                        if "Phase" in line:
+                            csv_list = list(reader)
+                            alloy_index = csv_list[0].index("alloy-solid_0")
+                            for row in csv_list[1:]:
+                                if not row == []:
+                                    a = row[alloy_index]
+                                    x = str(float(a))
+                                    alloy_abundance.append(x)
+                                else:
+                                    break
+                        else:
+                            pass
+                os.chdir(home_dir[0])
+                # print(alloy_abundance[1:])
+                alloy_abundance_nums = []
+                for z in alloy_abundance[1:]:
+                    alloy_abundance_nums.append(float(z))
+                alloy_abundance_sum = sum(alloy_abundance_nums)
+                print("Alloy abundance for {}: {}".format(alloy_abundance[0], alloy_abundance_sum))
+                alloy_mass_outfile.write("{},{}\n".format(alloy_abundance[0], alloy_abundance_sum))
+        except:
+            pass
         else:
             pass
 
@@ -1030,32 +1036,35 @@ def hefestofilewriter_bsp(bulkfile, infilename):
     bulkfile_df = pd.read_csv(bulkfile)
 
     for row in bulkfile_df.index:
-        star = bulkfile_df["Star"][row]
-        si = bulkfile_df["SiO2"][row]
-        mg = bulkfile_df["MgO"][row]
-        fe = bulkfile_df["FeO"][row]
-        ca = bulkfile_df["CaO"][row]
-        al = bulkfile_df["Al2O3"][row]
-        na = bulkfile_df["Na2O"][row]
+        try:
+            star = bulkfile_df["Star"][row]
+            si = bulkfile_df["SiO2"][row]
+            mg = bulkfile_df["MgO"][row]
+            fe = bulkfile_df["FeO"][row]
+            ca = bulkfile_df["CaO"][row]
+            al = bulkfile_df["Al2O3"][row]
+            na = bulkfile_df["Na2O"][row]
 
-        hefesto_bsp_file = open("{}_BSP_HeFESTo_Infile.txt".format(star), 'a')
+            hefesto_bsp_file = open("{}_BSP_HeFESTo_Infile.txt".format(star), 'a')
 
-        format_of_file = "0,20,80,1600,0,-2,0\n6,2,4,2\noxides\nSi          {}      5.39386    0\nMg          {}     2.71075    0\n" \
-                         "Fe          {}      .79840    0\nCa            {}      .31431    0\nAl            {}      .96680    0\n" \
-                         "Na            {}      .40654    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\nhc\n" \
-                         "phase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\njd\n" \
-                         "phase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\nmgwa\nfewa\n" \
-                         "phase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\nphase ppv\n0\nmppv\n" \
-                         "fppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n1\nqtz\nphase coes\n0\ncoes\n" \
-                         "phase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n0\nneph".format(si,
-                            mg, fe, ca, al, na)
+            format_of_file = "0,20,80,1600,0,-2,0\n6,2,4,2\noxides\nSi          {}      5.39386    0\nMg          {}     2.71075    0\n" \
+                             "Fe          {}      .79840    0\nCa            {}      .31431    0\nAl            {}      .96680    0\n" \
+                             "Na            {}      .40654    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\nhc\n" \
+                             "phase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\njd\n" \
+                             "phase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\nmgwa\nfewa\n" \
+                             "phase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\nphase ppv\n0\nmppv\n" \
+                             "fppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n1\nqtz\nphase coes\n0\ncoes\n" \
+                             "phase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n0\nneph".format(si,
+                                mg, fe, ca, al, na)
 
-        hefesto_bsp_file.write(format_of_file)
-        hefesto_bsp_file.close()
-        fdir = home_dir[0] + "/{}".format("{}_BSP_HeFESTo_Infile.txt".format(star))
-        tdir = home_dir[0] + "/{}/{}".format("{}_BSP_HeFESTo_Input_Files".format(infilename),
-                                             "{}_BSP_HeFESTo_Infile.txt".format(star))
-        shutil.move(fdir, tdir)
+            hefesto_bsp_file.write(format_of_file)
+            hefesto_bsp_file.close()
+            fdir = home_dir[0] + "/{}".format("{}_BSP_HeFESTo_Infile.txt".format(star))
+            tdir = home_dir[0] + "/{}/{}".format("{}_BSP_HeFESTo_Input_Files".format(infilename),
+                                                 "{}_BSP_HeFESTo_Infile.txt".format(star))
+            shutil.move(fdir, tdir)
+        except:
+            pass
 
     print("\n[~] BSP HeFESTo input files available in '{}'".format("{}_BSP_HeFESTo_Input_Files".format(infilename)))
 
@@ -1074,33 +1083,36 @@ def hefestofilewriter_morb(bulkfile, infilename):
     bulkfile_df = pd.read_csv(bulkfile)
 
     for row in bulkfile_df.index:
-        star = bulkfile_df["Star"][row]
-        si = bulkfile_df["SiO2"][row]
-        mg = bulkfile_df["MgO"][row]
-        fe = bulkfile_df["FeO"][row]
-        ca = bulkfile_df["CaO"][row]
-        al = bulkfile_df["Al2O3"][row]
-        na = bulkfile_df["Na2O"][row]
+        try:
+            star = bulkfile_df["Star"][row]
+            si = bulkfile_df["SiO2"][row]
+            mg = bulkfile_df["MgO"][row]
+            fe = bulkfile_df["FeO"][row]
+            ca = bulkfile_df["CaO"][row]
+            al = bulkfile_df["Al2O3"][row]
+            na = bulkfile_df["Na2O"][row]
 
-        hefesto_morb_file = open("{}_MORB_HeFESTo_Infile.txt".format(star), 'a')
+            hefesto_morb_file = open("{}_MORB_HeFESTo_Infile.txt".format(star), 'a')
 
-        format_of_file = ",20,80,1200,0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
-                         "Mg           {}     1.37685    0\nFe           {}      .55527    0\n" \
-                         "Ca           {}     1.33440    0\nAl           {}     1.82602    0\n" \
-                         "Na           {}     0.71860    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\n" \
-                         "hc\nphase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\n" \
-                         "jd\nphase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\n" \
-                         "mgwa\nfewa\nphase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\n" \
-                         "phase ppv\n0\nmppv\nfppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n" \
-                         "1\nqtz\nphase coes\n0\ncoes\nphase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n" \
-                         "0\nneph".format(si, mg, fe, ca, al, na)
+            format_of_file = ",20,80,1200,0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
+                             "Mg           {}     1.37685    0\nFe           {}      .55527    0\n" \
+                             "Ca           {}     1.33440    0\nAl           {}     1.82602    0\n" \
+                             "Na           {}     0.71860    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\n" \
+                             "hc\nphase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\n" \
+                             "jd\nphase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\n" \
+                             "mgwa\nfewa\nphase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\n" \
+                             "phase ppv\n0\nmppv\nfppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n" \
+                             "1\nqtz\nphase coes\n0\ncoes\nphase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n" \
+                             "0\nneph".format(si, mg, fe, ca, al, na)
 
-        hefesto_morb_file.write(format_of_file)
-        hefesto_morb_file.close()
-        fdir = home_dir[0] + "/{}".format("{}_MORB_HeFESTo_Infile.txt".format(star))
-        tdir = home_dir[0] + "/{}/{}".format("{}_MORB_HeFESTo_Input_Files".format(infilename),
-                                             "{}_MORB_HeFESTo_Infile.txt".format(star))
-        shutil.move(fdir, tdir)
+            hefesto_morb_file.write(format_of_file)
+            hefesto_morb_file.close()
+            fdir = home_dir[0] + "/{}".format("{}_MORB_HeFESTo_Infile.txt".format(star))
+            tdir = home_dir[0] + "/{}/{}".format("{}_MORB_HeFESTo_Input_Files".format(infilename),
+                                                 "{}_MORB_HeFESTo_Infile.txt".format(star))
+            shutil.move(fdir, tdir)
+        except:
+            pass
 
     print("\n[~] Crust HeFESTo input files available in '{}'".format("{}_MORB_HeFESTo_Input_Files".format(infilename)))
 
@@ -1157,200 +1169,200 @@ def runhefesto(infiledir, actual_run, runname):
     os.chdir(home_dir[0])
 
     if actual_run is True:
-        # try:
-            if 'main' not in os.listdir(os.getcwd()):
-                print("[X] ERROR!  HeFESTo's 'main' not detected in the working directory!\n")
-                time.sleep(4)
-                initialization()
-            else:
-                print("[~] HeFESTo detected in the working directory!\n")
-                pass
-            # os.chdir(home_dir[0])
-            # print("\nPlease enter the name of your BSP HeFESTo input .csv sheet:")
-            # hefesto_input_bsp = input(">>> ")
-            # if hefesto_input_bsp in os.listdir(os.getcwd()):
-            #     print("[~] {} has been found in the working directory!".format(hefesto_input_bsp))
+    # try:
+        if 'main' not in os.listdir(os.getcwd()):
+            print("[X] ERROR!  HeFESTo's 'main' not detected in the working directory!\n")
+            time.sleep(4)
+            initialization()
+        else:
+            print("[~] HeFESTo detected in the working directory!\n")
+            pass
+        # os.chdir(home_dir[0])
+        # print("\nPlease enter the name of your BSP HeFESTo input .csv sheet:")
+        # hefesto_input_bsp = input(">>> ")
+        # if hefesto_input_bsp in os.listdir(os.getcwd()):
+        #     print("[~] {} has been found in the working directory!".format(hefesto_input_bsp))
+        # else:
+        #     print("[X] {} has NOT been found in the working directory!".format(hefesto_input_bsp))
+        #     time.sleep(4)
+        #     initialization()
+        # print("\nPlease enter the name of your crust HeFESTo input .csv sheet:")
+        # hefesto_input_morb = input(">>> ")
+        # if hefesto_input_morb in os.listdir(os.getcwd()):
+        #     print("[~] {} has been found in the working directory!".format(hefesto_input_morb))
+        # else:
+        #     print("[X] {} has NOT been found in the working directory!".format(hefesto_input_morb))
+        #     time.sleep(4)
+        #     initialization()
+        #
+        # if os.path.exists("HeFESTo_BSP_Input_Files"):
+        #     shutil.rmtree("HeFESTo_BSP_Input_Files")
+        # else:
+        #     pass
+        # if os.path.exists("HeFESTo_MORB_Input_Files"):
+        #     shutil.rmtree("HeFESTo_MORB_Input_Files")
+        # else:
+        #     pass
+        #
+        # os.mkdir("HeFESTo_BSP_Input_Files")
+
+        if os.path.exists(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname)):
+            shutil.rmtree(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname))
+        else:
+            pass
+
+        if os.path.exists(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname)):
+            shutil.rmtree(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname))
+        else:
+            pass
+
+
+        os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname))
+        os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.66".format(runname))
+        os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.58".format(runname))
+        os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.59".format(runname))
+        os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname))
+        os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.66".format(runname))
+        os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.58".format(runname))
+        os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.59".format(runname))
+
+        bsp_dir = []
+        morb_dir = []
+        os.chdir(infiledir)
+        for i in os.listdir(os.getcwd()):
+            if "BSP" in i or "bsp" in i:
+                print("[~] Found BSP directory: {}".format(i))
+                bsp_dir.append(i)
+            elif "MORB" in i or "morb" in i:
+                print("[~] Found MORB directory: {}".format(i))
+                morb_dir.append(i)
             # else:
-            #     print("[X] {} has NOT been found in the working directory!".format(hefesto_input_bsp))
-            #     time.sleep(4)
+            #     print("\n[X] HeFESTo cumulative input directory not properly formatted!")
             #     initialization()
-            # print("\nPlease enter the name of your crust HeFESTo input .csv sheet:")
-            # hefesto_input_morb = input(">>> ")
-            # if hefesto_input_morb in os.listdir(os.getcwd()):
-            #     print("[~] {} has been found in the working directory!".format(hefesto_input_morb))
-            # else:
-            #     print("[X] {} has NOT been found in the working directory!".format(hefesto_input_morb))
-            #     time.sleep(4)
-            #     initialization()
-            #
-            # if os.path.exists("HeFESTo_BSP_Input_Files"):
-            #     shutil.rmtree("HeFESTo_BSP_Input_Files")
-            # else:
-            #     pass
-            # if os.path.exists("HeFESTo_MORB_Input_Files"):
-            #     shutil.rmtree("HeFESTo_MORB_Input_Files")
-            # else:
-            #     pass
-            #
-            # os.mkdir("HeFESTo_BSP_Input_Files")
 
-            if os.path.exists(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname)):
-                shutil.rmtree(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname))
-            else:
-                pass
-
-            if os.path.exists(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname)):
-                shutil.rmtree(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname))
-            else:
-                pass
+        if len(bsp_dir) > 1 or len(morb_dir) > 1:
+            print("\n[X] HeFESTo cumulative input directory not properly formatted!")
+            time.sleep(2)
+            initialization()
 
 
-            os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname))
-            os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.66".format(runname))
-            os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.58".format(runname))
-            os.mkdir(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.59".format(runname))
-            os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname))
-            os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.66".format(runname))
-            os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.58".format(runname))
-            os.mkdir(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.59".format(runname))
-
-            bsp_dir = []
-            morb_dir = []
-            os.chdir(infiledir)
-            for i in os.listdir(os.getcwd()):
-                if "BSP" in i or "bsp" in i:
-                    print("[~] Found BSP directory: {}".format(i))
-                    bsp_dir.append(i)
-                elif "MORB" in i or "morb" in i:
-                    print("[~] Found MORB directory: {}".format(i))
-                    morb_dir.append(i)
-                # else:
-                #     print("\n[X] HeFESTo cumulative input directory not properly formatted!")
-                #     initialization()
-
-            if len(bsp_dir) > 1 or len(morb_dir) > 1:
-                print("\n[X] HeFESTo cumulative input directory not properly formatted!")
-                time.sleep(2)
-                initialization()
+        bsp_dir = home_dir[0] + "/{}/{}".format(infiledir, bsp_dir[0])
+        morb_dir = home_dir[0] + "/{}/{}".format(infiledir, morb_dir[0])
 
 
-            bsp_dir = home_dir[0] + "/{}/{}".format(infiledir, bsp_dir[0])
-            morb_dir = home_dir[0] + "/{}/{}".format(infiledir, morb_dir[0])
-        
-            
-            print("\b[~] Initiating HeFESTo BSP calculations...")
+        print("\b[~] Initiating HeFESTo BSP calculations...")
 
 
-            for i in os.listdir(bsp_dir):
+        for i in os.listdir(bsp_dir):
 
-                star_name = i[:-23]
+            star_name = i[:-23]
 
-                os.chdir(home_dir[0])
-                if "fort.66" in os.listdir(os.getcwd()):
-                    try:
-                        os.remove("fort.66")
-                    except:
-                        pass
-                    try:
-                        shutil.rmtree("fort.66")
-                    except:
-                        pass
-                else:
-                    pass
-                if "fort.58" in os.listdir(os.getcwd()):
-                    try:
-                        os.remove("fort.58")
-                    except:
-                        pass
-                    try:
-                        shutil.rmtree("fort.58")
-                    except:
-                        pass
-                else:
-                    pass
-                if "fort.59" in os.listdir(os.getcwd()):
-                    try:
-                        os.remove("fort.59")
-                    except:
-                        pass
-                    try:
-                        shutil.rmtree("fort.59")
-                    except:
-                        pass
-                else:
-                    pass
-                if "control" in os.listdir(os.getcwd()):
-                    try:
-                        os.remove("control")
-                    except:
-                        pass
-                    try:
-                        shutil.rmtree("control")
-                    except:
-                        pass
-                else:
-                    pass
-                os.chdir(bsp_dir)
-                shutil.copy((bsp_dir + "/{}".format(i)), (home_dir[0] + "/{}".format("control")))
-                print("\n[~] Performing HeFESTo BSP calculations on: {}".format(i))
-                os.chdir(home_dir[0])
-                argz = (home_dir[0] + "/main")
-                p = subprocess.Popen(argz, stdin=None, stdout=None)
-                t = Timer(800, p.kill)
-                t.start()
-                p.communicate()
-                t.cancel()
-                if "fort.66" in os.listdir(os.getcwd()):
-                    print("\n[~] 'fort.66' found!")
-                    shutil.move("fort.66", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.66/{}".format(runname, star_name + "_fort66")))
-                if "fort.58" in os.listdir(os.getcwd()):
-                    print("\n[~] 'fort.58' found!")
-                    shutil.move("fort.58", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.58/{}".format(runname, star_name + "_fort58")))
-                if "fort.59" in os.listdir(os.getcwd()):
-                    print("\n[~] 'fort.59' found!")
-                    shutil.move("fort.59", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
-                if "control" in os.listdir(os.getcwd()):
-                    os.remove("control")
-
-                time.sleep(2)
-
-            print("\b[~] Initiating HeFESTo crust calculations...")
-
-
-            for i in os.listdir(morb_dir):
-
-                star_name = i[:-24]
-
-                os.chdir(home_dir[0])
-                if "fort.66" in os.listdir(os.getcwd()):
+            os.chdir(home_dir[0])
+            if "fort.66" in os.listdir(os.getcwd()):
+                try:
                     os.remove("fort.66")
-                if "fort.58" in os.listdir(os.getcwd()):
+                except:
+                    pass
+                try:
+                    shutil.rmtree("fort.66")
+                except:
+                    pass
+            else:
+                pass
+            if "fort.58" in os.listdir(os.getcwd()):
+                try:
                     os.remove("fort.58")
-                if "fort.59" in os.listdir(os.getcwd()):
+                except:
+                    pass
+                try:
+                    shutil.rmtree("fort.58")
+                except:
+                    pass
+            else:
+                pass
+            if "fort.59" in os.listdir(os.getcwd()):
+                try:
                     os.remove("fort.59")
-                if "control" in os.listdir(os.getcwd()):
+                except:
+                    pass
+                try:
+                    shutil.rmtree("fort.59")
+                except:
+                    pass
+            else:
+                pass
+            if "control" in os.listdir(os.getcwd()):
+                try:
                     os.remove("control")
-                os.chdir(morb_dir)
-                shutil.copy((morb_dir + "/{}".format(i)), (home_dir[0] + "/{}".format("control")))
-                print("\n[~] Performing HeFESTo crust calculations on: {}".format(i))
-                os.chdir(home_dir[0])
-                argz = (home_dir[0] + "/main")
-                p = subprocess.Popen(argz, stdin=None, stdout=None)
-                t = Timer(800, p.kill)
-                t.start()
-                p.communicate()
-                t.cancel()
-                if "fort.66" in os.listdir(os.getcwd()):
-                    print("\n[~] 'fort.66; found!")
-                    shutil.move("fort.66", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.66/{}".format(runname, star_name + "_fort66")))
-                if "fort.58" in os.listdir(os.getcwd()):
-                    print("\n[~] 'fort.58' found!")
-                    shutil.move("fort.58", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.58/{}".format(runname, star_name + "_fort58")))
-                if "fort.59" in os.listdir(os.getcwd()):
-                    print("\n[~] 'fort.59 found!")
-                    shutil.move("fort.59", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
-                if "control" in os.listdir(os.getcwd()):
-                    os.remove("control")
+                except:
+                    pass
+                try:
+                    shutil.rmtree("control")
+                except:
+                    pass
+            else:
+                pass
+            os.chdir(bsp_dir)
+            shutil.copy((bsp_dir + "/{}".format(i)), (home_dir[0] + "/{}".format("control")))
+            print("\n[~] Performing HeFESTo BSP calculations on: {}".format(i))
+            os.chdir(home_dir[0])
+            argz = (home_dir[0] + "/main")
+            p = subprocess.Popen(argz, stdin=None, stdout=None)
+            t = Timer(800, p.kill)
+            t.start()
+            p.communicate()
+            t.cancel()
+            if "fort.66" in os.listdir(os.getcwd()):
+                print("\n[~] 'fort.66' found!")
+                shutil.move("fort.66", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.66/{}".format(runname, star_name + "_fort66")))
+            if "fort.58" in os.listdir(os.getcwd()):
+                print("\n[~] 'fort.58' found!")
+                shutil.move("fort.58", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.58/{}".format(runname, star_name + "_fort58")))
+            if "fort.59" in os.listdir(os.getcwd()):
+                print("\n[~] 'fort.59' found!")
+                shutil.move("fort.59", (home_dir[0] + "/{}_HeFESTo_BSP_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
+            if "control" in os.listdir(os.getcwd()):
+                os.remove("control")
+
+            time.sleep(2)
+
+        print("\b[~] Initiating HeFESTo crust calculations...")
+
+
+        for i in os.listdir(morb_dir):
+
+            star_name = i[:-24]
+
+            os.chdir(home_dir[0])
+            if "fort.66" in os.listdir(os.getcwd()):
+                os.remove("fort.66")
+            if "fort.58" in os.listdir(os.getcwd()):
+                os.remove("fort.58")
+            if "fort.59" in os.listdir(os.getcwd()):
+                os.remove("fort.59")
+            if "control" in os.listdir(os.getcwd()):
+                os.remove("control")
+            os.chdir(morb_dir)
+            shutil.copy((morb_dir + "/{}".format(i)), (home_dir[0] + "/{}".format("control")))
+            print("\n[~] Performing HeFESTo crust calculations on: {}".format(i))
+            os.chdir(home_dir[0])
+            argz = (home_dir[0] + "/main")
+            p = subprocess.Popen(argz, stdin=None, stdout=None)
+            t = Timer(800, p.kill)
+            t.start()
+            p.communicate()
+            t.cancel()
+            if "fort.66" in os.listdir(os.getcwd()):
+                print("\n[~] 'fort.66; found!")
+                shutil.move("fort.66", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.66/{}".format(runname, star_name + "_fort66")))
+            if "fort.58" in os.listdir(os.getcwd()):
+                print("\n[~] 'fort.58' found!")
+                shutil.move("fort.58", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.58/{}".format(runname, star_name + "_fort58")))
+            if "fort.59" in os.listdir(os.getcwd()):
+                print("\n[~] 'fort.59 found!")
+                shutil.move("fort.59", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
+            if "control" in os.listdir(os.getcwd()):
+                os.remove("control")
 
             os.chdir(home_dir[0])
             if os.path.exists("{}_HeFESTo_Output_Files".format(runname)):
@@ -1469,29 +1481,32 @@ def scrapemorb(infiledirectory, infilename):
 
 
     for i in os.listdir(infiledirectory):
-        print("\n[~] Scraping MORB output file: {}".format(i))
-        os.chdir(infiledirectory)
-        with open(i, 'r') as infile:
-            star_name = []
-            data = []
-            reader = csv.reader(infile, delimiter=',')
-            reader2 = list(reader)
-            star_name.append(reader2[0][1])
-            if enumerate(i, 1) >= 100:
-                for num, line in enumerate(reader2, 1):
-                    if "Liquid" in line:
-                        skip_row2 = num + 1
-                        liquid_comp = reader2[skip_row2]
-                        for item in liquid_comp:
-                            data.append(item)
-                    else:
-                        pass
-                data_formatted = ",".join(str(z) for z in data)
-                os.chdir(home_dir[0])
-                morb_outfile.write("{},{}\n".format(star_name[0], data_formatted))
-            else:
-                os.chdir(home_dir[0])
-                morb_outfile.write("{},ERROR!\n".format(star_name[0]))
+        try:
+            print("\n[~] Scraping MORB output file: {}".format(i))
+            os.chdir(infiledirectory)
+            with open(i, 'r') as infile:
+                star_name = []
+                data = []
+                reader = csv.reader(infile, delimiter=',')
+                reader2 = list(reader)
+                star_name.append(reader2[0][1])
+                if enumerate(i, 1) >= 100:
+                    for num, line in enumerate(reader2, 1):
+                        if "Liquid" in line:
+                            skip_row2 = num + 1
+                            liquid_comp = reader2[skip_row2]
+                            for item in liquid_comp:
+                                data.append(item)
+                        else:
+                            pass
+                    data_formatted = ",".join(str(z) for z in data)
+                    os.chdir(home_dir[0])
+                    morb_outfile.write("{},{}\n".format(star_name[0], data_formatted))
+                else:
+                    os.chdir(home_dir[0])
+                    morb_outfile.write("{},ERROR!\n".format(star_name[0]))
+        except:
+            pass
 
     morb_outfile.close()
 
@@ -1524,140 +1539,144 @@ def morbrecalc(infiledirectory, infilename, bulkfilename):
 
     df_morb_chem = pd.read_csv(bulkfilename)
     for row in df_morb_chem.index:
-        star_name = df_morb_chem["Star Name"][row]
-        pressure = float(df_morb_chem["Pressure"][row])
-        temperature = float(df_morb_chem["Temperature"][row])
-        mass = float(df_morb_chem["mass"][row])
-        sio2_in = float(df_morb_chem["SiO2"][row])
-        tio2_in = float(df_morb_chem["TiO2"][row])
-        al2o3_in = float(df_morb_chem["Al2O3"][row])
-        fe2o3_in = float(df_morb_chem["Fe2O3"][row])
-        cr2o3_in = float(df_morb_chem["Cr2O3"][row])
-        feo_in = float(df_morb_chem["FeO"][row])
-        mgo_in = float(df_morb_chem["MgO"][row])
-        cao_in = float(df_morb_chem["CaO"][row])
-        na2o_in = float(df_morb_chem["Na2O"][row])
-        chem_in_sum = (sio2_in + tio2_in + al2o3_in + fe2o3_in + cr2o3_in + feo_in + mgo_in + cao_in + na2o_in)
+        try:
+            star_name = df_morb_chem["Star Name"][row]
+            pressure = float(df_morb_chem["Pressure"][row])
+            temperature = float(df_morb_chem["Temperature"][row])
+            mass = float(df_morb_chem["mass"][row])
+            sio2_in = float(df_morb_chem["SiO2"][row])
+            tio2_in = float(df_morb_chem["TiO2"][row])
+            al2o3_in = float(df_morb_chem["Al2O3"][row])
+            fe2o3_in = float(df_morb_chem["Fe2O3"][row])
+            cr2o3_in = float(df_morb_chem["Cr2O3"][row])
+            feo_in = float(df_morb_chem["FeO"][row])
+            mgo_in = float(df_morb_chem["MgO"][row])
+            cao_in = float(df_morb_chem["CaO"][row])
+            na2o_in = float(df_morb_chem["Na2O"][row])
+            chem_in_sum = (sio2_in + tio2_in + al2o3_in + fe2o3_in + cr2o3_in + feo_in + mgo_in + cao_in + na2o_in)
 
-        md1_header = "1,sio2,tio2,al2o3,fe2o3,cr2o3,cr2o3,feo,mgo,cao,na2o"
-        md1 = ",{},{},{},{},{},{},{},{},{}".format(sio2_in, tio2_in, al2o3_in, fe2o3_in,
-                            cr2o3_in, feo_in, mgo_in, cao_in, na2o_in)
-        morb_debug.write("{}\n{}\n".format(md1_header, md1))
-
-
-        wt_sio2_in = (sio2_in/100.0) * mass
-        wt_tio2_in = (tio2_in / 100.0) * mass
-        wt_al2o3_in = (al2o3_in / 100.0) * mass
-        wt_fe2o3_in = (fe2o3_in / 100.0) * mass
-        wt_cr2o3_in = (cr2o3_in / 100.0) * mass
-        wt_feo_in = (feo_in / 100.0) * mass
-        wt_mgo_in = (mgo_in / 100.0) * mass
-        wt_cao_in = (cao_in / 100.0) * mass
-        wt_na2o_in = (na2o_in / 100.0) * mass
-        sum_wt_in = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + wt_fe2o3_in + wt_cr2o3_in + wt_feo_in +
-                     wt_mgo_in + wt_cao_in + wt_na2o_in)
-
-        md2_header = "2,sio2,tio2,al2o3,fe2o3,cr2o3,feo,mgo,cao,na2o"
-        md2 = ",{},{},{},{},{},{},{},{},{}".format(wt_sio2_in, wt_tio2_in, wt_al2o3_in, wt_fe2o3_in,
-                    wt_cr2o3_in, wt_feo_in, wt_mgo_in, wt_cao_in, wt_na2o_in)
-        morb_debug.write("{}\n{}\n".format(md2_header, md2))
-
-        sio2_moles = wt_sio2_in / sio2_molwt
-        tio2_moles = wt_tio2_in / tio2_molwt
-        al2o3_moles = wt_al2o3_in / al2o3_molwt
-        fe2o3_moles = wt_fe2o3_in / fe2o3_molwt
-        cr2o3_moles = wt_cr2o3_in / cr2o3_molwt
-        feo_moles = wt_feo_in / feo_molwt
-        mgo_moles = wt_mgo_in / mgo_molwt
-        cao_moles = wt_cao_in / cao_molwt
-        na2o_moles = wt_na2o_in / na2o_molwt
-        sum_oxide_moles = (sio2_moles + tio2_moles + al2o3_moles + fe2o3_moles + cr2o3_moles + feo_moles + 
-                           mgo_moles + cao_moles + na2o_moles)
-
-        md3_header = "3,sio2,tio2,al2o3,fe2o3,feo,mgo,cao,na2o"
-        md3 = ",{},{},{},{},{},{},{},{},{}".format(sio2_moles, tio2_moles, al2o3_moles, fe2o3_moles,
-                cr2o3_moles, feo_moles, mgo_moles, cao_moles, na2o_moles)
-        morb_debug.write("{}\n{}\n".format(md3_header, md3))
-
-        si_cations = sio2_moles * num_sio2_cations
-        ti_cations = tio2_moles * num_tio2_cations
-        al_cations = al2o3_moles * num_al2o3_cations
-        fe_fe2o3_cations = fe2o3_moles * num_fe2o3_cations
-        cr_cations = cr2o3_moles * num_cr2o3_cations
-        fe_feo_cations = feo_moles * num_feo_cations
-        mg_cations = mgo_moles * num_mgo_cations
-        ca_cations = cao_moles * num_cao_cations
-        na_cations = na2o_moles * num_na2o_cations
-        sum_cations = (si_cations + ti_cations + al_cations + fe_fe2o3_cations + cr_cations + fe_feo_cations + mg_cations + 
-                          ca_cations + na_cations)
-
-        md4_header = "4,si,ti,al,fe,cr,fe,mg,ca,na,sum"
-        md4 = ",{},{},{},{},{},{},{},{},{},{}".format(si_cations, ti_cations, al_cations, fe_fe2o3_cations, cr_cations,
-                fe_feo_cations, mg_cations, na_cations, na_cations, sum_cations)
-        morb_debug.write("{}\n{}\n".format(md4_header, md4))
-
-        # fe2o3 --> feo recalc
-        total_mol_fe = (fe_feo_cations + fe_fe2o3_cations)
-        total_wt_fe = total_mol_fe * fe_atwt
-        total_wt_feo = total_mol_fe * feo_molwt
-
-        md5_header = "5,total_mol_fe,total_wt_fe,total_wt_feo"
-        md5 = ",{},{},{}".format(total_mol_fe, total_wt_fe, total_wt_feo)
-        morb_debug.write("{}\n{}\n".format(md5_header, md5))
+            md1_header = "1,sio2,tio2,al2o3,fe2o3,cr2o3,cr2o3,feo,mgo,cao,na2o"
+            md1 = ",{},{},{},{},{},{},{},{},{}".format(sio2_in, tio2_in, al2o3_in, fe2o3_in,
+                                cr2o3_in, feo_in, mgo_in, cao_in, na2o_in)
+            morb_debug.write("{}\n{}\n".format(md1_header, md1))
 
 
+            wt_sio2_in = (sio2_in/100.0) * mass
+            wt_tio2_in = (tio2_in / 100.0) * mass
+            wt_al2o3_in = (al2o3_in / 100.0) * mass
+            wt_fe2o3_in = (fe2o3_in / 100.0) * mass
+            wt_cr2o3_in = (cr2o3_in / 100.0) * mass
+            wt_feo_in = (feo_in / 100.0) * mass
+            wt_mgo_in = (mgo_in / 100.0) * mass
+            wt_cao_in = (cao_in / 100.0) * mass
+            wt_na2o_in = (na2o_in / 100.0) * mass
+            sum_wt_in = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + wt_fe2o3_in + wt_cr2o3_in + wt_feo_in +
+                         wt_mgo_in + wt_cao_in + wt_na2o_in)
 
-        # unnormalized wt%
-        unnorm_sum = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + total_wt_feo + 
-                      wt_cr2o3_in + wt_mgo_in + wt_cao_in + wt_na2o_in)
+            md2_header = "2,sio2,tio2,al2o3,fe2o3,cr2o3,feo,mgo,cao,na2o"
+            md2 = ",{},{},{},{},{},{},{},{},{}".format(wt_sio2_in, wt_tio2_in, wt_al2o3_in, wt_fe2o3_in,
+                        wt_cr2o3_in, wt_feo_in, wt_mgo_in, wt_cao_in, wt_na2o_in)
+            morb_debug.write("{}\n{}\n".format(md2_header, md2))
 
-        # normalized oxide wt% w/o mgo fix
-        norm_wt_sio2 = wt_sio2_in / unnorm_sum
-        norm_wt_tio2 = wt_tio2_in / unnorm_sum
-        norm_wt_al2o3 = wt_al2o3_in / unnorm_sum
-        norm_wt_feo = total_wt_feo / unnorm_sum
-        norm_wt_cr2o3 = wt_cr2o3_in / unnorm_sum
-        norm_wt_mgo = wt_mgo_in / unnorm_sum
-        norm_wt_cao = wt_cao_in / unnorm_sum
-        norm_wt_na2o = wt_na2o_in / unnorm_sum
-        norm_sum_nomgofix = (norm_wt_sio2 + norm_wt_tio2 + norm_wt_al2o3 + norm_wt_feo + norm_wt_cr2o3 + norm_wt_mgo +
-                                norm_wt_cao + norm_wt_na2o)
+            sio2_moles = wt_sio2_in / sio2_molwt
+            tio2_moles = wt_tio2_in / tio2_molwt
+            al2o3_moles = wt_al2o3_in / al2o3_molwt
+            fe2o3_moles = wt_fe2o3_in / fe2o3_molwt
+            cr2o3_moles = wt_cr2o3_in / cr2o3_molwt
+            feo_moles = wt_feo_in / feo_molwt
+            mgo_moles = wt_mgo_in / mgo_molwt
+            cao_moles = wt_cao_in / cao_molwt
+            na2o_moles = wt_na2o_in / na2o_molwt
+            sum_oxide_moles = (sio2_moles + tio2_moles + al2o3_moles + fe2o3_moles + cr2o3_moles + feo_moles +
+                               mgo_moles + cao_moles + na2o_moles)
 
-        md6_header = "6,sio2,tio2,al2o3,feo,cr2o3,mgo,cao,na2o,sum"
-        md6 = ",{},{},{},{},{},{},{},{},{}".format(norm_wt_sio2, norm_wt_tio2, norm_wt_al2o3,
-                norm_wt_feo, norm_wt_cr2o3, norm_wt_mgo, norm_wt_cao, norm_wt_na2o, norm_sum_nomgofix)
-        morb_debug.write("{}\n{}\n".format(md6_header, md6))
+            md3_header = "3,sio2,tio2,al2o3,fe2o3,feo,mgo,cao,na2o"
+            md3 = ",{},{},{},{},{},{},{},{},{}".format(sio2_moles, tio2_moles, al2o3_moles, fe2o3_moles,
+                    cr2o3_moles, feo_moles, mgo_moles, cao_moles, na2o_moles)
+            morb_debug.write("{}\n{}\n".format(md3_header, md3))
 
-        # mgo fix
-        norm_wt_mgo_fix = norm_wt_mgo * mgo_fix
-        norm_sum_mgofix = (norm_wt_sio2 + norm_wt_tio2 + norm_wt_al2o3 + norm_wt_feo + norm_wt_cr2o3 + norm_wt_mgo_fix +
-                                norm_wt_cao + norm_wt_na2o)
+            si_cations = sio2_moles * num_sio2_cations
+            ti_cations = tio2_moles * num_tio2_cations
+            al_cations = al2o3_moles * num_al2o3_cations
+            fe_fe2o3_cations = fe2o3_moles * num_fe2o3_cations
+            cr_cations = cr2o3_moles * num_cr2o3_cations
+            fe_feo_cations = feo_moles * num_feo_cations
+            mg_cations = mgo_moles * num_mgo_cations
+            ca_cations = cao_moles * num_cao_cations
+            na_cations = na2o_moles * num_na2o_cations
+            sum_cations = (si_cations + ti_cations + al_cations + fe_fe2o3_cations + cr_cations + fe_feo_cations + mg_cations +
+                              ca_cations + na_cations)
 
-        md7_header = "7,mgo_fix,norm_wt_mgo_fx,norm_sum_mgofix"
-        md7 = ",{},{},{}".format(mgo_fix, norm_wt_mgo_fix, norm_sum_mgofix)
-        morb_debug.write("{}\n{}\n".format(md7_header, md7))
+            md4_header = "4,si,ti,al,fe,cr,fe,mg,ca,na,sum"
+            md4 = ",{},{},{},{},{},{},{},{},{},{}".format(si_cations, ti_cations, al_cations, fe_fe2o3_cations, cr_cations,
+                    fe_feo_cations, mg_cations, na_cations, na_cations, sum_cations)
+            morb_debug.write("{}\n{}\n".format(md4_header, md4))
 
-        # normaized oxide wt% abundances --- what we want!
+            # fe2o3 --> feo recalc
+            total_mol_fe = (fe_feo_cations + fe_fe2o3_cations)
+            total_wt_fe = total_mol_fe * fe_atwt
+            total_wt_feo = total_mol_fe * feo_molwt
 
-        sio2_wtpct = (norm_wt_sio2 / norm_sum_mgofix) * 100
-        tio2_wtpct = (norm_wt_tio2 / norm_sum_mgofix) * 100
-        al2o3_wtpct = (norm_wt_al2o3 / norm_sum_mgofix) * 100
-        feo_wtpct = (norm_wt_feo / norm_sum_mgofix) * 100
-        cr2o3_wtpct = (norm_wt_cr2o3 / norm_sum_mgofix) * 100
-        mgo_wtpct = (norm_wt_mgo_fix / norm_sum_mgofix) * 100
-        cao_wtpct = (norm_wt_cao / norm_sum_mgofix) * 100
-        na2o_wtpct = (norm_wt_na2o / norm_sum_mgofix) * 100
-        sum_wtpct = (sio2_wtpct + tio2_wtpct + al2o3_wtpct + feo_wtpct + cr2o3_wtpct + mgo_wtpct + cao_wtpct + na2o_wtpct)
+            md5_header = "5,total_mol_fe,total_wt_fe,total_wt_feo"
+            md5 = ",{},{},{}".format(total_mol_fe, total_wt_fe, total_wt_feo)
+            morb_debug.write("{}\n{}\n".format(md5_header, md5))
 
-        md8_header = "8,sio2,tio2,al2o3,feo,cr2o3,mgo,cao,na2o,sum"
-        md8 = ",{},{},{},{},{},{},{},{},{}".format(sio2_wtpct, tio2_wtpct, al2o3_wtpct, feo_wtpct,
-                        cr2o3_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct, sum_wtpct)
-        morb_debug.write("{}\n{}\n".format(md8_header, md8))
 
-        chem_to_outfile = "{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(star_name, pressure, temperature, mass, sio2_wtpct,
-                                tio2_wtpct, al2o3_wtpct, cr2o3_wtpct, feo_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct, sum_wtpct)
 
-        morb_recalc_outfile.write(chem_to_outfile)
+            # unnormalized wt%
+            unnorm_sum = (wt_sio2_in + wt_tio2_in + wt_al2o3_in + total_wt_feo +
+                          wt_cr2o3_in + wt_mgo_in + wt_cao_in + wt_na2o_in)
+
+            # normalized oxide wt% w/o mgo fix
+            norm_wt_sio2 = wt_sio2_in / unnorm_sum
+            norm_wt_tio2 = wt_tio2_in / unnorm_sum
+            norm_wt_al2o3 = wt_al2o3_in / unnorm_sum
+            norm_wt_feo = total_wt_feo / unnorm_sum
+            norm_wt_cr2o3 = wt_cr2o3_in / unnorm_sum
+            norm_wt_mgo = wt_mgo_in / unnorm_sum
+            norm_wt_cao = wt_cao_in / unnorm_sum
+            norm_wt_na2o = wt_na2o_in / unnorm_sum
+            norm_sum_nomgofix = (norm_wt_sio2 + norm_wt_tio2 + norm_wt_al2o3 + norm_wt_feo + norm_wt_cr2o3 + norm_wt_mgo +
+                                    norm_wt_cao + norm_wt_na2o)
+
+            md6_header = "6,sio2,tio2,al2o3,feo,cr2o3,mgo,cao,na2o,sum"
+            md6 = ",{},{},{},{},{},{},{},{},{}".format(norm_wt_sio2, norm_wt_tio2, norm_wt_al2o3,
+                    norm_wt_feo, norm_wt_cr2o3, norm_wt_mgo, norm_wt_cao, norm_wt_na2o, norm_sum_nomgofix)
+            morb_debug.write("{}\n{}\n".format(md6_header, md6))
+
+            # mgo fix
+            norm_wt_mgo_fix = norm_wt_mgo * mgo_fix
+            norm_sum_mgofix = (norm_wt_sio2 + norm_wt_tio2 + norm_wt_al2o3 + norm_wt_feo + norm_wt_cr2o3 + norm_wt_mgo_fix +
+                                    norm_wt_cao + norm_wt_na2o)
+
+            md7_header = "7,mgo_fix,norm_wt_mgo_fx,norm_sum_mgofix"
+            md7 = ",{},{},{}".format(mgo_fix, norm_wt_mgo_fix, norm_sum_mgofix)
+            morb_debug.write("{}\n{}\n".format(md7_header, md7))
+
+            # normaized oxide wt% abundances --- what we want!
+
+            sio2_wtpct = (norm_wt_sio2 / norm_sum_mgofix) * 100
+            tio2_wtpct = (norm_wt_tio2 / norm_sum_mgofix) * 100
+            al2o3_wtpct = (norm_wt_al2o3 / norm_sum_mgofix) * 100
+            feo_wtpct = (norm_wt_feo / norm_sum_mgofix) * 100
+            cr2o3_wtpct = (norm_wt_cr2o3 / norm_sum_mgofix) * 100
+            mgo_wtpct = (norm_wt_mgo_fix / norm_sum_mgofix) * 100
+            cao_wtpct = (norm_wt_cao / norm_sum_mgofix) * 100
+            na2o_wtpct = (norm_wt_na2o / norm_sum_mgofix) * 100
+            sum_wtpct = (sio2_wtpct + tio2_wtpct + al2o3_wtpct + feo_wtpct + cr2o3_wtpct + mgo_wtpct + cao_wtpct + na2o_wtpct)
+
+            md8_header = "8,sio2,tio2,al2o3,feo,cr2o3,mgo,cao,na2o,sum"
+            md8 = ",{},{},{},{},{},{},{},{},{}".format(sio2_wtpct, tio2_wtpct, al2o3_wtpct, feo_wtpct,
+                            cr2o3_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct, sum_wtpct)
+            morb_debug.write("{}\n{}\n".format(md8_header, md8))
+
+            chem_to_outfile = "{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(star_name, pressure, temperature, mass, sio2_wtpct,
+                                    tio2_wtpct, al2o3_wtpct, cr2o3_wtpct, feo_wtpct, mgo_wtpct, cao_wtpct, na2o_wtpct, sum_wtpct)
+
+            morb_recalc_outfile.write(chem_to_outfile)
+
+        except:
+            pass
 
 
     morb_debug.close()
