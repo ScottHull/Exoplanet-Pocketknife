@@ -1334,14 +1334,14 @@ def runhefesto(infiledir, actual_run, runname):
             star_name = i[:-24]
 
             os.chdir(home_dir[0])
-            if "fort.66" in os.listdir(os.getcwd()):
-                os.remove("fort.66")
-            if "fort.58" in os.listdir(os.getcwd()):
-                os.remove("fort.58")
-            if "fort.59" in os.listdir(os.getcwd()):
-                os.remove("fort.59")
-            if "control" in os.listdir(os.getcwd()):
-                os.remove("control")
+            if "fort.66" in os.listdir(home_dir[0]):
+                os.remove(home_dir[0] + "/fort.66")
+            if "fort.58" in os.listdir(home_dir[0]):
+                os.remove(home_dir[0] + "/fort.58")
+            if "fort.59" in os.listdir(home_dir[0]):
+                os.remove(home_dir[0] + "/fort.59")
+            if "control" in os.listdir(home_dir[0]):
+                os.remove(home_dir[0] + "/control")
             os.chdir(morb_dir)
             shutil.copy((morb_dir + "/{}".format(i)), (home_dir[0] + "/{}".format("control")))
             print("\n[~] Performing HeFESTo crust calculations on: {}".format(i))
@@ -1352,27 +1352,37 @@ def runhefesto(infiledir, actual_run, runname):
             t.start()
             p.communicate()
             t.cancel()
+            try:
+                if "fort.66" in os.listdir(home_dir[0]):
+                    print("\n[~] 'fort.66; found!")
+                    shutil.move(home_dir[0] + "/fort.66", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.66/{}".format(runname, star_name + "_fort66")))
+                if "fort.58" in os.listdir(home_dir[0]):
+                    print("\n[~] 'fort.58' found!")
+                    shutil.move(home_dir[0] + "/fort.58", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.58/{}".format(runname, star_name + "_fort58")))
+                if "fort.59" in os.listdir(home_dir[0]):
+                    print("\n[~] 'fort.59 found!")
+                    shutil.move(home_dir[0] + "/fort.59", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
+                if "control" in os.listdir(home_dir[0]):
+                    os.remove(home_dir[0] + "/control")
+            except:
+                pass
+            os.chdir(home_dir[0])
             if "fort.66" in os.listdir(os.getcwd()):
-                print("\n[~] 'fort.66; found!")
-                shutil.move("fort.66", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.66/{}".format(runname, star_name + "_fort66")))
+                os.remove("fort.66")
             if "fort.58" in os.listdir(os.getcwd()):
-                print("\n[~] 'fort.58' found!")
-                shutil.move("fort.58", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.58/{}".format(runname, star_name + "_fort58")))
-            if "fort.59" in os.listdir(os.getcwd()):
-                print("\n[~] 'fort.59 found!")
-                shutil.move("fort.59", (home_dir[0] + "/{}_HeFESTo_MORB_Output_Files/fort.59/{}".format(runname, star_name + "_fort59")))
+                os.remove("fort.58")
+            if "fort.66" in os.listdir(os.getcwd()):
+                os.remove("fort.69")
             if "control" in os.listdir(os.getcwd()):
                 os.remove("control")
+        if os.path.exists("{}_HeFESTo_Output_Files".format(runname)):
+            shutil.rmtree("{}_HeFESTo_Output_Files".format(runname))
+        os.mkdir("{}_HeFESTo_Output_Files".format(runname))
+        shutil.move(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname), home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname))
+        shutil.move(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname), home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname))
 
-            os.chdir(home_dir[0])
-            if os.path.exists("{}_HeFESTo_Output_Files".format(runname)):
-                shutil.rmtree("{}_HeFESTo_Output_Files".format(runname))
-            os.mkdir("{}_HeFESTo_Output_Files".format(runname))
-            shutil.move(home_dir[0] + "/{}_HeFESTo_BSP_Output_Files".format(runname), home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname))
-            shutil.move(home_dir[0] + "/{}_HeFESTo_MORB_Output_Files".format(runname), home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname))
-
-            print("\n[~] HeFESTo Output Files available at '{}'".format(home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname)))
-            print("\n[~] Finished with HeFESTo calculations!")
+        print("\n[~] HeFESTo Output Files available at '{}'".format(home_dir[0] + "/{}_HeFESTo_Output_Files".format(runname)))
+        print("\n[~] Finished with HeFESTo calculations!")
 
 
 
