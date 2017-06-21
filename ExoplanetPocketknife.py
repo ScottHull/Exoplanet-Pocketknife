@@ -1779,44 +1779,48 @@ def integrationloop2(hefestodir, runname):
 
     for i in os.listdir(bsp_and_morb_dir[0]):
         star_name = i[:-7]
-        for z in os.listdir(bsp_and_morb_dir[1]):
-            if star_name in str(z):
-                print("\n\n[~] Matched BSP and MORB files for star: {}".format(star_name))
-                os.chdir(bsp_and_morb_dir[0])
-                with open(i, 'r') as bsp_infile:
-                    os.chdir(bsp_and_morb_dir[1])
-                    with open(z, 'r') as morb_infile:
-                        bsp_readfile = pd.read_fwf(bsp_infile, colspecs='infer')
-                        morb_readfile = pd.read_fwf(morb_infile, colspecs='infer')
-                        bsp_df = bsp_readfile.iloc[:, [1, 3]]
-                        morb_df = morb_readfile.iloc[:, [1, 3]]
-                        depths = []
-                        bsp_rho = []
-                        morb_rho = []
-                        morb_minus_bsp_rho = []
-                        integrated_values = []
-                        for y in bsp_df['depth']:
-                            depths.append(float(y))
-                        for y in bsp_df['rho']:
-                            bsp_rho.append(float(y))
-                        for y in morb_df['rho']:
-                            morb_rho.append(float(y))
-                        bsp_infile.close()
-                        morb_infile.close()
-                        cur_index = 0
-                        for q in morb_rho:
-                            corresponding_bsp = bsp_rho[cur_index]
-                            morb_minus_bsp_rho.append(q - corresponding_bsp)
-                            cur_index += 1
-                        for t in range(len(morb_minus_bsp_rho) - 1):
-                            x = depths[:(t + 2)]
-                            y = morb_minus_bsp_rho[:(t + 2)]
-                            # integrated_values.append(inte.simps(y, x))
-                            integrated_values.append((inte.simps(y, x)) * gravity * plate_thickness)
-                        print("[~] Calculated a net bouyancy force of {} for star {}!".format(integrated_values[-1], star_name))
-                        os.chdir(home_dir[0])
-                        integrated_vals_formatted = ",".join(str(i) for i in integrated_values)
-                        integrated_output_file.write("\n{},{},{}".format(star_name, str(integrated_values[-1]), integrated_vals_formatted))
+        try:
+            for z in os.listdir(bsp_and_morb_dir[1]):
+                if star_name in str(z):
+                    print("\n\n[~] Matched BSP and MORB files for star: {}".format(star_name))
+                    os.chdir(bsp_and_morb_dir[0])
+                    with open(i, 'r') as bsp_infile:
+                        os.chdir(bsp_and_morb_dir[1])
+                        with open(z, 'r') as morb_infile:
+                            bsp_readfile = pd.read_fwf(bsp_infile, colspecs='infer')
+                            morb_readfile = pd.read_fwf(morb_infile, colspecs='infer')
+                            bsp_df = bsp_readfile.iloc[:, [1, 3]]
+                            morb_df = morb_readfile.iloc[:, [1, 3]]
+                            depths = []
+                            bsp_rho = []
+                            morb_rho = []
+                            morb_minus_bsp_rho = []
+                            integrated_values = []
+                            for y in bsp_df['depth']:
+                                depths.append(float(y))
+                            for y in bsp_df['rho']:
+                                bsp_rho.append(float(y))
+                            for y in morb_df['rho']:
+                                morb_rho.append(float(y))
+                            bsp_infile.close()
+                            morb_infile.close()
+                            cur_index = 0
+                            for q in morb_rho:
+                                corresponding_bsp = bsp_rho[cur_index]
+                                morb_minus_bsp_rho.append(q - corresponding_bsp)
+                                cur_index += 1
+                            for t in range(len(morb_minus_bsp_rho) - 1):
+                                x = depths[:(t + 2)]
+                                y = morb_minus_bsp_rho[:(t + 2)]
+                                # integrated_values.append(inte.simps(y, x))
+                                integrated_values.append((inte.simps(y, x)) * gravity * plate_thickness)
+                            print("[~] Calculated a net buoyancy force of {} for star {}!".format(integrated_values[-1], star_name))
+                            os.chdir(home_dir[0])
+                            integrated_vals_formatted = ",".join(str(i) for i in integrated_values)
+                            integrated_output_file.write("\n{},{},{}".format(star_name, str(integrated_values[-1]), integrated_vals_formatted))
+        except:
+            integrated_output_file.write("\n{},{}".format(star_name, "FAILURE"))
+            print("[X] Failed to calculate a net buoyancy force for star {}!".format(star_name))
 
     integrated_output_file.close()
     print("\n[~] Net buoyant force output file '{}' available in '{}'!".format("{}_Integrated_Values.csv".format(runname), home_dir[0]))
@@ -1838,32 +1842,36 @@ def integrationloop2(hefestodir, runname):
 
         integrated_output_file_df = pd.read_csv(integrated_output_file)
         for row in integrated_output_file_df.index:
-            integrated_buoyant_vals = []
-            star_name = integrated_output_file_df['Star'][row]
-            print("\n[~] Plotting integrated buoyancy force results for star: {}".format(star_name))
-            if "{}.png".format(star_name) in os.listdir(home_dir[0]):
-                os.remove(home_dir[0] + "/{}_Buoyancy_Force_Graphs/{}.png".format(runname, star_name))
-            buoyant_force = integrated_output_file_df['Net Buoyant Force'][row]
-            with open(integrated_output_file, 'r') as inte_output:
-                reader = csv.reader(inte_output)
-                for i, row in enumerate(reader):
-                    if i == loop_num:
-                        for z in row[2:]:
-                            integrated_buoyant_vals.append(float(z))
-            loop_num += 1
-            inte_output.close()
-            plt.plot(depth_trans_zone[1:], integrated_buoyant_vals)
-            plt.title("{} Net Buoyant Forces".format(star_name))
-            plt.xlabel("Depth (km)")
-            plt.ylabel("Buoyant Force (N/m)")
-            plt.xlim(0, 574)
-            plt.grid()
-            plt.savefig("{}.png".format(star_name), format='png')
-            plt.close()
-            fdir = home_dir[0] + "/{}.png".format(star_name)
-            tdir = home_dir[0] + "/{}_Buoyancy_Force_Graphs/{}.png".format(runname, star_name)
-            shutil.move(fdir, tdir)
-        print("[~] Buoyant force plot for star {} available in directory '{}'!".format(star_name, tdir))
+            try:
+                integrated_buoyant_vals = []
+                star_name = integrated_output_file_df['Star'][row]
+                print("\n[~] Plotting integrated buoyancy force results for star: {}".format(star_name))
+                if "{}.png".format(star_name) in os.listdir(home_dir[0]):
+                    os.remove(home_dir[0] + "/{}_Buoyancy_Force_Graphs/{}.png".format(runname, star_name))
+                buoyant_force = integrated_output_file_df['Net Buoyant Force'][row]
+                with open(integrated_output_file, 'r') as inte_output:
+                    reader = csv.reader(inte_output)
+                    for i, row in enumerate(reader):
+                        if i == loop_num:
+                            for z in row[2:]:
+                                integrated_buoyant_vals.append(float(z))
+                loop_num += 1
+                inte_output.close()
+                plt.plot(depth_trans_zone[1:], integrated_buoyant_vals)
+                plt.title("{} Net Buoyant Forces".format(star_name))
+                plt.xlabel("Depth (km)")
+                plt.ylabel("Buoyant Force (N/m)")
+                plt.xlim(0, 574)
+                plt.grid()
+                plt.savefig("{}.png".format(star_name), format='png')
+                plt.close()
+                fdir = home_dir[0] + "/{}.png".format(star_name)
+                tdir = home_dir[0] + "/{}_Buoyancy_Force_Graphs/{}.png".format(runname, star_name)
+                shutil.move(fdir, tdir)
+                print("[~] Buoyant force plot for star {} available in directory '{}'!".format(star_name, tdir))
+            except:
+                print("[X] Failed to build a plot for star {}!".format(star_name))
+
         print("\n[~] Thank you for using the Exoplanet Pocketknife!\n[~] Returning to main menu...")
         time.sleep(2)
         initialization()
