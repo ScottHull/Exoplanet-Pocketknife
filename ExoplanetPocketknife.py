@@ -1807,13 +1807,24 @@ def integrationloop2(hefestodir, runname):
                             cur_index = 0
                             for q in morb_rho:
                                 corresponding_bsp = bsp_rho[cur_index]
-                                morb_minus_bsp_rho.append(q - corresponding_bsp)
+                                morb_minus_bsp_rho.append(corresponding_bsp - q)
+                                # morb_minus_bsp_rho.append(q - corresponding_bsp)
                                 cur_index += 1
+                            # print("\nDEPTHS")
+                            # print(depths)
+                            # print("\nBSPRHO")
+                            # print(bsp_rho)
+                            # print("\nMORBRHO")
+                            # print(morb_rho)
+                            # print("\nDELTARHO")
+                            # print(morb_minus_bsp_rho)
                             for t in range(len(morb_minus_bsp_rho) - 1):
                                 x = depths[:(t + 2)]
                                 y = morb_minus_bsp_rho[:(t + 2)]
                                 # integrated_values.append(inte.simps(y, x))
-                                integrated_values.append((inte.simps(y, x)) * gravity * plate_thickness)
+                                integrated_values.append((inte.simps(y, x) * plate_thickness * gravity))
+                            # print("\nINTEVALS")
+                            # print(integrated_values)
                             print("[~] Calculated a net buoyancy force of {} for star {}!".format(integrated_values[-1], star_name))
                             os.chdir(home_dir[0])
                             integrated_vals_formatted = ",".join(str(i) for i in integrated_values)
@@ -1991,7 +2002,8 @@ def initialization():
         integrationloop2(hefestodir=option5, runname=option6)
     elif option1 == 'o':
         print("\nPlease enter the letter of your choice.  Would you like to: \na. Write a single file with MELTS raw_inputs\n"
-              "b. Write a library of MELTS raw_input files\nc. Write a library of HeFESTo raw input files")
+              "b. Write a library of MELTS raw_input files\nc. Write a library of HeFESTo raw input files\n"
+              "d. Go back")
         raw_input_help = raw_input(">>> ")
         if raw_input_help == 'a':
             print("\nEnter '1' to raw_input [X/H] stellar abundances or '2' to raw_input stellar mole abundances.")
@@ -2055,6 +2067,8 @@ def initialization():
                 initialization()
         elif raw_input_help == 'c':
             runhefesto(actual_run=False)
+        elif raw_input_help == 'd':
+            initialization()
         else:
             print("\n[X] Oops!  That's not a valid command!\n")
             time.sleep(1)
