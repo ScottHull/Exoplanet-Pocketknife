@@ -19,7 +19,8 @@ bsp_run = False
 morb_run = False
 
 gravity = 9.8
-plate_thickness = 10.0
+# plate_thickness = 10.0 # This is in km!
+plate_thickness = 10 * 1000 # This is in m!
 
 na_atwt = 22.98976928
 mg_atwt = 24.305
@@ -1822,7 +1823,7 @@ def integrationloop2(hefestodir, runname):
                                 x = depths[:(t + 2)]
                                 y = morb_minus_bsp_rho[:(t + 2)]
                                 # integrated_values.append(inte.simps(y, x))
-                                integrated_values.append((inte.simps(y, x) * plate_thickness * gravity))
+                                integrated_values.append((inte.simps(y, x) * 1000 * 1000 * plate_thickness * gravity)) # Multiply by 1000 to account for g/cm^3 -> kg/m^3, and by 1000 again for depth km -> m.
                             # print("\nINTEVALS")
                             # print(integrated_values)
                             print("[~] Calculated a net buoyancy force of {} for star {}!".format(integrated_values[-1], star_name))
@@ -1920,10 +1921,10 @@ def initialization():
     createmorbenvfile()
     print("\n_______________________________________________\n\n\n\n\n\n\n\n\n\n")
     print("\n\n\nThe Exoplanet Pocketknife\nScott D. Hull, The Ohio State University 2015-2017\n")
-    print("This code is meant to work in conjunction with the methods described in 'The Prevalence of"
+    print("This software is meant to work in conjunction with the methods described in 'The Prevalence of"
           " Exoplanetary Plate Tectonics' (Unterborn et. al 2017).\nPlease refer to the article and "
           "the documentation for more information.\n"
-          "\n*Any use of this code or the methods described in Unterborn et al. 2017 requires proper"
+          "\n*Any use of this software or the methods described in Unterborn et al. 2017 requires proper"
           " citation.*\n\n")
     # if "Star2Oxide_Output.csv" in os.listdir(os.getcwd()):
     #     os.remove("Star2Oxide_Output.csv")
@@ -1932,12 +1933,12 @@ def initialization():
     # outputfile = open("Star2Oxide_Output.csv", 'a')
     # time.sleep(1)
     print("Enter:\n"
-          "'1' to raw_input [X/H] stellar abundances,\n"
-          "'2' to raw_input stellar mole abundances,\n"
+          "'1' to raw_input [X/H] stellar abundances\n"
+          "'2' to raw_input stellar mole abundances\n"
           "'3' to launch HeFESTo calculations\n"
           "'4' to perform buoyancy force calculations & visualize\n"
-          "Enter 'o' for more options.\n"
-          "To exit, enter 'e'.\n")
+          "'o' for more options\n"
+          "'e' to exit the Exoplanet Pocketknife\n")
     option1 = str(raw_input(">>> "))
     if option1 == '1':
         if "run_alphamelts.command" in os.listdir(os.getcwd()):
