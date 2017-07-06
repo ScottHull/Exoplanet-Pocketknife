@@ -1776,13 +1776,14 @@ def integrationloop2(hefestodir, runname):
 
     print("\n[~] Initiating HeFESTo output file parsing...")
 
+
     # planet_grav = (6.674*10**-11) * (planet_mass / planet_radius**2)
 
     for i in os.listdir(bsp_and_morb_dir[0]):
-        star_name = i.replace("fort.58.control.", "").replace("_fort.58", "").replace("_bsp.txt_bsp", "").replace("fort.58_", "")
+        star_name = i.replace("fort.58.control.", "").replace("_fort.58", "").replace("_bsp.txt_bsp", "").replace("fort.58_", "").replace("_fort58", "")
         try:
             for z in os.listdir(bsp_and_morb_dir[1]):
-                starname_morb = z.replace("fort.58.control.", "").replace("fort.58_", "").replace("_morb.txt_morb", "").replace("_fort.58", "")
+                starname_morb = z.replace("fort.58.control.", "").replace("fort.58_", "").replace("_morb.txt_morb", "").replace("_fort.58", "").replace("_fort58", "")
                 if star_name ==starname_morb:
                     print("\n\n[~] Matched BSP and MORB files for star: {}".format(star_name))
                     os.chdir(bsp_and_morb_dir[0])
