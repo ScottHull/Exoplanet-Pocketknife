@@ -23,14 +23,22 @@ def match_stars(filename):
             star_data.append(row[2:])
     infile.close()
 
-    for i in match_with:
-        if i in match_to:
-            print("Matched {}!".format(i))
+    matched_val = 0
+    missed_val = 0
+
+    for i in match_to:
+        if i in match_with:
+            print("[~] Matched {}! ({} + {})".format(i, i, match_with[match_with.index(i)]))
             star_data_single = star_data[int(match_with.index(i))]
             star_data_single_formatted = ",".join(str(z) for z in star_data_single)
             output.write("{},{}\n".format(i, star_data_single_formatted))
+            matched_val += 1
         else:
-            output.write("\n")
+            print("[X] Failed to find {}!".format(i))
+            output.write("{},""\n".format(i))
+            missed_val += 1
+
+    print("\nMatched {}\nMissed {}\n\n".format(matched_val, missed_val))
 
     output.close()
 
