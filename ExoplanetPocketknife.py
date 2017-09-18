@@ -1095,7 +1095,7 @@ def hefestofilewriter_morb(bulkfile, infilename):
 
             hefesto_morb_file = open("{}_MORB_HeFESTo_Infile.txt".format(star), 'a')
 
-            format_of_file = ",20,80,1200,0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
+            format_of_file = "0,20,80,1200,0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
                              "Mg           {}     1.37685    0\nFe           {}      .55527    0\n" \
                              "Ca           {}     1.33440    0\nAl           {}     1.82602    0\n" \
                              "Na           {}     0.71860    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\n" \
