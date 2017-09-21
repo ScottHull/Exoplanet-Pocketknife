@@ -2004,9 +2004,9 @@ def initialization():
         option6 = raw_input(">>> ")
         integrationloop2(hefestodir=option5, runname=option6)
     elif option1 == 'o':
-        print("\nPlease enter the letter of your choice.  Would you like to: \na. Write a single file with MELTS raw_inputs\n"
-              "b. Write a library of MELTS raw_input files\nc. Write a library of HeFESTo raw input files\n"
-              "d. Go back\n")
+        print("\nPlease enter the letter of your choice.  Would you like to: \n'a' Write a single file with MELTS raw_inputs\n"
+              "'b' Write a library of MELTS raw_input files\n'c' Write a library of HeFESTo raw input files\n"
+              "'d' Go back\n")
         raw_input_help = raw_input(">>> ")
         if raw_input_help == 'a':
             print("\nEnter '1' to raw_input [X/H] stellar abundances or '2' to raw_input stellar mole abundances.")
