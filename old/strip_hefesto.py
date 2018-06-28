@@ -17,9 +17,12 @@ for i in os.listdir(os.getcwd()):
     if "fort" in i:
         star_name = i.replace("fort.58.control.", "").replace("_fort.58", "").replace("_bsp.txt_bsp", "").replace(
             "fort.58_", "").replace("_fort58", "")
-        df = pd.read_fwf(i, colspecs='infer')
-        rho = df['rho'].tolist()
-        depth = df['depth'].tolist()
-        rho_str = star_name + "," + ",".join(str(z) for z in rho)
-        outfile.write(rho_str + "\n")
-        print("Finished with {}".format(i))
+        try:
+            df = pd.read_fwf(i, colspecs='infer')
+            rho = df['rho'].tolist()
+            depth = df['depth'].tolist()
+            rho_str = star_name + "," + ",".join(str(z) for z in rho)
+            outfile.write(rho_str + "\n")
+            print("Finished with {}".format(i))
+        except:
+            outfile.write(star_name + "\n")
