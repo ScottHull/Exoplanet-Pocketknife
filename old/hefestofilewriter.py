@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import pandas as pd
 
 
@@ -36,12 +37,12 @@ def renormalize(sio2, feo, mgo, na2o, al2o3, cao):
 
     norm_sum = (mol_sio2 + mol_feo + mol_mgo + mol_na2o + mol_al2o3 + mol_cao)
 
-    mol_sio2 = mol_sio2 / norm_sum
-    mol_feo = mol_feo / norm_sum
-    mol_mgo = mol_mgo / norm_sum
-    mol_na2o = mol_na2o / norm_sum
-    mol_al2o3 = mol_al2o3 / norm_sum
-    mol_cao = mol_cao / norm_sum
+    mol_sio2 = mol_sio2 / norm_sum * 100
+    mol_feo = mol_feo / norm_sum * 100
+    mol_mgo = mol_mgo / norm_sum * 100
+    mol_na2o = mol_na2o / norm_sum * 100
+    mol_al2o3 = mol_al2o3 / norm_sum * 100
+    mol_cao = mol_cao / norm_sum * 100
 
     confirm_sum = (mol_sio2 + mol_feo + mol_mgo + mol_na2o + mol_al2o3 + mol_cao)
 
@@ -113,33 +114,51 @@ if __name__ == "__main__":
 
     print("BSP or MORB?")
     while True:
-        inp = (">>> ").lower()
+        inp = input(">>> ").lower()
         if inp == "morb" or inp == "bsp":
-            modelType = inp
+            modelType = inp.upper()
+            if os.path.exists(os.getcwd() + "/" + modelType.upper()):
+                shutil.rmtree(os.getcwd() + "/" + modelType.upper())
+            os.mkdir(os.getcwd() + "/" + modelType.upper())
             break
         else:
             print("That is not a proper model type. Try again.")
 
     for temp in temperatures:
         todir = os.getcwd() + "/" + modelType.upper() + "/" + str(temp)
+        todir = os.mkdir(todir)
         for row in compfile.index:
-            star = compfile[row]['Star']
-            feo = compfile[row]['FeO']
-            na2o = compfile[row]['Na2O']
-            mgo = compfile[row]['MgO']
-            al2o3 = compfile[row]['Al2O3']
-            sio2 = compfile[row]['SiO2']
-            cao = compfile[row]['CaO']
-            tio2 = compfile[row]['TiO2']
-            cr2o3 = compfile[row]['Cr2O3']
+            star = compfile['Star'][row]
+            feo = compfile['FeO'][row]
+            na2o = compfile['Na2O'][row]
+            mgo = compfile['MgO'][row]
+            al2o3 = compfile['Al2O3'][row]
+            sio2 = compfile['SiO2'][row]
+            cao = compfile['CaO'][row]
+            tio2 = compfile['TiO2'][row]
+            cr2o3 = compfile['Cr2O3'][row]
 
-            if not pd.isnull(compfile[row]['SiO2']):
+            if not pd.isnull(compfile['SiO2'][row]):
 
                 normComposition = renormalize(sio2=sio2, feo=feo, na2o=na2o, mgo=mgo, al2o3=al2o3, cao=cao)
 
-                if modelType == 'bsp':
+                if modelType == 'BSP':
                     f = open(todir + "/{}_{}_HeFESTo_Infile.txt".format(star, modelType), 'a')
                     tostr = templateBSP(
+                        temperature=temp,
+                        sio2=normComposition['sio2'],
+                        mgo=normComposition['mgo'],
+                        feo=normComposition['feo'],
+                        na2o=normComposition['na2o'],
+                        cao=normComposition['cao'],
+                        al2o3=normComposition['al2o3']
+                    )
+                    f.write(tostr)
+                    f.close()
+
+                elif modelType == 'MORB':
+                    f = open(todir + "/{}_{}_HeFESTo_Infile.txt".format(star, modelType), 'a')
+                    tostr = templateMORB(
                         temperature=temp,
                         sio2=normComposition['sio2'],
                         mgo=normComposition['mgo'],
