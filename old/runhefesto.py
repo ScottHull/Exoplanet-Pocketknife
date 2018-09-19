@@ -60,13 +60,13 @@ if __name__ == "__main__":
                     if "fort.58" in os.listdir(os.getcwd()):
                         shutil.move(os.getcwd() + "/fort.58",
                                     os.getcwd() + "/{}_HeFESTo_Output_Files/".format(runname) + dir + "/fort.58/" + "{}.txt".format(
-                                        starcomponent))
+                                        starcomponent + "HeFESTo_Output_File"))
                     if "fort.59" in os.listdir(os.getcwd()):
                         shutil.move(os.getcwd() + "/fort.59",
                                     os.getcwd() + "/{}_HeFESTo_Output_Files/".format(runname) + dir + "/fort.59/" + "{}.txt".format(
-                                        starcomponent))
+                                        starcomponent + "HeFESTo_Output_File"))
                     if "fort.66" in os.listdir(os.getcwd()):
                         shutil.move(os.getcwd() + "/fort.66",
                                     os.getcwd() + "/{}_HeFESTo_Output_Files/".format(runname) + dir + "/fort.66/" + "{}.txt".format(
-                                        starcomponent))
+                                        starcomponent + "HeFESTo_Output_File"))
 
