@@ -126,7 +126,7 @@ if __name__ == "__main__":
 
     for temp in temperatures:
         todir = os.getcwd() + "/" + modelType.upper() + "/" + str(temp)
-        todir = os.mkdir(todir)
+        os.mkdir(todir)
         for row in compfile.index:
             star = compfile['Star'][row]
             feo = compfile['FeO'][row]
