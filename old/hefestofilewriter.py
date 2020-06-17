@@ -1,171 +1,172 @@
 import os
-import sys
 import shutil
 import pandas as pd
 
+class _AtomicWeights:
 
-na2o_molwt = 61.9785
-mgo_molwt = 40.3040
-al2o3_molwt = 101.9601
-sio2_molwt = 60.0835
-cao_molwt = 56.0770
-tio2_molwt = 79.8650
-cr2o3_molwt = 151.9892
-feo_molwt = 71.8440
-nio_molwt = 74.6924
-fe2o3_molwt = 159.687
-
-num_na2o_cations = 2
-num_mgo_cations = 1
-num_al2o3_cations = 2
-num_sio2_cations = 1
-num_cao_cations = 1
-num_tio2_cations = 1
-num_cr2o3_cations = 2
-num_feo_cations = 1
-num_nio_cations = 1
-num_fe2o3_cations = 2
+    def __init__(self):
+        self.fe = 55.845
+        self.mg = 24.305
+        self.si = 28.086
+        self.ca = 40.078
+        self.al = 26.982
+        self.ti = 47.867
+        self.na = 22.99
+        self.o = 15.99
 
 
-def renormalize(sio2, feo, mgo, na2o, al2o3, cao):
-    mol_sio2 = (sio2 / sio2_molwt) / num_sio2_cations
-    mol_feo = (feo / feo_molwt) / num_feo_cations
-    mol_mgo = (mgo / mgo_molwt) / num_mgo_cations
-    mol_na2o = (na2o / na2o_molwt) / num_na2o_cations
-    mol_al2o3 = (al2o3 / al2o3_molwt) / num_al2o3_cations
-    mol_cao = (cao / cao_molwt) / num_cao_cations
+class _OxideCationNumbers:
 
-    norm_sum = (mol_sio2 + mol_feo + mol_mgo + mol_na2o + mol_al2o3 + mol_cao)
-
-    mol_sio2 = mol_sio2 / norm_sum * 100
-    mol_feo = mol_feo / norm_sum * 100
-    mol_mgo = mol_mgo / norm_sum * 100
-    mol_na2o = mol_na2o / norm_sum * 100
-    mol_al2o3 = mol_al2o3 / norm_sum * 100
-    mol_cao = mol_cao / norm_sum * 100
-
-    confirm_sum = (mol_sio2 + mol_feo + mol_mgo + mol_na2o + mol_al2o3 + mol_cao)
-
-    if confirm_sum != 100.0:
-        print("Normalized sum not 100!")
-        sys.exit(1)
-
-    composition = {
-        'sio2': mol_sio2,
-        'feo': mol_feo,
-        'mgo': mol_mgo,
-        "na2o": mol_na2o,
-        "al2o3": mol_al2o3,
-        'cao': mol_cao
-    }
-
-    return composition
+    def __init__(self):
+        self.fe = 1  # feo, 1
+        self.mg = 1  # mgo, 1
+        self.si = 1  # sio2, 1
+        self.ca = 1  # cao, 1
+        self.al = 2  # al2o3, 2
+        self.ti = 1  # tio2, 1
+        self.na = 2  # na2o, 2
 
 
+class _OxideWeights:
 
-def templateMORB(temperature, sio2, mgo, feo, cao, al2o3, na2o):
-    template = "0,20,80,{},0,-2,0\n6,2,4,2\noxides\nSi           {}     0.0    0\n" \
-         "Mg           {}     0.0    0\nFe           {}      0.0    0\n" \
-         "Ca           {}     0.0    0\nAl           {}     0.0    0\n" \
-         "Na           {}     0.0    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\n" \
-         "hc\nphase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\n" \
-         "jd\nphase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\n" \
-         "mgwa\nfewa\nphase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\n" \
-         "phase ppv\n0\nmppv\nfppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n" \
-         "1\nqtz\nphase coes\n0\ncoes\nphase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n" \
-         "0\nneph".format(temperature, sio2, mgo, feo, cao, al2o3, na2o)
+    def __init__(self):
+        self.atomic_weights = _AtomicWeights()
+        self.oxide_cation_numbers = _OxideCationNumbers()
+        self.feo = (self.atomic_weights.fe * self.oxide_cation_numbers.fe) + self.atomic_weights.o
+        self.mgo = (self.atomic_weights.mg * self.oxide_cation_numbers.mg) + self.atomic_weights.o
+        self.sio2 = (self.atomic_weights.si * self.oxide_cation_numbers.si) + (self.atomic_weights.o * 2)
+        self.cao = (self.atomic_weights.ca * self.oxide_cation_numbers.ca) + self.atomic_weights.o
+        self.al2o3 = (self.atomic_weights.al * self.oxide_cation_numbers.al) + (self.atomic_weights.o * 3)
+        self.tio2 = (self.atomic_weights.ti * self.oxide_cation_numbers.ti) + (self.atomic_weights.o * 2)
+        self.na2o = (self.atomic_weights.na * self.oxide_cation_numbers.na) + self.atomic_weights.o
 
-    return template
+class HeFESTpFileWriter:
+
+    def __init__(self, from_path, to_path, temperatures, material):
+        self.df = pd.read_csv(from_path)
+        self.to_path = to_path
+        self.temperatures = temperatures
+        self.material = material
+        self.BSP_FILE_FORMAT = "0,20,80,{},0,-2,0\n6,2,4,2\noxides\nSi          {}      5.39386    0\nMg          {}     2.71075    0\n" \
+                             "Fe          {}      .79840    0\nCa            {}      .31431    0\nAl            {}      .96680    0\n" \
+                             "Na            {}      .40654    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\nhc\n" \
+                             "phase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\njd\n" \
+                             "phase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\nmgwa\nfewa\n" \
+                             "phase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\nphase ppv\n0\nmppv\n" \
+                             "fppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n1\nqtz\nphase coes\n0\ncoes\n" \
+                             "phase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n0\nneph"
+        self.MORB_FILE_FORMAT = "0,20,80,{},0,-2,0\n6,2,4,2\noxides\nSi           {}     5.33159    0\n" \
+                             "Mg           {}     1.37685    0\nFe           {}      .55527    0\n" \
+                             "Ca           {}     1.33440    0\nAl           {}     1.82602    0\n" \
+                             "Na           {}     0.71860    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\n" \
+                             "hc\nphase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\n" \
+                             "jd\nphase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\n" \
+                             "mgwa\nfewa\nphase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\n" \
+                             "phase ppv\n0\nmppv\nfppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n" \
+                             "1\nqtz\nphase coes\n0\ncoes\nphase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n" \
+                             "0\nneph"
+
+    def __oxide_pct_to_cation_pct(self, df, row):
+        mgo = self.df['MgO'][row].item()
+        sio2 = self.df['SiO2'][row].item()
+        feo = self.df['FeO'][row].item()
+        al2o3 = self.df['Al2O3'][row].item()
+        na2o = self.df['Na2O'][row].item()
+        cao = self.df['CaO'][row].item()
+        tio2 = self.df['TiO2'][row].item()
+        sum = (mgo + sio2 + feo + al2o3 + na2o + cao + tio2)
+
+        c = _OxideCationNumbers()
+        o = _OxideWeights()
+        print(o.mgo, o.sio2, o.feo, o.al2o3, o.na2o, o.cao, o.tio2)
+        mg = (mgo / o.mgo) * c.mg
+        si = (sio2 / o.sio2) * c.si
+        fe = (feo / o.feo) * c.fe
+        al = (al2o3 / o.al2o3) * c.al
+        na = (na2o / o.na2o) * c.na
+        ca = (cao / o.cao) * c.ca
+        ti = (tio2 / o.tio2) * c.ti
+
+        sum = (mg + si + fe + al + na + ca + ti)
+
+        mg = mg / sum * 100.0
+        si = si / sum * 100.0
+        fe = fe / sum * 100.0
+        al = al / sum * 100.0
+        na = na / sum * 100.0
+        ca = ca / sum * 100.0
+        ti = ti / sum * 100.0
+
+        return {
+            'mg': mg,
+            'si': si,
+            'fe': fe,
+            'al': al,
+            'na': na,
+            'ca': ca,
+            'ti': ti
+        }
 
 
-def templateBSP(temperature, sio2, mgo, feo, cao, al2o3, na2o):
-    template = "0,20,80,{},0,-2,0\n6,2,4,2\noxides\nSi          {}      0.0    0\nMg          {}     0.0    0\n" \
-        "Fe          {}      0.0    0\nCa            {}      0.0    0\nAl            {}      0.0    0\n" \
-        "Na            {}      0.0    0\n1,1,1\ninv251010\n47\nphase plg\n1\nan\nab\nphase sp\n0\nsp\nhc\n" \
-        "phase opx\n1\nen\nfs\nmgts\nodi\nphase c2c\n0\nmgc2\nfec2\nphase cpx\n1\ndi\nhe\ncen\ncats\njd\n" \
-        "phase gt\n0\npy\nal\ngr\nmgmj\njdmj\nphase cpv\n0\ncapv\nphase ol\n1\nfo\nfa\nphase wa\n0\nmgwa\nfewa\n" \
-        "phase ri\n0\nmgri\nferi\nphase il\n0\nmgil\nfeil\nco\nphase pv\n0\nmgpv\nfepv\nalpv\nphase ppv\n0\nmppv\n" \
-        "fppv\nappv\nphase cf\n0\nmgcf\nfecf\nnacf\nphase mw\n0\npe\nwu\nphase qtz\n1\nqtz\nphase coes\n0\ncoes\n" \
-        "phase st\n0\nst\nphase apbo\n0\napbo\nphase ky\n0\nky\nphase neph\n0\nneph".format(temperature,
-                                                                                            sio2, mgo, feo, cao, al2o3, na2o)
-    return template
+    def writefiles(self):
+        for t in self.temperatures:
+            print(t)
+            if os.path.exists(self.to_path + "/" + str(t)):
+                shutil.rmtree(self.to_path + "/" + str(t))
+            os.mkdir(self.to_path + "/" + str(t))
+            for row in self.df.index:
+                if len(str(self.df['MgO'][row])) > 0:
+                    star = self.df['Star'][row]
+                    print(star)
+                    cations = self.__oxide_pct_to_cation_pct(df=self.df, row=row)
+                    mg = cations['mg']
+                    si = cations['si']
+                    fe = cations['fe']
+                    al = cations['al']
+                    na = cations['na']
+                    ca = cations['ca']
+                    ti = cations['ti']
+
+                    if self.material.lower() == 'bsp':
+                        bsp_contents = self.BSP_FILE_FORMAT.format(t, si, mg, fe, ca, al, na)
+                        with open(self.to_path + "/" + str(t) + "/{}_{}_{}_HeFESTo_Input_File.txt".format(star, self.material.upper(), t), 'w') as infile:
+                            infile.write(bsp_contents)
+                            infile.close()
+                    else:
+                        morb_contents = self.MORB_FILE_FORMAT.format(t, si, mg, fe, ca, al, na)
+                        with open(self.to_path + "/" + str(t) + "/{}_{}_{}_HeFESTo_Input_File.txt".format(star, self.material.upper(), t), 'w') as infile:
+                            infile.write(morb_contents)
+                            infile.close()
 
 
-if __name__ == "__main__":
-    temperatures = []
-    compfile = None
-    modelType = None
-    print("\n\n\nEnter temperatures in degK. Enter 'e' when finished.")
-    while True:
-        inp = input(">>> ")
-        if inp.lower() == "e":
-            break
-        else:
-            temperatures.append(inp)
+df_paths = [
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/adibekyan_f1200_depleted_lithosphere_oxides.csv",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/adibekyan_f1400_depleted_lithosphere_oxides.csv",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/adibekyan_f1600_depleted_lithosphere_oxides.csv",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/kepler_f1200_depleted_lithosphere_oxides.csv",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/kepler_f1400_depleted_lithosphere_oxides.csv",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/kepler_f1600_depleted_lithosphere_oxides.csv",
+]
 
-    print("\nEnter the name of the CSV compositional input file in the working directory.")
-    while True:
-        inp = input(">>> ")
-        if inp in os.listdir(os.getcwd()):
-            compfile = pd.read_csv(inp)
-            break
-        else:
-            print("That file is not in the working directory. Try again.")
+temperatures = [
+    [1200],
+    [1200, 1400],
+    [1200, 1400, 1600],
+    [1200],
+    [1200, 1400],
+    [1200, 1400, 1600]
+]
 
-    print("BSP or MORB?")
-    while True:
-        inp = input(">>> ").lower()
-        if inp == "morb" or inp == "bsp":
-            modelType = inp.upper()
-            if os.path.exists(os.getcwd() + "/" + modelType.upper()):
-                shutil.rmtree(os.getcwd() + "/" + modelType.upper())
-            os.mkdir(os.getcwd() + "/" + modelType.upper())
-            break
-        else:
-            print("That is not a proper model type. Try again.")
+to_paths = [
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/adibekyan_depleted_lithosphere_compositions_f1200",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/adibekyan_depleted_lithosphere_compositions_f1400",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/adibekyan_depleted_lithosphere_compositions_f1600",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/kepler_depleted_lithosphere_compositions_f1200",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/kepler_depleted_lithosphere_compositions_f1400",
+    "/Users/scotthull/Documents - Scott’s MacBook Pro/PhD Research/depleted-lithosphere/kepler_depleted_lithosphere_compositions_f1600"
+]
 
-    for temp in temperatures:
-        todir = os.getcwd() + "/" + modelType.upper() + "/" + str(temp)
-        os.mkdir(todir)
-        for row in compfile.index:
-            star = compfile['Star'][row]
-            feo = compfile['FeO'][row]
-            na2o = compfile['Na2O'][row]
-            mgo = compfile['MgO'][row]
-            al2o3 = compfile['Al2O3'][row]
-            sio2 = compfile['SiO2'][row]
-            cao = compfile['CaO'][row]
-            tio2 = compfile['TiO2'][row]
-            cr2o3 = compfile['Cr2O3'][row]
-
-            if not pd.isnull(compfile['SiO2'][row]):
-
-                normComposition = renormalize(sio2=sio2, feo=feo, na2o=na2o, mgo=mgo, al2o3=al2o3, cao=cao)
-
-                if modelType == 'BSP':
-                    f = open(todir + "/{}_{}_HeFESTo_Infile.txt".format(star, modelType), 'a')
-                    tostr = templateBSP(
-                        temperature=temp,
-                        sio2=normComposition['sio2'],
-                        mgo=normComposition['mgo'],
-                        feo=normComposition['feo'],
-                        na2o=normComposition['na2o'],
-                        cao=normComposition['cao'],
-                        al2o3=normComposition['al2o3']
-                    )
-                    f.write(tostr)
-                    f.close()
-
-                elif modelType == 'MORB':
-                    f = open(todir + "/{}_{}_HeFESTo_Infile.txt".format(star, modelType), 'a')
-                    tostr = templateMORB(
-                        temperature=temp,
-                        sio2=normComposition['sio2'],
-                        mgo=normComposition['mgo'],
-                        feo=normComposition['feo'],
-                        na2o=normComposition['na2o'],
-                        cao=normComposition['cao'],
-                        al2o3=normComposition['al2o3']
-                    )
-                    f.write(tostr)
-                    f.close()
+for index, path in enumerate(df_paths):
+    temps = temperatures[index]
+    to_path = to_paths[index]
+    HeFESTpFileWriter(from_path=path, to_path=to_path, temperatures=temps, material="BSP").writefiles()
